@@ -1,15 +1,34 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { CalendarDays, Clock, MapPin, Star, Users } from 'lucide-react'
+import { CalendarDays, Clock, MapPin } from 'lucide-react'
 import { tours } from '@/lib/site-data'
+import {
+  getTourDetailContent,
+  standardPaymentPolicy,
+  standardCancellationPolicy,
+  cancellationPolicyNote,
+} from '@/lib/tours/tour-detail-content'
 import { SiteChrome } from '@/components/site/site-chrome'
 import { PageHero } from '@/components/site/page-hero'
-import { TourCard } from '@/components/site/tour-card'
+import { TourGallery } from '@/components/site/tour-detail/gallery'
+import { TourItinerary } from '@/components/site/tour-detail/itinerary'
+import { TourInclusions } from '@/components/site/tour-detail/inclusions'
+import { TourPolicy } from '@/components/site/tour-detail/policy'
+import { TourBookingCard } from '@/components/site/tour-detail/booking-card'
+import { RelatedTourCard } from '@/components/site/tour-detail/related-tour-card'
 import { Reveal } from '@/components/mv/reveal'
-import { MVButton } from '@/components/mv/mv-button'
+import { TourDetailJsonLd } from '@/components/seo/json-ld'
+import { SITE_URL } from '@/constants/seo'
 
 export function generateStaticParams() {
   return tours.map((t) => ({ slug: t.id }))
+}
+
+function findTour(slug: string) {
+  const tour = tours.find((t) => t.id === slug)
+  const detail = tour ? getTourDetailContent(tour.id) : undefined
+  if (!tour || !detail) return null
+  return { tour, detail }
 }
 
 export async function generateMetadata({
@@ -18,11 +37,28 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const tour = tours.find((t) => t.id === slug)
-  if (!tour) return { title: 'Không tìm thấy hành trình | Minh Việt Travel' }
+  const found = findTour(slug)
+  if (!found) return { title: 'Không tìm thấy hành trình | Minh Việt Travel' }
+
+  const { tour, detail } = found
+  const priceLabel = detail.priceType === 'estimate' ? 'Giá tham khảo' : 'Giá'
+  const title = `${tour.title} | Minh Việt Travel`
+  const description = `${tour.duration} · Khởi hành từ ${tour.departure}. ${priceLabel} ${tour.price}. Lịch trình chi tiết, bao gồm/không bao gồm và chính sách thanh toán, hoàn hủy rõ ràng.`
+  const canonicalPath = `/tour/${tour.id}`
+  const ogImage = detail.gallery[0]?.src ?? tour.image
+
   return {
-    title: `${tour.title} | Minh Việt Travel`,
-    description: `${tour.duration} · Khởi hành từ ${tour.departure}. Giá từ ${tour.price}.`,
+    title,
+    description,
+    alternates: { canonical: canonicalPath },
+    openGraph: {
+      title,
+      description,
+      url: `${SITE_URL}${canonicalPath}`,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: tour.title }],
+      locale: 'vi_VN',
+      type: 'website',
+    },
   }
 }
 
@@ -32,13 +68,20 @@ export default async function TourDetailPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const tour = tours.find((t) => t.id === slug)
-  if (!tour) notFound()
+  const found = findTour(slug)
+  if (!found) notFound()
+  const { tour, detail } = found
 
   const related = tours.filter((t) => t.id !== tour.id && t.category === tour.category).slice(0, 3)
 
   return (
     <SiteChrome>
+      <TourDetailJsonLd
+        tour={tour}
+        images={detail.gallery.map((image) => image.src)}
+        availability={detail.availability}
+      />
+
       <PageHero
         eyebrow={`${tour.country} · ${tour.category}`}
         title={tour.title}
@@ -48,64 +91,58 @@ export default async function TourDetailPage({
 
       <section className="bg-background py-16 lg:py-20">
         <div className="container-mv grid gap-12 lg:grid-cols-[1.6fr_1fr] lg:gap-16">
-          <Reveal>
-            <div className="flex flex-wrap gap-3 text-sm">
-              <span className="inline-flex items-center gap-2 rounded-full border border-border px-3.5 py-1.5 text-foreground">
-                <Clock className="size-4 text-royal" /> {tour.duration}
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-border px-3.5 py-1.5 text-foreground">
-                <MapPin className="size-4 text-royal" /> Khởi hành: {tour.departure}
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-border px-3.5 py-1.5 text-foreground">
-                <CalendarDays className="size-4 text-royal" /> {tour.date}
-              </span>
-              {tour.rating ? (
+          <div className="flex flex-col gap-14">
+            <Reveal>
+              <div className="flex flex-wrap gap-3 text-sm">
                 <span className="inline-flex items-center gap-2 rounded-full border border-border px-3.5 py-1.5 text-foreground">
-                  <Star className="size-4 fill-gold text-gold" /> {tour.rating.toFixed(1)}/5
+                  <Clock className="size-4 text-royal" /> {tour.duration}
                 </span>
-              ) : null}
-            </div>
+                <span className="inline-flex items-center gap-2 rounded-full border border-border px-3.5 py-1.5 text-foreground">
+                  <MapPin className="size-4 text-royal" /> Khởi hành: {tour.departure}
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-border px-3.5 py-1.5 text-foreground">
+                  <CalendarDays className="size-4 text-royal" /> Gần nhất: {tour.date}
+                </span>
+              </div>
 
-            <h2 className="mt-10 font-display text-2xl font-bold text-foreground">Lịch trình chi tiết</h2>
-            <div className="mt-4 rounded-2xl border border-dashed border-border bg-secondary/40 p-8 text-center">
-              <p className="font-display text-lg text-foreground">Lịch trình đang được biên soạn</p>
-              <p className="mx-auto mt-2 max-w-md text-pretty text-sm leading-relaxed text-muted-foreground">
-                Đây là hành trình được tổ chức riêng theo yêu cầu. Vui lòng liên hệ chuyên viên
-                tư vấn của Minh Việt để nhận lịch trình chi tiết, báo giá và các lựa chọn tùy chỉnh.
+              <div className="mt-8">
+                <TourGallery images={detail.gallery} title={tour.title} />
+              </div>
+            </Reveal>
+
+            <Reveal>
+              <h2 className="font-display text-2xl font-bold text-foreground">Lịch trình chi tiết</h2>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                Lịch trình tham khảo — chuyên viên Minh Việt sẽ xác nhận chi tiết cuối cùng theo ngày khởi hành thực tế.
               </p>
-              <MVButton href="/contact" variant="primary" size="md" className="mt-6">
-                Nhận tư vấn giải pháp
-              </MVButton>
-            </div>
-          </Reveal>
+              <div className="mt-6">
+                <TourItinerary days={detail.itinerary} />
+              </div>
+            </Reveal>
+
+            <Reveal>
+              <h2 className="font-display text-2xl font-bold text-foreground">Bao gồm / Không bao gồm</h2>
+              <div className="mt-6">
+                <TourInclusions inclusions={detail.inclusions} exclusions={detail.exclusions} />
+              </div>
+            </Reveal>
+
+            <Reveal>
+              <h2 className="font-display text-2xl font-bold text-foreground">
+                Chính sách thanh toán &amp; hoàn hủy
+              </h2>
+              <div className="mt-6">
+                <TourPolicy
+                  paymentPolicy={standardPaymentPolicy}
+                  cancellationPolicy={standardCancellationPolicy}
+                  cancellationNote={cancellationPolicyNote}
+                />
+              </div>
+            </Reveal>
+          </div>
 
           <Reveal delay={100}>
-            <div className="sticky top-24 rounded-3xl bg-card p-7 shadow-soft-lg">
-              <p className="eyebrow text-[11px] font-semibold text-muted-foreground">
-                {tour.originalPrice ? 'Giá ưu đãi' : 'Giá từ'}
-              </p>
-              {tour.originalPrice && (
-                <p className="text-sm text-muted-foreground line-through">{tour.originalPrice}</p>
-              )}
-              <p className="mt-1 font-display text-3xl font-extrabold text-primary">{tour.price}</p>
-              <p className="mt-1 text-xs text-muted-foreground">/ khách</p>
-
-              <ul className="mt-6 space-y-3 border-t border-border pt-5 text-sm text-foreground">
-                <li className="flex items-center gap-2.5">
-                  <Users className="size-4 text-royal" /> {tour.seats}
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <MapPin className="size-4 text-royal" /> Điểm đi: {tour.departure}
-                </li>
-              </ul>
-
-              <MVButton href="/contact" variant="gold" size="lg" className="mt-7 w-full">
-                Nhận tư vấn giải pháp
-              </MVButton>
-              <MVButton href="tel:0934368132" variant="outline" size="lg" className="mt-3 w-full">
-                Gọi hotline 24/7
-              </MVButton>
-            </div>
+            <TourBookingCard tour={tour} priceType={detail.priceType} availability={detail.availability} />
           </Reveal>
         </div>
       </section>
@@ -116,7 +153,7 @@ export default async function TourDetailPage({
             <h2 className="font-display text-2xl font-bold text-foreground">Hành trình liên quan</h2>
             <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((t) => (
-                <TourCard key={t.id} tour={t} />
+                <RelatedTourCard key={t.id} tour={t} />
               ))}
             </div>
           </div>

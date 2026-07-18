@@ -182,16 +182,19 @@ export function SiteHeader() {
         )}
       </div>
 
-      {/* Mobile drawer */}
+      {/* Mobile drawer — both layers are their own top-level `fixed` element
+          (viewport-relative), not nested inside a shared `fixed` wrapper via
+          `absolute` + `h-full`, so the panel's height can't collapse if an
+          ancestor's box height ever fails to resolve. */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <>
           <div
-            className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-foreground/40 backdrop-blur-sm lg:hidden"
             onClick={() => setMobileOpen(false)}
           />
-          <div className="absolute right-0 top-0 flex h-full w-[86%] max-w-sm flex-col bg-background shadow-2xl">
+          <div className="fixed inset-y-0 right-0 z-50 flex h-dvh w-[86%] max-w-sm flex-col bg-background shadow-2xl lg:hidden">
             <div className="flex items-center justify-between border-b border-border px-5 py-4">
-              <Logo height={40} />
+              <Logo height={38} />
               <button
                 className="grid size-10 place-items-center rounded-lg text-foreground"
                 onClick={() => setMobileOpen(false)}
@@ -225,7 +228,7 @@ export function SiteHeader() {
               Hotline: <span className="font-bold text-primary">0934 368 132</span>
             </div>
           </div>
-        </div>
+        </>
       )}
     </header>
   )

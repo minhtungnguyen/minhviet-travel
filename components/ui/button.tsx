@@ -11,6 +11,9 @@ const buttonVariants = cva(
         default: 'bg-primary text-primary-foreground [a]:hover:bg-primary/80',
         outline:
           'border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50',
+        /** For an outline button placed directly on a dark/photo surface — no `bg-background` fill, so it never renders white-on-white. */
+        'outline-light':
+          'border-white/40 bg-transparent text-white hover:bg-white hover:text-deep',
         secondary:
           'bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground',
         ghost:

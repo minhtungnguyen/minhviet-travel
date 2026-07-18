@@ -44,7 +44,7 @@ export function JourneyCard({ journey }: { journey: JourneyContent }) {
         </span>
       </Link>
 
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex flex-1 flex-col p-6">
         <div className="flex items-center justify-between">
           <span className="eyebrow text-[10px] text-primary">{journey.country}</span>
           {journey.reviewScore && journey.reviewCount ? (
@@ -56,11 +56,11 @@ export function JourneyCard({ journey }: { journey: JourneyContent }) {
           ) : null}
         </div>
 
-        <h3 className="mt-2 line-clamp-2 text-pretty font-display text-lg leading-snug text-foreground transition-colors group-hover:text-primary">
+        <h3 className="mt-2.5 line-clamp-2 text-pretty font-display text-xl font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
           <Link href={journey.href}>{journey.title}</Link>
         </h3>
 
-        <ul className="mt-3 space-y-1.5 text-xs text-muted-foreground">
+        <ul className="mt-3.5 space-y-1.5 text-xs text-muted-foreground">
           <li className="flex items-center gap-2">
             <CalendarDays className="size-3.5 shrink-0 text-royal/70" />
             Khởi hành gần nhất: <span className="font-medium text-foreground">{journey.nextDeparture}</span>
@@ -71,7 +71,7 @@ export function JourneyCard({ journey }: { journey: JourneyContent }) {
           </li>
         </ul>
 
-        <div className="mt-4 flex items-end justify-between border-t border-border pt-4">
+        <div className="mt-5 flex items-end justify-between border-t border-border pt-4">
           <div>
             <p className="eyebrow text-[10px] text-muted-foreground">
               {journey.priceType === 'estimate' ? 'Giá tham khảo' : 'Giá'}

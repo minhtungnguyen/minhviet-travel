@@ -108,7 +108,7 @@ export function SiteFooter() {
             <ul className="mt-4 space-y-3 text-sm text-white/65">
               <li className="flex items-start gap-3">
                 <MapPin className="mt-0.5 size-4 shrink-0 text-gold" />
-                60/384 Lạy Tray, P. Bạch Đằng, Q. Ngô Quyền, TP. Hải Phòng
+                Tầng 3, Tòa nhà VCCI Duyên Hải Bắc Bộ, Số 464 Lạch Tray, Gia Viên, Hải Phòng
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="size-4 shrink-0 text-gold" />
@@ -131,7 +131,7 @@ export function SiteFooter() {
       <div className="border-t border-white/10">
         <div className="container-mv flex flex-col items-center justify-between gap-2 py-6 text-xs text-white/45 sm:flex-row">
           <p>© {new Date().getFullYear()} Minh Việt Travel. All rights reserved.</p>
-          <p>Thiết kế &amp; phát triển bởi Minh Việt Group</p>
+          <p>Được vận hành và phát triển bởi Minh Việt Travel.</p>
         </div>
       </div>
     </footer>

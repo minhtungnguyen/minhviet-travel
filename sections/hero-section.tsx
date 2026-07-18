@@ -48,9 +48,8 @@ export async function HeroSection() {
               {hero.primaryCta.label} <ArrowUpRight className="size-5" />
             </Button>
             <Button
-              variant="outline"
+              variant="outline-light"
               size="lg"
-              className="border-white/40 text-white hover:bg-white hover:text-deep"
               render={<Link href={hero.secondaryCta.href} />}
             >
               {hero.secondaryCta.label}

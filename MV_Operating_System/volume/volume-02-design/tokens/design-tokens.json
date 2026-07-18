@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json.schemastore.org/design-tokens.json",
+  "version": "1.0.0",
+  "color": {
+    "brand": {
+      "primary": {
+        "value": "#1F3863"
+      },
+      "primaryDark": {
+        "value": "#13233F"
+      },
+      "primaryLight": {
+        "value": "#E9EEF6"
+      },
+      "accent": {
+        "value": "#C8A45D"
+      },
+      "accentLight": {
+        "value": "#F6F0E4"
+      }
+    },
+    "surface": {
+      "canvas": {
+        "value": "#F7F8FA"
+      },
+      "default": {
+        "value": "#FFFFFF"
+      },
+      "subtle": {
+        "value": "#F1F3F6"
+      }
+    },
+    "text": {
+      "primary": {
+        "value": "#172033"
+      },
+      "secondary": {
+        "value": "#5C667A"
+      },
+      "inverse": {
+        "value": "#FFFFFF"
+      }
+    },
+    "border": {
+      "default": {
+        "value": "#D9DEE8"
+      }
+    },
+    "status": {
+      "success": {
+        "value": "#1F7A4D"
+      },
+      "warning": {
+        "value": "#A86500"
+      },
+      "danger": {
+        "value": "#B42318"
+      },
+      "info": {
+        "value": "#1769AA"
+      }
+    },
+    "focus": {
+      "value": "#2F6FED"
+    }
+  },
+  "spacing": {
+    "0": {
+      "value": "0px"
+    },
+    "1": {
+      "value": "4px"
+    },
+    "2": {
+      "value": "8px"
+    },
+    "3": {
+      "value": "12px"
+    },
+    "4": {
+      "value": "16px"
+    },
+    "5": {
+      "value": "20px"
+    },
+    "6": {
+      "value": "24px"
+    },
+    "7": {
+      "value": "32px"
+    },
+    "8": {
+      "value": "40px"
+    },
+    "9": {
+      "value": "48px"
+    },
+    "10": {
+      "value": "64px"
+    },
+    "11": {
+      "value": "80px"
+    },
+    "12": {
+      "value": "96px"
+    },
+    "13": {
+      "value": "128px"
+    }
+  },
+  "radius": {
+    "sm": {
+      "value": "6px"
+    },
+    "md": {
+      "value": "10px"
+    },
+    "lg": {
+      "value": "16px"
+    },
+    "xl": {
+      "value": "24px"
+    },
+    "full": {
+      "value": "9999px"
+    }
+  },
+  "shadow": {
+    "sm": {
+      "value": "0 1px 2px rgba(16,24,40,0.06)"
+    },
+    "card": {
+      "value": "0 4px 16px rgba(16,24,40,0.08)"
+    },
+    "overlay": {
+      "value": "0 16px 40px rgba(16,24,40,0.16)"
+    }
+  },
+  "motion": {
+    "duration": {
+      "fast": {
+        "value": "140ms"
+      },
+      "standard": {
+        "value": "220ms"
+      },
+      "slow": {
+        "value": "360ms"
+      }
+    }
+  },
+  "breakpoint": {
+    "sm": {
+      "value": "640px"
+    },
+    "md": {
+      "value": "768px"
+    },
+    "lg": {
+      "value": "1024px"
+    },
+    "xl": {
+      "value": "1280px"
+    },
+    "2xl": {
+      "value": "1536px"
+    }
+  }
+}

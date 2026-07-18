@@ -1,0 +1,50 @@
+/**
+ * Motion System — Linear-inspired, deliberately restrained.
+ *
+ * Hard rules for every product built on this system:
+ *   1. 200ms is the default duration for interactive state changes.
+ *   2. No bounce, no spring easing, ever.
+ *   3. No scale()/zoom transforms on hover or press — motion communicates
+ *      state, it does not perform.
+ *   4. Entrances may use a small opacity + 8px translate; nothing larger.
+ *
+ * These are opt-in utility classes. Nothing here is applied automatically
+ * to any existing page.
+ */
+
+@layer utilities {
+  .ds-fade-in {
+    animation: ds-fade-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .ds-slide-up-in {
+    animation: ds-slide-up-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes ds-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes ds-slide-up-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ds-fade-in,
+    .ds-slide-up-in {
+      animation: none;
+    }
+  }
+}

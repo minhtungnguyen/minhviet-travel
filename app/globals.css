@@ -1,0 +1,319 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+/*
+ * Design System token layer (additive only — see /design-system).
+ * Namespaced under `ds-` so it cannot collide with or change any of the
+ * site tokens below. Nothing on the current site consumes these yet.
+ */
+@import '../design-system/css/tokens.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-navy: var(--navy);
+  --color-deep: var(--deep);
+  --color-royal: var(--royal);
+  --color-surface: var(--surface);
+  --color-sky: var(--sky);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-sand: var(--sand);
+
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: calc(var(--radius) - 1px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+}
+
+:root {
+  color-scheme: light;
+  --radius: 0.9rem;
+
+  /* Warm ivory / white base — dominant surface (~60%) */
+  --background: #ffffff;
+  --foreground: #1a1d21;
+
+  --card: #ffffff;
+  --card-foreground: #1a1d21;
+  --popover: #ffffff;
+  --popover-foreground: #1a1d21;
+
+  /* Primary Navy — corporate anchor (~25%) */
+  --primary: #0b1f3a;
+  --primary-foreground: #ffffff;
+
+  /* Soft Gray neutrals */
+  --secondary: #eef1f4;
+  --secondary-foreground: #0b1f3a;
+
+  --muted: #eef1f4;
+  --muted-foreground: #5b6472;
+
+  /* Sky Accent — targeted use only (~10%) */
+  --accent: #35a9e0;
+  --accent-foreground: #ffffff;
+
+  --destructive: oklch(0.58 0.2 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --success: oklch(0.58 0.13 155);
+  --success-foreground: oklch(0.98 0 0);
+  /* Warning — Volume 02 Ch.5.1 requires a distinct warning role; this
+     was missing from the live palette (see Design Audit, Design System
+     Compliance). Amber, kept in the existing warm-gold family. */
+  --warning: oklch(0.7 0.15 75);
+  --warning-foreground: oklch(0.2 0.04 75);
+
+  /* Hairline border: a touch deeper than Soft Gray so it reads on white */
+  --border: #e4e8ed;
+  --input: #e4e8ed;
+  --ring: #35a9e0;
+
+  /* Brand scale */
+  --navy: #0b1f3a;
+  --deep: #07162b;
+  --royal: #195daa;
+  --surface: #ffffff;
+  --sky: #35a9e0;
+  --ink: #1a1d21;
+  --paper: #f7f4ee;
+  --sand: #eef1f4;
+
+  /* Champagne Gold — premium accent only (~5%), never a primary surface */
+  --gold: #c7a86b;
+  --gold-soft: #e2d3b3;
+
+  --chart-1: #0b1f3a;
+  --chart-2: #195daa;
+  --chart-3: #35a9e0;
+  --chart-4: #c7a86b;
+  --chart-5: #5b6472;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  h1, h2, h3, h4, h5 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+}
+
+@utility container-mv {
+  @apply mx-auto w-full max-w-[1280px] px-5 sm:px-6 lg:px-10;
+}
+
+@layer utilities {
+  /* Thin uppercase editorial label */
+  .eyebrow {
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+  /* Champagne gold script — premium accent, used sparingly on dark surfaces */
+  .text-gradient-gold {
+    background: linear-gradient(100deg, #c7a86b, #e2d3b3);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* Brand navy → royal blue, used on light surfaces */
+  .text-gradient-brand {
+    background: linear-gradient(105deg, #0b1f3a, #195daa);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .gold-hairline {
+    background: linear-gradient(90deg, transparent, rgb(199 168 107 / 55%), transparent);
+  }
+  .luxury-ring {
+    box-shadow: 0 1px 0 0 rgb(255 255 255 / 60%) inset, 0 30px 60px -30px rgb(7 22 43 / 40%);
+  }
+  /* Modern soft card shadow */
+  .shadow-soft {
+    box-shadow: 0 1px 2px rgb(11 31 58 / 6%), 0 12px 28px -12px rgb(11 31 58 / 18%);
+  }
+  .shadow-soft-lg {
+    box-shadow: 0 2px 4px rgb(11 31 58 / 6%), 0 24px 48px -18px rgb(11 31 58 / 24%);
+  }
+  .hover-lift {
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .hover-lift:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 2px 4px rgb(11 31 58 / 8%), 0 30px 60px -20px rgb(11 31 58 / 30%);
+  }
+  @keyframes kenburns {
+    from { transform: scale(1.04); }
+    to { transform: scale(1.13); }
+  }
+  .animate-kenburns {
+    animation: kenburns 20s ease-out forwards;
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .animate-marquee {
+    animation: marquee 45s linear infinite;
+  }
+  .reveal {
+    opacity: 0;
+    transform: translateY(26px);
+    transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  /* Directional reveal variants */
+  .reveal-left { transform: translateX(-40px); }
+  .reveal-right { transform: translateX(40px); }
+  .reveal-scale { transform: scale(0.92); }
+  .reveal-blur { filter: blur(12px); transition: opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.22,1,0.36,1), filter 0.8s cubic-bezier(0.22,1,0.36,1); }
+  .reveal.is-visible.reveal-left,
+  .reveal.is-visible.reveal-right { transform: translateX(0); }
+  .reveal.is-visible.reveal-scale { transform: scale(1); }
+  .reveal.is-visible.reveal-blur { filter: blur(0); }
+
+  /* Floating loop */
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .animate-float { animation: float 6s ease-in-out infinite; }
+
+  /* Animated brand gradient background */
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient-shift 8s ease infinite;
+  }
+
+  /* Shimmer sweep for text / skeletons */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  /* Shine sweep across a surface (buttons, cards, images) */
+  .shine {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .shine::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 30%, oklch(1 0 0 / 45%) 50%, transparent 70%);
+    transform: translateX(-120%);
+    transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+    z-index: 1;
+  }
+  .shine:hover::after { transform: translateX(120%); }
+
+  /* Soft pulsing glow ring */
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgb(53 169 224 / 45%); }
+    50% { box-shadow: 0 0 0 10px rgb(53 169 224 / 0%); }
+  }
+  .animate-glow { animation: glow-pulse 2.4s ease-in-out infinite; }
+
+  /* Ping dot for urgency/live badges */
+  @keyframes soft-ping {
+    0% { transform: scale(1); opacity: 0.7; }
+    75%, 100% { transform: scale(2.2); opacity: 0; }
+  }
+  .animate-soft-ping { animation: soft-ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite; }
+
+  /* Image zoom on parent hover */
+  .img-zoom { transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1); }
+  .group:hover .img-zoom { transform: scale(1.08); }
+
+  /* Animated underline sweep for links */
+  .link-underline {
+    position: relative;
+  }
+  .link-underline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    height: 2px;
+    width: 100%;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .link-underline:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  /* Top scroll progress bar */
+  .scroll-progress {
+    background: linear-gradient(90deg, #0b1f3a, #195daa, #35a9e0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+      filter: none;
+    }
+    .animate-kenburns,
+    .animate-float,
+    .animate-gradient,
+    .animate-glow,
+    .animate-soft-ping { animation: none; }
+    .shine::after { display: none; }
+  }
+}

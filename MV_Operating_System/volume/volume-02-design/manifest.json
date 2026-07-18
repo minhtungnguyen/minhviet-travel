@@ -1,0 +1,22 @@
+{
+  "volume": 2,
+  "title": "Design Operating System",
+  "version": "1.0.0",
+  "dependency": [
+    "Volume 01 — Brand Strategy"
+  ],
+  "mandatory_documents": [
+    "docs/VOLUME_02_DESIGN_OPERATING_SYSTEM.md",
+    "standards/COMPONENT_RULES.md",
+    "tokens/design-tokens.json"
+  ],
+  "applies_to": [
+    "web",
+    "mobile",
+    "dashboard",
+    "CMS",
+    "CRM",
+    "AI UX",
+    "frontend"
+  ]
+}

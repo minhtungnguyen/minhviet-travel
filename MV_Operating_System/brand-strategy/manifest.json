@@ -1,0 +1,14 @@
+{
+  "project": "MV Operating System",
+  "volume": "01",
+  "title": "Brand Strategy",
+  "version": "1.0",
+  "canonical_document": "docs/VOLUME_01_BRAND_STRATEGY.md",
+  "claude_entrypoint": "CLAUDE.md",
+  "ai_policy": "docs/AI_BRAND_CONSTITUTION.md",
+  "templates": [
+    "templates/decision-scorecard.md",
+    "templates/ai-agent-identity-card.md",
+    "templates/executive-checklist.md"
+  ]
+}

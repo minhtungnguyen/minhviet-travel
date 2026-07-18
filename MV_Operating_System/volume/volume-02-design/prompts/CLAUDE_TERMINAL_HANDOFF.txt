@@ -1,0 +1,28 @@
+You are working inside the MV Operating System repository.
+
+Before changing any code:
+
+1. Read the root CLAUDE.md.
+2. Read Volume 01 Brand Strategy.
+3. Read volumes/volume-02-design/docs/VOLUME_02_DESIGN_OPERATING_SYSTEM.md.
+4. Read volumes/volume-02-design/standards/COMPONENT_RULES.md.
+5. Read volumes/volume-02-design/tokens/design-tokens.json.
+6. Inspect the existing repository and identify reusable components.
+
+Then respond with:
+
+- the primary user and user job;
+- applicable brand and design rules;
+- the current UX problems;
+- the proposed information architecture;
+- the component reuse plan;
+- required data and states;
+- mobile and accessibility behavior;
+- implementation plan;
+- files expected to change;
+- risks and acceptance criteria.
+
+Do not modify files until this analysis is complete.
+Do not invent business data.
+Do not hard-code content that belongs in CMS or database.
+After implementation, run the Design QA checklist and report failures honestly.

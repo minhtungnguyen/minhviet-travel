@@ -1,0 +1,150 @@
+/**
+ * Design System CSS Token Layer
+ * ------------------------------------------------------------------
+ * Isolated, `ds-` namespaced Tailwind theme extension mirroring
+ * design-system/tokens/*.ts. Every variable here is additive: nothing
+ * in this file renames or overrides the existing site theme in
+ * app/globals.css, so importing it does not change any currently
+ * shipped page. New utility classes become available for future work
+ * (bg-ds-neutral-25, text-ds-blue-600, shadow-ds-floating, etc.).
+ *
+ * Not every token category maps onto a Tailwind @theme namespace:
+ * - spacing already matches Tailwind's native 4px scale — use the
+ *   built-in spacing utilities (p-5, gap-6, ...) directly.
+ * - z-index and container tokens are consumed from
+ *   design-system/tokens (TS) as arbitrary values or inline styles.
+ */
+
+@import '../motion/motion.css';
+
+@theme {
+  /*
+   * Typography — `--ds-manrope` / `--ds-inter` are populated by next/font
+   * when a product wires the fonts in (see design-system/docs/typography.md).
+   * The literal family names are the fallback so this works even before
+   * that wiring exists.
+   */
+  --font-ds-heading: var(--ds-manrope, 'Manrope'), ui-sans-serif, system-ui, sans-serif;
+  --font-ds-body: var(--ds-inter, 'Inter'), ui-sans-serif, system-ui, sans-serif;
+
+  /* Neutral scale — White → Graphite */
+  --color-ds-neutral-0: #ffffff;
+  --color-ds-neutral-25: #fafafb;
+  --color-ds-neutral-50: #f5f5f7;
+  --color-ds-neutral-100: #edeef0;
+  --color-ds-neutral-150: #e5e7ea;
+  --color-ds-neutral-200: #dbdde1;
+  --color-ds-neutral-300: #c2c5cb;
+  --color-ds-neutral-400: #9ca0ab;
+  --color-ds-neutral-500: #71757f;
+  --color-ds-neutral-600: #52565f;
+  --color-ds-neutral-700: #3a3d45;
+  --color-ds-neutral-800: #24262b;
+  --color-ds-neutral-900: #16171b;
+
+  /* Enterprise Blue — interactive only */
+  --color-ds-blue-50: #eef2ff;
+  --color-ds-blue-100: #dce4ff;
+  --color-ds-blue-200: #b7c6ff;
+  --color-ds-blue-300: #8da3ff;
+  --color-ds-blue-400: #5c7cff;
+  --color-ds-blue-500: #3358f2;
+  --color-ds-blue-600: #2247e0;
+  --color-ds-blue-700: #1b39b8;
+  --color-ds-blue-800: #162e93;
+  --color-ds-blue-900: #132872;
+
+  /* Champagne Bronze — premium accent */
+  --color-ds-bronze-50: #fbf6ee;
+  --color-ds-bronze-100: #f3e7d2;
+  --color-ds-bronze-200: #e6cda4;
+  --color-ds-bronze-300: #d6b27b;
+  --color-ds-bronze-400: #c39a5e;
+  --color-ds-bronze-500: #a9814f;
+  --color-ds-bronze-600: #8c6b3e;
+  --color-ds-bronze-700: #6e5330;
+  --color-ds-bronze-800: #503c23;
+  --color-ds-bronze-900: #372a18;
+
+  /* Feedback */
+  --color-ds-success-subtle: #e8f5ee;
+  --color-ds-success-default: #1e8a5b;
+  --color-ds-success-strong: #146341;
+  --color-ds-warning-subtle: #fff4e5;
+  --color-ds-warning-default: #b76e00;
+  --color-ds-warning-strong: #8a5200;
+  --color-ds-danger-subtle: #fdedec;
+  --color-ds-danger-default: #c0362c;
+  --color-ds-danger-strong: #8e2620;
+
+  /* Semantic roles — components should prefer these over raw scales */
+  --color-ds-surface-base: var(--color-ds-neutral-0);
+  --color-ds-surface-subtle: var(--color-ds-neutral-25);
+  --color-ds-surface-muted: var(--color-ds-neutral-50);
+  --color-ds-surface-inverse: var(--color-ds-neutral-900);
+
+  --color-ds-text-primary: var(--color-ds-neutral-900);
+  --color-ds-text-secondary: var(--color-ds-neutral-600);
+  --color-ds-text-muted: var(--color-ds-neutral-500);
+  --color-ds-text-disabled: var(--color-ds-neutral-300);
+  --color-ds-text-inverse: var(--color-ds-neutral-0);
+  --color-ds-text-on-bronze: var(--color-ds-neutral-900);
+  --color-ds-text-on-interactive: var(--color-ds-neutral-0);
+
+  --color-ds-border-subtle: var(--color-ds-neutral-150);
+  --color-ds-border-default: var(--color-ds-neutral-200);
+  --color-ds-border-strong: var(--color-ds-neutral-300);
+  --color-ds-border-focus: var(--color-ds-blue-600);
+
+  --color-ds-interactive-default: var(--color-ds-blue-600);
+  --color-ds-interactive-hover: var(--color-ds-blue-700);
+  --color-ds-interactive-active: var(--color-ds-blue-800);
+  --color-ds-interactive-subtle: var(--color-ds-blue-50);
+  --color-ds-interactive-subtle-hover: var(--color-ds-blue-100);
+  --color-ds-interactive-border: var(--color-ds-blue-200);
+
+  --color-ds-accent-default: var(--color-ds-bronze-500);
+  --color-ds-accent-hover: var(--color-ds-bronze-600);
+  --color-ds-accent-subtle: var(--color-ds-bronze-50);
+  --color-ds-accent-text: var(--color-ds-bronze-700);
+
+  /* Radius */
+  --radius-ds-sm: 4px;
+  --radius-ds-md: 8px;
+  --radius-ds-lg: 12px;
+  --radius-ds-xl: 16px;
+  --radius-ds-2xl: 24px;
+  --radius-ds-3xl: 32px;
+  --radius-ds-full: 9999px;
+
+  /* Shadow — soft, neutral-tinted, no Material elevation */
+  --shadow-ds-soft: 0 1px 2px rgba(16, 23, 42, 0.04), 0 2px 8px rgba(16, 23, 42, 0.04);
+  --shadow-ds-medium: 0 4px 16px rgba(16, 23, 42, 0.06), 0 2px 4px rgba(16, 23, 42, 0.04);
+  --shadow-ds-floating: 0 16px 48px rgba(16, 23, 42, 0.1), 0 4px 12px rgba(16, 23, 42, 0.06);
+
+  /* Breakpoints — mirrors Tailwind defaults for consistency across products */
+  --breakpoint-ds-sm: 640px;
+  --breakpoint-ds-md: 768px;
+  --breakpoint-ds-lg: 1024px;
+  --breakpoint-ds-xl: 1280px;
+  --breakpoint-ds-2xl: 1536px;
+}
+
+@layer utilities {
+  /* Motion — 200ms base, no bounce, no spring, no scale/zoom on interaction */
+  .ds-transition {
+    transition-property: color, background-color, border-color, box-shadow, opacity;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .ds-transition-fast {
+    transition-property: color, background-color, border-color, box-shadow, opacity;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .ds-transition-enter {
+    transition-property: opacity, transform;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}

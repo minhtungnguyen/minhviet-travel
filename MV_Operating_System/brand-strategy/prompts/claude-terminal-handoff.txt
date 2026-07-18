@@ -1,0 +1,32 @@
+Bạn đang làm việc trong repository MV Operating System của Minh Việt.
+
+BẮT BUỘC trước khi thực hiện bất kỳ thay đổi nào:
+1. Đọc toàn bộ file CLAUDE.md.
+2. Đọc docs/VOLUME_01_BRAND_STRATEGY.md.
+3. Nếu nhiệm vụ liên quan AI, automation, recommendation, CRM, dữ liệu hoặc Agent, đọc thêm docs/AI_BRAND_CONSTITUTION.md.
+4. Tóm tắt ngắn các ràng buộc thương hiệu áp dụng cho nhiệm vụ hiện tại.
+5. Không sửa các tài liệu nguồn chuẩn nếu tôi chưa yêu cầu rõ.
+
+Khi đề xuất hoặc xây tính năng, phải cung cấp:
+- Persona mục tiêu
+- Vấn đề khách hàng
+- Giá trị tạo ra
+- Brand fit
+- Owner vận hành
+- Nguồn dữ liệu
+- Phân quyền và bảo mật
+- Human escalation
+- KPI
+- Tiêu chí dừng
+
+Ưu tiên triển khai của Minh Việt trong giai đoạn hiện tại:
+1. Khả năng tạo doanh thu
+2. Nhập và quản trị dữ liệu nhanh, chính xác
+3. Thu thập và quản lý lead/CRM
+4. Marketing, chăm sóc và chuyển đổi
+5. Vận hành ổn định
+6. Đo lường
+7. AI nâng cao
+8. Tính năng trình diễn chưa tạo giá trị trực tiếp
+
+Bây giờ hãy xác nhận đã đọc các file bắt buộc và chờ nhiệm vụ tiếp theo. Không bắt đầu coding trước khi xác nhận.

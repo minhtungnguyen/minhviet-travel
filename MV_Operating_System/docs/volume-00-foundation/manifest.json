@@ -1,0 +1,48 @@
+{
+  "name": "Minh Viet Travel Platform - Volume 00 Foundation",
+  "version": "1.0.0",
+  "language": "vi-VN",
+  "product": "minhviettravel.com",
+  "status": "implementation-ready",
+  "scope": [
+    "public website",
+    "cms",
+    "crm",
+    "booking request",
+    "ai tour import",
+    "notifications",
+    "analytics"
+  ],
+  "excluded_v1": [
+    "native mobile app",
+    "multi-vendor marketplace",
+    "automatic ticket issuance",
+    "automatic booking confirmation",
+    "full accounting ERP",
+    "complex loyalty program"
+  ],
+  "required_stack": {
+    "framework": "Next.js App Router",
+    "language": "TypeScript",
+    "ui": [
+      "Tailwind CSS",
+      "shadcn/ui"
+    ],
+    "database": "Supabase PostgreSQL",
+    "auth": "Supabase Auth",
+    "storage": "Supabase Storage",
+    "deployment": "Vercel"
+  },
+  "reading_order": [
+    "CLAUDE.md",
+    "docs/01-platform-vision.md",
+    "docs/02-business-scope.md",
+    "docs/03-product-principles.md",
+    "docs/04-technical-stack.md",
+    "docs/05-ai-principles.md",
+    "docs/06-development-rules.md",
+    "docs/07-module-map.md",
+    "docs/08-roadmap-v1.md",
+    "docs/09-definition-of-done.md"
+  ]
+}

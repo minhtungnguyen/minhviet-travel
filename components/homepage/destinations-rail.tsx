@@ -33,7 +33,7 @@ export function DestinationsRail({ destinations }: { destinations: DestinationCo
 
       <div
         ref={scroller}
-        className="mt-6 flex snap-x snap-mandatory gap-6 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="mt-5 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {destinations.map((destination) => (
           <div key={destination.id} className="shrink-0">

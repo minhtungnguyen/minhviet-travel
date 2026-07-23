@@ -50,21 +50,21 @@ export function JourneyCard({ journey }: { journey: JourneyContent }) {
         </span>
       </Link>
 
-      <div className="flex flex-1 flex-col p-6">
+      <div className="flex flex-1 flex-col p-5">
         <span className="eyebrow text-[10px] text-primary">{journey.country}</span>
 
-        <h3 className="mt-2 line-clamp-2 text-pretty font-display text-xl font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
+        <h3 className="mt-1.5 line-clamp-2 text-pretty font-display text-xl font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
           <Link href={journey.href}>{journey.title}</Link>
         </h3>
 
-        <p className="mt-3 text-xs text-muted-foreground">
+        <p className="mt-2 text-xs text-muted-foreground">
           Khởi hành {journey.nextDeparture} · Điểm đi {journey.departure}
           {journey.reviewScore && journey.reviewCount
             ? ` · ${journey.reviewScore.toFixed(1)}/5 (${journey.reviewCount} đánh giá)`
             : null}
         </p>
 
-        <div className="mt-5 flex items-end justify-between border-t border-border pt-4">
+        <div className="mt-4 flex items-end justify-between border-t border-border pt-3">
           <div>
             <p className="eyebrow text-[10px] text-muted-foreground">
               {journey.priceType === 'estimate' ? 'Giá tham khảo' : 'Giá'}

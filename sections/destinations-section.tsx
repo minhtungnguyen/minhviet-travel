@@ -6,7 +6,7 @@ export async function DestinationsSection() {
   const { destinations } = await getHomepageContent()
 
   return (
-    <section className="border-t border-border bg-background py-24 lg:py-32">
+    <section className="section-py-lg border-t border-border bg-background">
       <div className="container-mv">
         <SectionHeading
           eyebrow={destinations.eyebrow}

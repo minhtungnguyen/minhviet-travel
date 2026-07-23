@@ -15,11 +15,11 @@ export async function EnterpriseMiceSection() {
   const { enterpriseMice } = await getHomepageContent()
 
   return (
-    <section className="bg-background py-20 lg:py-24">
+    <section className="section-py-md bg-background">
       <div className="container-mv">
         <Reveal>
           <div className="relative overflow-hidden rounded-3xl shadow-soft-lg">
-            <div className="relative min-h-[560px] w-full">
+            <div className="relative min-h-[480px] w-full lg:min-h-[520px]">
               <Image
                 src={enterpriseMice.image.src}
                 alt={enterpriseMice.image.alt}
@@ -36,26 +36,26 @@ export async function EnterpriseMiceSection() {
                   <Sparkles className="size-3.5" />
                   {enterpriseMice.badge}
                 </span>
-                <h2 className="mt-5 text-balance font-display text-3xl font-bold leading-[1.1] tracking-tight text-paper sm:text-4xl lg:text-[2.75rem]">
+                <h2 className="mt-3 text-balance font-display text-3xl font-bold leading-[1.1] tracking-tight text-paper sm:text-4xl lg:text-[2.75rem]">
                   {enterpriseMice.title}
                 </h2>
-                <p className="mt-5 max-w-md text-pretty leading-relaxed text-paper/75">
+                <p className="mt-3 max-w-md text-pretty leading-relaxed text-paper/75">
                   {enterpriseMice.description}
                 </p>
 
-                <p className="mt-6 max-w-md text-pretty text-sm leading-relaxed text-paper/70 border-t border-paper/25 pt-6">
+                <p className="mt-4 max-w-md text-pretty text-sm leading-relaxed text-paper/70 border-t border-paper/25 pt-4">
                   {enterpriseMice.story}
                 </p>
 
-                <p className="mt-5 max-w-md text-pretty text-[11px] font-semibold uppercase tracking-wide text-paper/55">
+                <p className="mt-3 max-w-md text-pretty text-[11px] font-semibold uppercase tracking-wide text-paper/55">
                   {enterpriseMice.process.join(' · ')}
                 </p>
 
-                <div className="mt-8">
+                <div className="mt-5">
                   <VerifiedStat stat={enterpriseMice.proofStat} onDark />
                 </div>
 
-                <Button variant="accent" size="lg" className="mt-8" render={<Link href={enterpriseMice.cta.href} />}>
+                <Button variant="accent" size="lg" className="mt-5" render={<Link href={enterpriseMice.cta.href} />}>
                   {enterpriseMice.cta.label} <ArrowUpRight className="size-5" />
                 </Button>
               </div>

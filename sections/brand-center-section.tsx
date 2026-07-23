@@ -12,9 +12,9 @@ export async function BrandCenterSection() {
   const [featured, ...rest] = brandCenter.stories
 
   return (
-    <section className="border-t border-border bg-background py-20 lg:py-28">
+    <section className="section-py-md border-t border-border bg-background">
       <div className="container-mv">
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <SectionHeading
             eyebrow={brandCenter.eyebrow}
             title={brandCenter.title}
@@ -31,7 +31,7 @@ export async function BrandCenterSection() {
           </Button>
         </div>
 
-        <div className="mt-12 grid gap-5 lg:grid-cols-2">
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
           <Reveal>
             <Link
               href={featured.href}
@@ -47,13 +47,13 @@ export async function BrandCenterSection() {
               <div className="absolute inset-0 bg-gradient-to-t from-deep/95 via-deep/40 to-transparent" />
               <div className="relative p-7 sm:p-9">
                 <Badge variant="accent">{featured.category}</Badge>
-                <h3 className="mt-4 text-balance text-2xl font-bold text-white sm:text-3xl">{featured.title}</h3>
-                <p className="mt-3 max-w-lg text-pretty text-white/75">{featured.description}</p>
+                <h3 className="mt-3 text-balance text-2xl font-bold text-white sm:text-3xl">{featured.title}</h3>
+                <p className="mt-2 max-w-lg text-pretty text-white/75">{featured.description}</p>
               </div>
             </Link>
           </Reveal>
 
-          <div className="grid gap-5">
+          <div className="grid gap-4">
             {rest.map((story, i) => (
               <Reveal key={story.id} delay={i * 0.08}>
                 <Link
@@ -73,10 +73,10 @@ export async function BrandCenterSection() {
                     <Badge variant="neutral" className="w-fit">
                       {story.category}
                     </Badge>
-                    <h3 className="mt-2 line-clamp-2 font-bold text-foreground group-hover:text-primary">
+                    <h3 className="mt-1.5 line-clamp-2 font-bold text-foreground group-hover:text-primary">
                       {story.title}
                     </h3>
-                    <div className="mt-2 flex items-center justify-end">
+                    <div className="mt-1.5 flex items-center justify-end">
                       <ArrowUpRight className="size-4 text-muted-foreground/50 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-primary" />
                     </div>
                   </div>
@@ -86,7 +86,7 @@ export async function BrandCenterSection() {
           </div>
         </div>
 
-        <div className="mt-8 flex justify-center md:hidden">
+        <div className="mt-5 flex justify-center md:hidden">
           <Button variant="outline" size="default" render={<Link href={brandCenter.cta.href} />}>
             {brandCenter.cta.label} <ArrowRight className="size-4" />
           </Button>

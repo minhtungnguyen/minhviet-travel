@@ -32,17 +32,17 @@ export function FeaturedJourneysGrid({ content }: { content: FeaturedJourneysCon
       </div>
 
       {filtered.length === 0 ? (
-        <div className="mt-12 flex flex-col items-center justify-center border border-dashed border-border py-20 text-center">
+        <div className="mt-8 flex flex-col items-center justify-center border border-dashed border-border py-12 text-center">
           <p className="font-display text-xl text-foreground">Chưa có hành trình phù hợp</p>
           <p className="mt-2 text-sm text-muted-foreground">
             Vui lòng chọn khu vực khác hoặc để lại yêu cầu để được tư vấn riêng.
           </p>
-          <Button size="lg" className="mt-6" render={<a href="#lead-form" />}>
+          <Button size="lg" className="mt-4" render={<a href="#lead-form" />}>
             Liên hệ chuyên gia
           </Button>
         </div>
       ) : (
-        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((journey) => (
             <JourneyCard key={journey.id} journey={journey} />
           ))}

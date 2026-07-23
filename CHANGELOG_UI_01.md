@@ -145,3 +145,31 @@
 ### Còn tồn đọng (mới)
 5. Nav item "Bảo hiểm" trỏ tới `/insurance` — route này **chưa tồn tại** trong `app/`, cần tạo trang (kể cả dạng placeholder như `/hotels`/`/cruises`) trước go-live để tránh 404.
 6. Logo chỉ tăng ~1.2 lần thay vì 1.8–2 lần theo đúng số brief gốc, do ràng buộc không được sửa `pt-40` của Hero — nếu muốn đúng 1.8–2 lần, cần một task riêng được phép điều chỉnh padding của Hero (hoặc đổi Header từ `fixed` sang `sticky`, kéo theo thay đổi cách Hero hiển thị video nền — cả hai đều ngoài phạm vi task này).
+
+---
+
+## Global UI Spacing Optimization (2026-07-24)
+
+**Phạm vi:** Toàn bộ Homepage (trừ `sections/hero-section.tsx` — không đụng, vì `pt-40` của Hero đang được Header mới ở trên tính toán khớp; đổi giá trị đó sẽ phá lại phép đo vừa chốt).
+
+### Đã sửa
+- **File:** `app/globals.css` — thêm 3 token spacing dùng chung, theo đúng cơ chế `@utility` đã có sẵn cho `container-mv` (không hardcode `py-*` riêng từng section nữa):
+  - `section-py-lg` = `py-12 lg:py-16` (48/64px) — dùng cho section nhiều nội dung nhất (Tour ghép quốc tế, Điểm đến), giảm ~50% so với `py-24 lg:py-32` cũ.
+  - `section-py-md` = `py-10 lg:py-14` (40/56px) — Core Services, MICE, Năng lực, Liên hệ, giảm ~42–50% so với `py-20 lg:py-24/28` cũ.
+  - `section-py-sm` = `py-8 lg:py-10` (32/40px) — Trust Strip, giảm 50% so với `py-16 lg:py-20` cũ.
+- **File:** `components/homepage/section-heading.tsx` — gap Eyebrow→Title→Description dùng chung cho 4 section (Core Services, Tour ghép quốc tế, Năng lực, Điểm đến) giảm từ `gap-4` (16px) xuống `gap-2.5` (10px) — sửa 1 nơi, áp dụng đồng loạt.
+- **File:** từng section (`trust-strip`, `core-services`, `enterprise-mice`, `featured-journeys`, `destinations`, `brand-center`, `final-cta`) — áp đúng 1 trong 3 token trên, đồng thời giảm khoảng cách nội bộ (heading khối→nội dung, description→CTA, viền phân cách) theo cùng tỉ lệ ~35–45% (mt-8→mt-5, mt-10→mt-6, mt-12→mt-6, pt-8→pt-5...).
+- **File:** `components/homepage/journey-card.tsx`, `components/homepage/featured-journeys-grid.tsx`, `components/homepage/destinations-rail.tsx`, `components/homepage/dual-path-cta.tsx` — giảm gap giữa Card trong grid (`gap-6`→`gap-5`), padding nội dung Card (`p-6`→`p-5`), và khoảng cách heading→mô tả bên trong từng Card/khối form.
+- Card ảnh MICE: `min-h-[560px]` → `min-h-[480px] lg:min-h-[520px]` — nội dung chữ bên trong đã gọn hơn nên không cần khung ảnh cao như cũ.
+
+### Đã đo (thực tế, không ước lượng)
+- Chiều cao trang chủ (Desktop 1440px, `document.body.scrollHeight`): **6533px** — so với 7490px trước khi tối ưu (đo lại từ ảnh `before.png`/`after.png` của Sprint UI-01) → **giảm ~12.8%**.
+- Từng section riêng lẻ (đo `getBoundingClientRect().height`) giảm đúng theo tỉ lệ ~40–50% ở phần padding — nhưng **tổng thể trang chỉ ngắn hơn ~13%, không đạt mục tiêu "~30%"** nêu ở brief, vì phần lớn chiều cao còn lại đến từ **nội dung** (Hero cao 820px không được sửa; section Tour ghép quốc tế cao 1283px chủ yếu do 6 Tour Card thật, không phải khoảng trắng) — không cắt bớt nội dung/số lượng card vì ngoài phạm vi yêu cầu (chỉ được đụng "spacing", không đụng "content").
+- Không overflow ngang ở Desktop (1440px)/Tablet (768px)/Mobile (375px) — `scrollWidth === clientWidth` cả 3 mốc. Ảnh minh chứng: `docs/sprint-ui-01/spacing-after-{desktop,tablet,mobile}.png`.
+- `npx tsc --noEmit`, `npx eslint .`, `npx next build` — cả 3 sạch.
+
+### Không đụng tới
+`sections/hero-section.tsx` (giữ nguyên `pt-28/32/40` vì Header vừa tính khớp với giá trị này), `components/homepage/lead-form.tsx` (gap giữa các field trong form giữ nguyên — đây là nhịp điệu thao tác nhập liệu, không phải nhịp điệu trình bày biên tập, thay đổi rủi ro ảnh hưởng khả năng đọc form), `components/site/site-header.tsx`, backend/CMS/API/database.
+
+### Còn tồn đọng (mới)
+7. Mục tiêu "ngắn hơn ~30%" chưa đạt (mới đạt ~13%) — muốn đạt được cần hoặc giảm số lượng Tour Card hiển thị trên Homepage (vd. 6→4), hoặc thu nhỏ Hero (cả hai đều là thay đổi **nội dung/Hero**, ngoài phạm vi task "chỉ spacing" này, cần task riêng nếu muốn theo đuổi tiếp mục tiêu 30%.

@@ -17,14 +17,14 @@ export async function CoreServicesSection() {
   const [bespoke, readyMade] = coreServices.groups
 
   return (
-    <section className="border-t border-border bg-background py-20 lg:py-24">
+    <section className="section-py-md border-t border-border bg-background">
       <div className="container-mv">
-        <SectionHeading eyebrow={coreServices.eyebrow} title={coreServices.title} className="mb-10 max-w-2xl" />
+        <SectionHeading eyebrow={coreServices.eyebrow} title={coreServices.title} className="mb-6 max-w-2xl" />
 
-        <Reveal className="flex flex-col gap-10">
+        <Reveal className="flex flex-col gap-6">
           {bespoke && (
             <div>
-              <p className="eyebrow mb-4 text-[11px] font-semibold text-accent">{bespoke.label}</p>
+              <p className="eyebrow mb-3 text-[11px] font-semibold text-accent">{bespoke.label}</p>
               <div className="grid gap-4 sm:grid-cols-2">
                 {bespoke.services.map((service) => {
                   const Icon = SERVICE_ICONS[service.icon]
@@ -50,7 +50,7 @@ export async function CoreServicesSection() {
 
           {readyMade && (
             <div>
-              <p className="eyebrow mb-4 text-[11px] font-semibold text-muted-foreground">{readyMade.label}</p>
+              <p className="eyebrow mb-3 text-[11px] font-semibold text-muted-foreground">{readyMade.label}</p>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
                 {readyMade.services.map((service) => {
                   const Icon = SERVICE_ICONS[service.icon]

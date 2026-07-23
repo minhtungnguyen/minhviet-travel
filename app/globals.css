@@ -142,6 +142,20 @@
   @apply mx-auto w-full max-w-[1280px] px-5 sm:px-6 lg:px-10;
 }
 
+/* Section vertical-rhythm tokens (Sprint: Global UI Spacing Optimization).
+   ~50% tighter than the values they replace, on a shared 3-tier scale so
+   no section hardcodes its own py-* — pick the tier by how much visual
+   separation the section actually needs, not by copying a neighbor. */
+@utility section-py-lg {
+  @apply py-12 lg:py-16;
+}
+@utility section-py-md {
+  @apply py-10 lg:py-14;
+}
+@utility section-py-sm {
+  @apply py-8 lg:py-10;
+}
+
 @layer utilities {
   /* Thin uppercase editorial label */
   .eyebrow {

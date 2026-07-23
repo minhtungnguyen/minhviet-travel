@@ -9,9 +9,9 @@ export async function FeaturedJourneysSection() {
   const { featuredJourneys } = await getHomepageContent()
 
   return (
-    <section id="tour-ghep-quoc-te" className="scroll-mt-20 bg-background py-24 lg:py-32">
+    <section id="tour-ghep-quoc-te" className="section-py-lg scroll-mt-20 bg-background">
       <div className="container-mv">
-        <div className="flex flex-col gap-8 border-b border-border pb-8 md:flex-row md:items-end md:justify-between">
+        <div className="flex flex-col gap-5 border-b border-border pb-5 md:flex-row md:items-end md:justify-between">
           <SectionHeading
             eyebrow={featuredJourneys.eyebrow}
             title={
@@ -31,11 +31,11 @@ export async function FeaturedJourneysSection() {
           </Button>
         </div>
 
-        <div className="mt-8">
+        <div className="mt-6">
           <FeaturedJourneysGrid content={featuredJourneys} />
         </div>
 
-        <div className="mt-10 flex justify-center md:hidden">
+        <div className="mt-6 flex justify-center md:hidden">
           <Button variant="outline" size="default" render={<Link href={featuredJourneys.viewAllCta.href} />}>
             {featuredJourneys.viewAllCta.label} <ArrowRight className="size-4" />
           </Button>

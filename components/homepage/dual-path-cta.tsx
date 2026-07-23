@@ -39,7 +39,7 @@ export function DualPathCta({
   serviceOptions: { value: string; label: string }[]
 }) {
   return (
-    <div id="lead-form" className="flex flex-col items-center gap-8">
+    <div id="lead-form" className="flex flex-col items-center gap-6">
       <Tabs defaultValue="corporate" className="w-full max-w-2xl">
         <TabsList className="mx-auto flex w-fit rounded-full bg-white/10 p-1" aria-label="Chọn loại yêu cầu tư vấn">
           <TabsTab value="corporate" className={TAB_TRIGGER_CLASS}>
@@ -50,7 +50,7 @@ export function DualPathCta({
           </TabsTab>
         </TabsList>
 
-        <TabsPanel value="corporate" className="mt-8 min-h-[560px] sm:min-h-[520px]">
+        <TabsPanel value="corporate" className="mt-6 min-h-[560px] sm:min-h-[520px]">
           <PathBlock
             title={content.corporate.title}
             description={content.corporate.description}
@@ -58,7 +58,7 @@ export function DualPathCta({
             serviceOptions={serviceOptions}
           />
         </TabsPanel>
-        <TabsPanel value="individual" className="mt-8 min-h-[560px] sm:min-h-[520px]">
+        <TabsPanel value="individual" className="mt-6 min-h-[560px] sm:min-h-[520px]">
           <PathBlock
             title={content.individual.title}
             description={content.individual.description}
@@ -93,10 +93,10 @@ function PathBlock({
   serviceOptions: { value: string; label: string }[]
 }) {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       <div className="text-center">
         <h3 className="font-display text-xl font-bold text-paper">{title}</h3>
-        <p className="mt-2 text-sm text-paper/70">{description}</p>
+        <p className="mt-1.5 text-sm text-paper/70">{description}</p>
       </div>
       <LeadForm intent={intent} serviceOptions={serviceOptions} />
     </div>

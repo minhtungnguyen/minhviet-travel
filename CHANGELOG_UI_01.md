@@ -113,3 +113,35 @@
 
 ### Không đụng tới
 `lead-form.tsx`, `use-lead-form.ts`, `lib/actions/lead-action.ts`, mọi section khác của Homepage, `components/ui/tabs.tsx` (bug trong file này được né bằng override cục bộ thay vì sửa trực tiếp, để không vượt phạm vi "chỉ sửa section form tư vấn" — nếu muốn sửa tận gốc cho các chỗ dùng `Tabs` khác trong tương lai, cần một task riêng).
+
+---
+
+## Sprint UI-01.1 — Header & Navigation Refinement (2026-07-24)
+
+**Phạm vi:** Chỉ `components/site/site-header.tsx` (+ 1 component mới cho language switcher). Không sửa Hero, Homepage section, backend, CMS, hay responsive ngoài Header.
+
+### Đã sửa
+- **File mới:** `components/site/language-switcher.tsx` — dropdown chọn ngôn ngữ bằng cờ quốc gia (🇻🇳 mặc định, 🇬🇧, 🇨🇳, 🇯🇵, 🇰🇷), có hover + active state (chữ đậm + màu accent + dấu check), đóng khi click ra ngoài hoặc nhấn `Esc`. **Chỉ UI** — chọn ngôn ngữ đổi state cục bộ, chưa đổi route/nội dung; cấu trúc list phẳng có `code` để việc nối i18n thật sau này chỉ cần sửa bên trong component này, không phải nơi gọi nó.
+- **File:** `components/site/site-header.tsx` — viết lại thành 3 tầng đúng yêu cầu:
+  - **Level 1 (Utility bar):** trái = Hotline 24/7; phải = Về chúng tôi · Tin tức · Tư vấn (đổi tên từ "Liên hệ", giữ nguyên href `/contact`) · `LanguageSwitcher` · Đăng nhập · Đăng ký. Bỏ hành vi ẩn khi cuộn (trước đây `scrolled` làm `h-0 opacity-0`) — nay luôn hiển thị vì đây là nơi duy nhất còn hotline + tài khoản.
+  - **Level 2 (Brand):** bỏ hẳn hotline (trước đây có 1 nút gọi persistent ở đây). Logo căn giữa, tăng từ 50px lên 60px (scroll co còn 48px) — xem phần "Quyết định kỹ thuật" bên dưới về lý do không đạt đúng 1.8–2 lần như brief gốc. Thêm dòng Brand Statement dưới logo: "Tour Thiết Kế Trọn Gói" (navy, semibold) · kim cương vàng nhỏ · "MICE" (vàng, bold, đậm hơn — điểm nhấn) · kim cương vàng nhỏ · "Tour Ghép Quốc Tế" (navy, semibold), 2 đường line vàng mảnh 2 bên (ẩn dưới `sm` để tránh chật). Không icon máy bay, không gradient.
+  - **Level 3 (Main nav):** đổi "Tour" → "Tour Thiết Kế"; thêm mục mới "Bảo hiểm" (href tạm `/insurance`, trang đích chưa tồn tại — xem "Còn tồn đọng"); "Ưu đãi" tô `text-destructive` (đỏ) — mục duy nhất có màu riêng; "Bảo hiểm" và mọi mục khác dùng chung 1 màu chuẩn (`text-foreground/80 hover:text-accent`), không có màu xanh riêng nào khác biệt.
+  - Mobile drawer: thêm `LanguageSwitcher` (trước đây không có ở mobile), áp cùng màu đỏ cho "Ưu đãi" trong danh sách menu mobile.
+
+### Quyết định kỹ thuật: chiều cao Header vs. Hero
+- `sections/hero-section.tsx` (không được sửa) dùng `lg:pt-40` (160px) cố định để chừa chỗ cho Header `fixed` — thực đo, headline (`h1`) render tại `y≈200px` (160px padding + dòng eyebrow + `mt-6` phía trên h1), không phải đúng 160px như tính nhẩm ban đầu.
+- Logo 1.8–2 lần (90–100px) + thêm dòng Brand Statement không thể vừa trong ngân sách cũ mà không đụng Hero — đã hỏi lại và được chọn phương án: **tăng logo vừa phải (60px, ~1.2 lần) thay vì 1.8–2 lần**, nén padding Level 1/2 để tổng chiều cao Header thực đo còn **173.75px ở Desktop/Laptop** (94–106px ở Tablet/Mobile do Utility bar + Nav ẩn) — headline Hero vẫn hiện đầy đủ, đo được khoảng hở thực tế **~27px**, không đè lên chữ.
+
+### Đã kiểm tra
+- Desktop (1440px)/Laptop (1280px): Header 173.75px, không overflow ngang, không đè Hero (khoảng hở 26.75px).
+- Tablet (768px): Header 94.33px, logo + brand statement căn giữa, không tràn.
+- Mobile (375px): Header 106.33px, brand statement tự xuống 2 dòng gọn gàng, hamburger đúng vị trí, không overflow ngang.
+- `npx tsc --noEmit`, `npx eslint .`, `npx next build` — cả 3 sạch.
+- Không phát sinh console error mới (vẫn chỉ còn cảnh báo hydration tiền tồn tại ở `VerifiedStat`, không liên quan).
+
+### Không đụng tới
+`sections/hero-section.tsx`, mọi Homepage section khác, backend/CMS/API/database, responsive của các thành phần ngoài Header.
+
+### Còn tồn đọng (mới)
+5. Nav item "Bảo hiểm" trỏ tới `/insurance` — route này **chưa tồn tại** trong `app/`, cần tạo trang (kể cả dạng placeholder như `/hotels`/`/cruises`) trước go-live để tránh 404.
+6. Logo chỉ tăng ~1.2 lần thay vì 1.8–2 lần theo đúng số brief gốc, do ràng buộc không được sửa `pt-40` của Hero — nếu muốn đúng 1.8–2 lần, cần một task riêng được phép điều chỉnh padding của Hero (hoặc đổi Header từ `fixed` sang `sticky`, kéo theo thay đổi cách Hero hiển thị video nền — cả hai đều ngoài phạm vi task này).

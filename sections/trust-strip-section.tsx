@@ -17,7 +17,18 @@ export async function TrustStripSection() {
     <section className="border-b border-border bg-paper py-16 lg:py-20">
       <div className="container-mv">
         <Reveal>
-          <div className="flex flex-col gap-6 border-b border-border pb-8 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-3xl border-b border-border pb-8">
+            <h2 className="text-balance font-display text-2xl font-bold leading-snug tracking-tight text-foreground sm:text-3xl">
+              {trustStrip.positioning.headline}
+            </h2>
+            <p className="mt-3 text-pretty leading-relaxed text-muted-foreground">
+              {trustStrip.positioning.description}
+            </p>
+          </div>
+        </Reveal>
+
+        <Reveal>
+          <div className="mt-8 flex flex-col gap-6 border-b border-border pb-8 lg:flex-row lg:items-center lg:justify-between">
             <p className="eyebrow text-[11px] font-semibold text-primary">{trustStrip.eyebrow}</p>
             <ul className="flex flex-wrap gap-2.5">
               {trustStrip.segments.map((segment) => {

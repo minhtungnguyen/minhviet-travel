@@ -9,7 +9,7 @@ export async function FeaturedJourneysSection() {
   const { featuredJourneys } = await getHomepageContent()
 
   return (
-    <section className="bg-background py-24 lg:py-32">
+    <section id="tour-ghep-quoc-te" className="scroll-mt-20 bg-background py-24 lg:py-32">
       <div className="container-mv">
         <div className="flex flex-col gap-8 border-b border-border pb-8 md:flex-row md:items-end md:justify-between">
           <SectionHeading

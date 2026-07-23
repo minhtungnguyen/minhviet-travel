@@ -32,7 +32,7 @@ export async function EnterpriseMiceSection() {
 
             <div className="absolute inset-0 flex items-center">
               <div className="max-w-xl p-8 sm:p-12 lg:p-16">
-                <span className="inline-flex items-center gap-2 rounded-full bg-gold/15 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-gold">
+                <span className="inline-flex items-center gap-2 rounded-full bg-accent/15 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-accent">
                   <Sparkles className="size-3.5" />
                   {enterpriseMice.badge}
                 </span>
@@ -43,20 +43,19 @@ export async function EnterpriseMiceSection() {
                   {enterpriseMice.description}
                 </p>
 
-                <div className="mt-8 grid gap-5 sm:grid-cols-2">
-                  {enterpriseMice.differentiators.map((item) => (
-                    <div key={item.id} className="border-t border-paper/25 pt-4">
-                      <p className="font-display text-lg text-paper">{item.title}</p>
-                      <p className="mt-1 text-xs leading-relaxed text-paper/65">{item.description}</p>
-                    </div>
-                  ))}
-                </div>
+                <p className="mt-6 max-w-md text-pretty text-sm leading-relaxed text-paper/70 border-t border-paper/25 pt-6">
+                  {enterpriseMice.story}
+                </p>
+
+                <p className="mt-5 max-w-md text-pretty text-[11px] font-semibold uppercase tracking-wide text-paper/55">
+                  {enterpriseMice.process.join(' · ')}
+                </p>
 
                 <div className="mt-8">
                   <VerifiedStat stat={enterpriseMice.proofStat} onDark />
                 </div>
 
-                <Button variant="gold" size="lg" className="mt-8" render={<Link href={enterpriseMice.cta.href} />}>
+                <Button variant="accent" size="lg" className="mt-8" render={<Link href={enterpriseMice.cta.href} />}>
                   {enterpriseMice.cta.label} <ArrowUpRight className="size-5" />
                 </Button>
               </div>

@@ -38,7 +38,7 @@ export function FeaturedJourneysGrid({ content }: { content: FeaturedJourneysCon
             Vui lòng chọn khu vực khác hoặc để lại yêu cầu để được tư vấn riêng.
           </p>
           <Button size="lg" className="mt-6" render={<a href="#lead-form" />}>
-            Yêu cầu tư vấn
+            Liên hệ chuyên gia
           </Button>
         </div>
       ) : (

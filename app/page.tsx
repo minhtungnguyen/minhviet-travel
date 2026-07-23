@@ -7,7 +7,6 @@ import { HeroSection } from '@/sections/hero-section'
 import { TrustStripSection } from '@/sections/trust-strip-section'
 import { CoreServicesSection } from '@/sections/core-services-section'
 import { EnterpriseMiceSection } from '@/sections/enterprise-mice-section'
-import { AIAdvisorSection } from '@/sections/ai-advisor-section'
 import { FeaturedJourneysSection } from '@/sections/featured-journeys-section'
 import { DestinationsSection } from '@/sections/destinations-section'
 import { BrandCenterSection } from '@/sections/brand-center-section'
@@ -40,7 +39,6 @@ export default async function HomePage() {
       <TrustStripSection />
       <CoreServicesSection />
       <EnterpriseMiceSection />
-      <AIAdvisorSection />
       <FeaturedJourneysSection />
       <DestinationsSection />
       <BrandCenterSection />

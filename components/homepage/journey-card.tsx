@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { CalendarDays, Clock, MapPin, Star } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { AvailabilityStatus } from '@/types/cms'
@@ -23,12 +23,18 @@ function formatPrice(value: number) {
   return value.toLocaleString('vi-VN') + '₫'
 }
 
+/**
+ * Redesigned away from the Traveloka/Klook shape (floating rating
+ * badge, dense icon-per-line meta, price as the loudest element) —
+ * the image and the journey title carry the card, meta collapses to
+ * one line, price is present but subordinate. Data contract unchanged.
+ */
 export function JourneyCard({ journey }: { journey: JourneyContent }) {
   const availability = AVAILABILITY_COPY[journey.availability]
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl bg-card shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-lg">
-      <Link href={journey.href} className="relative block aspect-[4/3] overflow-hidden">
+      <Link href={journey.href} className="relative block aspect-[16/11] overflow-hidden">
         <Image
           src={journey.image.src}
           alt={journey.image.alt}
@@ -45,44 +51,28 @@ export function JourneyCard({ journey }: { journey: JourneyContent }) {
       </Link>
 
       <div className="flex flex-1 flex-col p-6">
-        <div className="flex items-center justify-between">
-          <span className="eyebrow text-[10px] text-primary">{journey.country}</span>
-          {journey.reviewScore && journey.reviewCount ? (
-            <span className="flex items-center gap-1 text-xs font-semibold text-foreground">
-              <Star className="size-3.5 fill-gold text-gold" />
-              {journey.reviewScore.toFixed(1)}
-              <span className="text-muted-foreground">({journey.reviewCount})</span>
-            </span>
-          ) : null}
-        </div>
+        <span className="eyebrow text-[10px] text-primary">{journey.country}</span>
 
-        <h3 className="mt-2.5 line-clamp-2 text-pretty font-display text-xl font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
+        <h3 className="mt-2 line-clamp-2 text-pretty font-display text-xl font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
           <Link href={journey.href}>{journey.title}</Link>
         </h3>
 
-        <ul className="mt-3.5 space-y-1.5 text-xs text-muted-foreground">
-          <li className="flex items-center gap-2">
-            <CalendarDays className="size-3.5 shrink-0 text-royal/70" />
-            Khởi hành gần nhất: <span className="font-medium text-foreground">{journey.nextDeparture}</span>
-          </li>
-          <li className="flex items-center gap-2">
-            <MapPin className="size-3.5 shrink-0 text-royal/70" />
-            Điểm đi: <span className="font-medium text-foreground">{journey.departure}</span>
-          </li>
-        </ul>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Khởi hành {journey.nextDeparture} · Điểm đi {journey.departure}
+          {journey.reviewScore && journey.reviewCount
+            ? ` · ${journey.reviewScore.toFixed(1)}/5 (${journey.reviewCount} đánh giá)`
+            : null}
+        </p>
 
         <div className="mt-5 flex items-end justify-between border-t border-border pt-4">
           <div>
             <p className="eyebrow text-[10px] text-muted-foreground">
               {journey.priceType === 'estimate' ? 'Giá tham khảo' : 'Giá'}
             </p>
-            <p className="text-xl font-extrabold text-primary">{formatPrice(journey.priceFrom)}</p>
-            {journey.priceType === 'estimate' && (
-              <p className="text-[11px] text-muted-foreground">Xác nhận khi đặt chỗ</p>
-            )}
+            <p className="text-base font-bold text-primary">{formatPrice(journey.priceFrom)}</p>
           </div>
           <Button variant="outline" size="sm" render={<Link href={journey.href} />}>
-            Xem hành trình
+            Khám phá tour
           </Button>
         </div>
       </div>

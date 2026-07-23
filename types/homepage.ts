@@ -33,6 +33,10 @@ export interface PartnerLogo {
 
 export interface TrustStripContent {
   eyebrow: string
+  positioning: {
+    headline: string
+    description: string
+  }
   segments: AudienceSegment[]
   stats: VerifiedStat[]
   partners: PartnerLogo[]
@@ -41,27 +45,28 @@ export interface TrustStripContent {
 export interface ServiceTile {
   id: string
   title: string
-  icon: 'group' | 'briefcase' | 'sparkles' | 'building' | 'ship' | 'plane'
+  icon: 'group' | 'briefcase' | 'sparkles' | 'building' | 'ship' | 'plane' | 'ticket'
   href: string
+}
+
+export interface ServiceGroup {
+  id: string
+  label: string
+  services: ServiceTile[]
 }
 
 export interface CoreServicesContent {
   eyebrow: string
   title: string
-  services: ServiceTile[]
-}
-
-export interface EnterpriseDifferentiator {
-  id: string
-  title: string
-  description: string
+  groups: ServiceGroup[]
 }
 
 export interface EnterpriseMiceContent {
   badge: string
   title: string
   description: string
-  differentiators: EnterpriseDifferentiator[]
+  story: string
+  process: string[]
   proofStat: VerifiedStat
   image: CmsImage
   cta: CmsLink

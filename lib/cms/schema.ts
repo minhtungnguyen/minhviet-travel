@@ -45,14 +45,14 @@ const partnerLogoSchema = z.object({
 const serviceTileSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
-  icon: z.enum(['group', 'briefcase', 'sparkles', 'building', 'ship', 'plane']),
+  icon: z.enum(['group', 'briefcase', 'sparkles', 'building', 'ship', 'plane', 'ticket']),
   href: z.string().min(1),
 })
 
-const enterpriseDifferentiatorSchema = z.object({
+const serviceGroupSchema = z.object({
   id: z.string().min(1),
-  title: z.string().min(1),
-  description: z.string().min(1),
+  label: z.string().min(1),
+  services: z.array(serviceTileSchema).min(1),
 })
 
 const aiAdvisorQuestionSchema = z.object({
@@ -122,6 +122,10 @@ export const homepageContentSchema = z.object({
   }),
   trustStrip: z.object({
     eyebrow: z.string().min(1),
+    positioning: z.object({
+      headline: z.string().min(1),
+      description: z.string().min(1),
+    }),
     segments: z.array(audienceSegmentSchema).min(1),
     stats: z.array(verifiedStatSchema).min(1),
     partners: z.array(partnerLogoSchema).min(1),
@@ -129,13 +133,14 @@ export const homepageContentSchema = z.object({
   coreServices: z.object({
     eyebrow: z.string().min(1),
     title: z.string().min(1),
-    services: z.array(serviceTileSchema).min(1),
+    groups: z.array(serviceGroupSchema).min(1),
   }),
   enterpriseMice: z.object({
     badge: z.string().min(1),
     title: z.string().min(1),
     description: z.string().min(1),
-    differentiators: z.array(enterpriseDifferentiatorSchema).min(1),
+    story: z.string().min(1),
+    process: z.array(z.string().min(1)).min(1),
     proofStat: verifiedStatSchema,
     image: cmsImageSchema,
     cta: cmsLinkSchema,

@@ -18,8 +18,8 @@ export const homepageContentSeed: HomepageContent = {
     headlineAccent: 'doanh nghiệp',
     subhead:
       'Giải pháp du lịch, sự kiện và công tác trọn gói dành cho doanh nghiệp, tổ chức và khách hàng cao cấp — thẩm định bởi chuyên gia, hỗ trợ bởi AI.',
-    primaryCta: { label: 'Nhận tư vấn giải pháp', href: '/contact?intent=corporate' },
-    secondaryCta: { label: 'Thử gợi ý AI', href: '#ai-advisor' },
+    primaryCta: { label: 'Thiết kế chương trình riêng', href: '/contact?intent=corporate' },
+    secondaryCta: { label: 'Khám phá tour có sẵn', href: '#tour-ghep-quoc-te' },
     backgroundImage: {
       src: '/editorial-hero.webp',
       alt: 'Du khách ngắm bình minh trên thung lũng núi đá vôi Việt Nam',
@@ -37,6 +37,11 @@ export const homepageContentSeed: HomepageContent = {
   },
   trustStrip: {
     eyebrow: 'Được tin dùng bởi doanh nghiệp & tổ chức trên cả nước',
+    positioning: {
+      headline: 'Minh Việt không chỉ bán tour — Minh Việt thiết kế và tổ chức toàn bộ hành trình.',
+      description:
+        'Đội ngũ chuyên trách thiết kế chương trình riêng cho tour doanh nghiệp, MICE, hội nghị và tour gia đình — song song phân phối tour ghép quốc tế, vé máy bay, du thuyền, khách sạn, vé vui chơi, visa và bảo hiểm cho khách cần dịch vụ có sẵn.',
+    },
     segments: [
       { id: 'fdi', label: 'Khu công nghiệp & FDI', icon: 'building' },
       { id: 'gov', label: 'Cơ quan nhà nước', icon: 'landmark' },
@@ -83,13 +88,26 @@ export const homepageContentSeed: HomepageContent = {
   coreServices: {
     eyebrow: 'Dịch vụ cốt lõi',
     title: 'Một đầu mối, trọn vẹn hành trình',
-    services: [
-      { id: 'group-tours', title: 'Tour đoàn', icon: 'group', href: '/tours?type=group' },
-      { id: 'mice', title: 'MICE & Sự kiện', icon: 'briefcase', href: '/mice' },
-      { id: 'custom-service', title: 'Dịch vụ lẻ', icon: 'sparkles', href: '/services' },
-      { id: 'hotels', title: 'Khách sạn', icon: 'building', href: '/hotels' },
-      { id: 'cruises', title: 'Du thuyền', icon: 'ship', href: '/cruises' },
-      { id: 'flights', title: 'Vé máy bay', icon: 'plane', href: '/flights' },
+    groups: [
+      {
+        id: 'bespoke',
+        label: 'Thiết kế theo yêu cầu',
+        services: [
+          { id: 'group-tours', title: 'Tour đoàn', icon: 'group', href: '/tours?type=group' },
+          { id: 'mice', title: 'MICE & Sự kiện', icon: 'briefcase', href: '/mice' },
+        ],
+      },
+      {
+        id: 'ready-made',
+        label: 'Có sẵn — khám phá ngay',
+        services: [
+          { id: 'custom-service', title: 'Dịch vụ lẻ', icon: 'sparkles', href: '/services' },
+          { id: 'hotels', title: 'Khách sạn', icon: 'building', href: '/hotels' },
+          { id: 'cruises', title: 'Du thuyền', icon: 'ship', href: '/cruises' },
+          { id: 'flights', title: 'Vé máy bay', icon: 'plane', href: '/flights' },
+          { id: 'tickets', title: 'Vé vui chơi', icon: 'ticket', href: '/tickets' },
+        ],
+      },
     ],
   },
   enterpriseMice: {
@@ -97,27 +115,15 @@ export const homepageContentSeed: HomepageContent = {
     title: 'Sự kiện đẳng cấp cho doanh nghiệp của bạn',
     description:
       'Hội nghị, team building, gala dinner và incentive — dàn dựng trọn gói, chuyên nghiệp, đạt tiêu chuẩn doanh nghiệp và tổ chức quốc tế.',
-    differentiators: [
-      {
-        id: 'custom-design',
-        title: 'Thiết kế riêng',
-        description: 'Hành trình linh hoạt theo ngân sách & mục tiêu doanh nghiệp.',
-      },
-      {
-        id: 'full-operation',
-        title: 'Vận hành trọn gói',
-        description: 'Từ vận chuyển, lưu trú đến sự kiện — một đầu mối duy nhất.',
-      },
-      {
-        id: '24-7-coordination',
-        title: 'Điều phối 24/7',
-        description: 'Đội ngũ điều hành theo sát trước, trong và sau chuyến đi.',
-      },
-      {
-        id: 'enterprise-standard',
-        title: 'Tiêu chuẩn doanh nghiệp',
-        description: 'Quy trình, hợp đồng & báo cáo đạt chuẩn đối tác FDI.',
-      },
+    story:
+      'Từ tiếp nhận yêu cầu đến nghiệm thu sau sự kiện, một đội điều phối duy nhất đồng hành cùng doanh nghiệp qua từng bước — không bàn giao giữa chừng, không phát sinh đầu mối thứ hai.',
+    process: [
+      'Tiếp nhận yêu cầu',
+      'Lên Concept',
+      'Thiết kế chương trình',
+      'Điều phối',
+      'Vận hành',
+      'Nghiệm thu',
     ],
     proofStat: {
       id: 'mice-programs-delivered',
@@ -133,7 +139,7 @@ export const homepageContentSeed: HomepageContent = {
       width: 1600,
       height: 1200,
     },
-    cta: { label: 'Nhận tư vấn giải pháp MICE', href: '/mice' },
+    cta: { label: 'Yêu cầu thiết kế chương trình', href: '/contact?intent=corporate' },
   },
   aiAdvisor: {
     eyebrow: 'Công nghệ & con người',
@@ -181,9 +187,9 @@ export const homepageContentSeed: HomepageContent = {
     humanHandoffCta: { label: 'Nói chuyện với chuyên viên', href: '/contact?intent=ai-advisor' },
   },
   featuredJourneys: {
-    eyebrow: 'Hành trình tuyển chọn',
-    title: 'Những chuyến đi',
-    titleAccent: 'đáng nhớ',
+    eyebrow: 'Tour ghép quốc tế',
+    title: 'Khởi hành định kỳ,',
+    titleAccent: 'ghép đoàn theo lịch có sẵn',
     filters: [
       { id: 'all', label: 'Tất cả' },
       { id: 'asia', label: 'Châu Á' },
@@ -288,7 +294,7 @@ export const homepageContentSeed: HomepageContent = {
         matchTags: ['budget:under-15tr', 'budget:15-30tr', 'group:small-group', 'group:corporate', 'preference:city'],
       },
     ],
-    viewAllCta: { label: 'Xem tất cả tour', href: '/tours' },
+    viewAllCta: { label: 'Khám phá tour', href: '/tours' },
   },
   destinations: {
     eyebrow: 'Điểm đến',
@@ -304,7 +310,7 @@ export const homepageContentSeed: HomepageContent = {
     ],
   },
   brandCenter: {
-    eyebrow: 'Dấu ấn Minh Việt',
+    eyebrow: 'Năng lực',
     title: 'Năng lực & uy tín được khẳng định',
     description:
       'Trung tâm thương hiệu ghi nhận năng lực tổ chức, đội ngũ lãnh đạo và mạng lưới đối tác của Minh Việt — không phải một trang blog.',

@@ -16,3 +16,6 @@ node_modules
 .next/
 .DS_Store
 *.tsbuildinfo
+
+# Playwright MCP trace/log output (tool-generated, not project source)
+.playwright-mcp/

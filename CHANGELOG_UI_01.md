@@ -63,7 +63,7 @@
 - Token màu/font/spacing trong `app/globals.css` hay tài liệu Volume 01 Design DNA.
 - Không thêm rating/review/số liệu/countdown/flash-sale giả — mọi số liệu mới dùng lại `VerifiedStat`/`verifiedStatSchema` đã có nguồn.
 - `sections/destinations-section.tsx` — không nằm trong flow 10 mục nhưng vẫn hợp lý, giữ nguyên không lý do di chuyển/xoá.
-- `sections/final-cta-section.tsx` / `components/homepage/dual-path-cta.tsx` / `lead-form.tsx` — cấu trúc giữ nguyên (đã đúng chuẩn từ trước), chỉ sửa lỗi type ở mục 9.
+- `sections/final-cta-section.tsx` / `lead-form.tsx` — cấu trúc giữ nguyên (đã đúng chuẩn từ trước), chỉ sửa lỗi type ở mục 9. (`dual-path-cta.tsx` sau đó được sửa bởi hotfix riêng — xem mục "Hotfix" bên dưới.)
 
 ## Đã xác minh
 
@@ -84,3 +84,32 @@
 2. Hydration mismatch tiền tồn tại ở `components/homepage/verified-stat.tsx` (count-up animation render khác giữa server/client) — xuất hiện độc lập với thay đổi của sprint này, cần task riêng.
 3. `sections/ai-advisor-section.tsx` và các component liên quan hiện không còn route nào trỏ tới — cần quyết định giữ làm tính năng ở trang khác hay dọn hẳn trong một sprint sau.
 4. `/hotels`, `/cruises`, `/tickets` vẫn là `PlaceholderSection` tĩnh — section Core Services trên Homepage trỏ tới các trang này nhưng bản thân trang đích chưa có nội dung/listing thật.
+
+---
+
+## Hotfix — Consultation Form Tabs (2026-07-24)
+
+**Phạm vi:** Chỉ section form tư vấn ở cuối Homepage (`#lead-form`). Không sửa section khác, không đổi backend lead handling/API/database.
+
+### Vấn đề
+2 form (Doanh nghiệp/Tổ chức và Khách cá nhân) hiển thị đồng thời cạnh nhau trên desktop (`md:grid md:grid-cols-2`) — tải nhận thức cao, section quá nặng, mất cân đối thị giác.
+
+### Đã sửa
+- **File:** `components/homepage/dual-path-cta.tsx`
+- Gộp 2 form vào 1 khối duy nhất, chuyển sang segmented tab control (dùng lại `components/ui/tabs.tsx` — primitive `@base-ui/react/tabs` có sẵn, không tạo component mới). Tab mặc định: **Doanh nghiệp / Tổ chức**. Chỉ 1 form render tại một thời điểm — xác nhận bằng DOM: Base UI **unmount hẳn** panel không active (không phải ẩn bằng CSS), nên không có rủi ro submit nhầm form/gộp sai dữ liệu giữa 2 loại khách hàng.
+- Bỏ hẳn layout `hidden md:grid` / `md:hidden` (2 nhánh desktop/mobile riêng biệt trước đây) — giờ dùng đúng 1 markup cho mọi breakpoint, cùng container (`max-w-2xl`, cùng nền `bg-card`/`rounded-2xl`/`shadow-soft-lg` kế thừa từ `LeadForm`).
+- Thêm `min-h-[560px] sm:min-h-[520px]` cho vùng panel để giảm layout shift khi đổi tab (2 form chỉ lệch 1 field — Đơn vị/Doanh nghiệp — nên chiều cao gần như không đổi).
+- **Phát hiện & sửa lỗi tiền tồn tại:** `components/ui/tabs.tsx`'s `TabsTab` style nhắm vào thuộc tính `data-selected`, nhưng Base UI Tabs thực tế set `data-active` (xác nhận bằng cách đọc DOM đã render) — nghĩa là trạng thái active/inactive **chưa từng thực sự áp dụng** kể cả ở bản mobile-only trước đây. Sửa bằng cách nhắm đúng `data-[active]` **trong class truyền qua `className` của `dual-path-cta.tsx`** (không sửa `components/ui/tabs.tsx` — đúng phạm vi "chỉ sửa section form tư vấn"); dùng modifier `!important` cho các thuộc tính màu vì class mặc định của primitive dùng `not-data-[selected]` (luôn đúng, do sai tên thuộc tính) có cùng độ ưu tiên CSS và thứ tự build không ổn định.
+- Active tab: nền trắng, chữ navy đậm (`bg-white`/`text-primary`) — tương phản tốt trên nền `bg-deep` của section. Inactive: trong suốt, chữ `paper/70`, dễ đọc nhưng không nổi bật.
+- `role="tablist"`/`role="tab"`/`role="tabpanel"`, `aria-selected`, keyboard navigation (mũi tên trái/phải đổi tab + focus theo) đều có sẵn từ primitive Base UI — xác nhận bằng kiểm thử thực tế (xem "Đã kiểm tra" bên dưới), không cần code thêm.
+
+### Đã kiểm tra
+- Chuyển tab bằng click: chỉ 1 panel tồn tại trong DOM tại một thời điểm (xác nhận qua `document.querySelectorAll('[data-slot="tabs-panel"]')` → luôn length 1).
+- Chuyển tab bằng bàn phím: focus tab đầu, `ArrowRight` → focus + `aria-selected` chuyển đúng sang tab 2.
+- Nhập dữ liệu + submit thật trên form Khách cá nhân (Playwright, dev server thật) → nhận đúng trạng thái thành công trung thực có sẵn từ `useLeadForm`: "Đã ghi nhận yêu cầu. Chuyên viên tư vấn Minh Việt sẽ phản hồi trong thời gian sớm nhất." — logic submit/webhook không bị đụng.
+- Desktop (1440px), Mobile (375px): không overflow ngang (`scrollWidth === clientWidth` ở cả hai), tab vẫn bấm được và đọc được ở mobile (wrap 2 dòng trong pill, không tràn).
+- Console: không phát sinh lỗi mới. Vẫn còn đúng 1 warning hydration tiền tồn tại ở `VerifiedStat` (mục "Còn tồn đọng" #2 ở trên) — không liên quan tới hotfix này.
+- `npx tsc --noEmit`, `npx eslint .`, `npx next build` — cả 3 sạch.
+
+### Không đụng tới
+`lead-form.tsx`, `use-lead-form.ts`, `lib/actions/lead-action.ts`, mọi section khác của Homepage, `components/ui/tabs.tsx` (bug trong file này được né bằng override cục bộ thay vì sửa trực tiếp, để không vượt phạm vi "chỉ sửa section form tư vấn" — nếu muốn sửa tận gốc cho các chỗ dùng `Tabs` khác trong tương lai, cần một task riêng).

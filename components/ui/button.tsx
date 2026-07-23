@@ -23,6 +23,8 @@ const buttonVariants = cva(
         link: 'text-primary underline-offset-4 hover:underline',
         /** Premium accent — Volume 02 Ch.5.3: gold for selective emphasis, never large text blocks or a default action. */
         gold: 'bg-gold text-deep [a]:hover:bg-gold-soft hover:bg-gold-soft',
+        /** Sky-blue primary action — the homepage's default CTA fill, sampled from the logo mark. */
+        accent: 'bg-accent text-white [a]:hover:bg-royal hover:bg-royal',
       },
       size: {
         default:

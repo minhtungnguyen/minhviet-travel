@@ -71,7 +71,7 @@ export function SiteFooter() {
                   key={i}
                   href="#"
                   aria-label="Mạng xã hội Minh Việt"
-                  className="grid size-10 place-items-center rounded-xl bg-white/10 text-white transition-colors hover:bg-gold hover:text-deep"
+                  className="grid size-10 place-items-center rounded-xl bg-white/10 text-white transition-colors hover:bg-accent hover:text-white"
                 >
                   <Icon className="size-4.5" />
                 </a>
@@ -82,7 +82,7 @@ export function SiteFooter() {
           {/* Link columns */}
           {footerCols.map((col) => (
             <div key={col.heading}>
-              <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-gold">
+              <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-accent">
                 {col.heading}
               </h3>
               <ul className="mt-4 space-y-2.5">
@@ -90,7 +90,7 @@ export function SiteFooter() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-white/60 transition-colors hover:text-gold"
+                      className="text-sm text-white/60 transition-colors hover:text-accent"
                     >
                       {link.label}
                     </Link>
@@ -102,25 +102,25 @@ export function SiteFooter() {
 
           {/* Contact */}
           <div>
-            <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-gold">
+            <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-accent">
               Liên hệ 24/7
             </h3>
             <ul className="mt-4 space-y-3 text-sm text-white/65">
               <li className="flex items-start gap-3">
-                <MapPin className="mt-0.5 size-4 shrink-0 text-gold" />
+                <MapPin className="mt-0.5 size-4 shrink-0 text-accent" />
                 Tầng 3, Tòa nhà VCCI Duyên Hải Bắc Bộ, Số 464 Lạch Tray, Gia Viên, Hải Phòng
               </li>
               <li className="flex items-center gap-3">
-                <Phone className="size-4 shrink-0 text-gold" />
+                <Phone className="size-4 shrink-0 text-accent" />
                 <span className="font-semibold text-white">0934 368 132</span>
                 <span className="text-white/45">·</span>
                 <span className="font-semibold text-white">(0225) 662 7777</span>
               </li>
               <li className="flex items-center gap-3">
-                <Mail className="size-4 shrink-0 text-gold" /> info@minhviettravel.com
+                <Mail className="size-4 shrink-0 text-accent" /> info@minhviettravel.com
               </li>
               <li className="flex items-center gap-3">
-                <Globe className="size-4 shrink-0 text-gold" /> www.minhviettravel.com
+                <Globe className="size-4 shrink-0 text-accent" /> www.minhviettravel.com
               </li>
             </ul>
           </div>

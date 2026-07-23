@@ -46,7 +46,7 @@ export async function BrandCenterSection() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-deep/95 via-deep/40 to-transparent" />
               <div className="relative p-7 sm:p-9">
-                <Badge variant="gold">{featured.category}</Badge>
+                <Badge variant="accent">{featured.category}</Badge>
                 <h3 className="mt-4 text-balance text-2xl font-bold text-white sm:text-3xl">{featured.title}</h3>
                 <p className="mt-3 max-w-lg text-pretty text-white/75">{featured.description}</p>
               </div>

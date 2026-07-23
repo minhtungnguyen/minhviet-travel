@@ -63,12 +63,12 @@ export function DualPathCta({
       </div>
 
       <div className="flex items-center gap-3 text-sm font-semibold text-paper">
-        <a href={`tel:${content.phone.replace(/\s/g, '')}`} className="flex items-center gap-2 hover:text-gold">
-          <Phone className="size-4 text-gold" /> Hotline 24/7 {content.phone}
+        <a href={`tel:${content.phone.replace(/\s/g, '')}`} className="flex items-center gap-2 hover:text-accent">
+          <Phone className="size-4 text-accent" /> Hotline 24/7 {content.phone}
         </a>
         <span className="h-4 w-px bg-paper/20" />
-        <a href={content.zaloHref} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-gold">
-          <MessageCircle className="size-4 text-gold" /> Zalo
+        <a href={content.zaloHref} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-accent">
+          <MessageCircle className="size-4 text-accent" /> Zalo
         </a>
       </div>
     </div>
@@ -91,7 +91,7 @@ function PathBlock({
   return (
     <div className="flex flex-col gap-4">
       <div>
-        {eyebrow && <p className="eyebrow text-[11px] font-semibold text-gold">{eyebrow}</p>}
+        {eyebrow && <p className="eyebrow text-[11px] font-semibold text-accent">{eyebrow}</p>}
         <h3 className="mt-2 font-display text-xl font-bold text-paper">{title}</h3>
         <p className="mt-2 text-sm text-paper/70">{description}</p>
       </div>

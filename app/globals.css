@@ -148,9 +148,9 @@
     letter-spacing: 0.24em;
     text-transform: uppercase;
   }
-  /* Champagne gold script — premium accent, used sparingly on dark surfaces */
-  .text-gradient-gold {
-    background: linear-gradient(100deg, #c7a86b, #e2d3b3);
+  /* Sky blue script — primary accent, used on dark (hero video) surfaces */
+  .text-gradient-sky {
+    background: linear-gradient(100deg, #35a9e0, #195daa);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -162,8 +162,8 @@
     background-clip: text;
     color: transparent;
   }
-  .gold-hairline {
-    background: linear-gradient(90deg, transparent, rgb(199 168 107 / 55%), transparent);
+  .sky-hairline {
+    background: linear-gradient(90deg, transparent, rgb(53 169 224 / 55%), transparent);
   }
   .luxury-ring {
     box-shadow: 0 1px 0 0 rgb(255 255 255 / 60%) inset, 0 30px 60px -30px rgb(7 22 43 / 40%);

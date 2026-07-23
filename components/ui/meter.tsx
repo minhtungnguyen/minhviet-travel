@@ -27,7 +27,7 @@ function Meter({
       {...props}
     >
       <MeterPrimitive.Track className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
-        <MeterPrimitive.Indicator className="h-full rounded-full bg-gold transition-[width] duration-[220ms] ease-out" />
+        <MeterPrimitive.Indicator className="h-full rounded-full bg-accent transition-[width] duration-[220ms] ease-out" />
       </MeterPrimitive.Track>
     </MeterPrimitive.Root>
   )

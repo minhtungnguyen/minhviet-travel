@@ -15,7 +15,7 @@ export function AppPhone() {
         {/* Headline */}
         <div className="px-4 text-center">
           <p className="font-display text-sm font-bold text-white">Kiến tạo hành trình</p>
-          <p className="font-script text-lg leading-tight text-gradient-gold">Kết nối giá trị</p>
+          <p className="font-script text-lg leading-tight text-gradient-sky">Kết nối giá trị</p>
         </div>
         {/* Mini search */}
         <div className="mx-3 mt-3 rounded-xl border border-white/10 bg-white/5 p-2">
@@ -40,7 +40,7 @@ export function AppPhone() {
               </div>
             )
           })}
-          <div className="mt-1 flex items-center justify-center gap-1 rounded-md bg-gradient-to-b from-gold-soft to-gold py-1.5 text-[9px] font-bold text-accent-foreground">
+          <div className="mt-1 flex items-center justify-center gap-1 rounded-md bg-gradient-to-b from-accent to-royal py-1.5 text-[9px] font-bold text-white">
             <Search className="size-3" />
             Tìm kiếm
           </div>

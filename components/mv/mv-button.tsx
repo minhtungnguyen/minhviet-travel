@@ -10,6 +10,8 @@ const mvButtonVariants = cva(
       variant: {
         primary:
           'bg-primary text-primary-foreground hover:bg-deep',
+        /** Sky-blue primary action — the homepage's default CTA fill, sampled from the logo mark. */
+        accent: 'bg-accent text-white hover:bg-royal',
         gold: 'bg-gold text-deep hover:bg-gold-soft',
         secondary:
           'bg-secondary text-secondary-foreground hover:bg-secondary/70',

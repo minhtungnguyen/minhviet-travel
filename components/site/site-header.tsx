@@ -62,13 +62,13 @@ export function SiteHeader() {
             <span className="font-bold text-primary">0934 368 132</span>
           </div>
           <div className="flex items-center gap-6">
-            <Link href="/about" className="transition-colors hover:text-primary">
+            <Link href="/about" className="transition-colors hover:text-accent">
               Về chúng tôi
             </Link>
-            <Link href="/brand/news" className="transition-colors hover:text-primary">
+            <Link href="/brand/news" className="transition-colors hover:text-accent">
               Tin tức
             </Link>
-            <Link href="/contact" className="transition-colors hover:text-primary">
+            <Link href="/contact" className="transition-colors hover:text-accent">
               Liên hệ
             </Link>
           </div>
@@ -87,7 +87,7 @@ export function SiteHeader() {
               at every scroll position (Volume 02 Ch.2 Principle 4). */}
           <a
             href="tel:0934368132"
-            className="hidden items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary md:flex"
+            className="hidden items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary hover:text-accent md:flex"
           >
             <Phone className="size-4 text-accent" />
             0934 368 132
@@ -97,7 +97,7 @@ export function SiteHeader() {
               <User className="size-4" />
               Đăng nhập
             </MVButton>
-            <MVButton href="/register" variant="gold" size="sm">
+            <MVButton href="/register" variant="accent" size="sm">
               Đăng ký
             </MVButton>
           </div>
@@ -129,8 +129,8 @@ export function SiteHeader() {
                   className={cn(
                     'flex items-center gap-1 px-3.5 py-3 text-[13px] font-semibold uppercase tracking-wide transition-colors',
                     item.menu && item.menu === openMenu
-                      ? 'text-primary'
-                      : 'text-foreground/80 hover:text-primary',
+                      ? 'text-accent'
+                      : 'text-foreground/80 hover:text-accent',
                   )}
                 >
                   {item.label}
@@ -141,7 +141,7 @@ export function SiteHeader() {
           </nav>
           <Link
             href="/tours"
-            className="grid size-9 place-items-center rounded-lg text-foreground/80 transition-colors hover:text-primary"
+            className="grid size-9 place-items-center rounded-lg text-foreground/80 transition-colors hover:text-accent"
             aria-label="Tìm kiếm tour"
           >
             <Search className="size-5" />
@@ -165,7 +165,7 @@ export function SiteHeader() {
                           className="group block"
                           onClick={() => setOpenMenu(null)}
                         >
-                          <span className="text-sm font-medium text-foreground transition-colors group-hover:text-primary">
+                          <span className="text-sm font-medium text-foreground transition-colors group-hover:text-accent">
                             {link.label}
                           </span>
                           {link.desc && (
@@ -208,7 +208,7 @@ export function SiteHeader() {
                 <Link
                   key={item.label}
                   href={item.href}
-                  className="block rounded-lg px-3 py-3 text-base font-medium text-foreground transition-colors hover:bg-secondary hover:text-primary"
+                  className="block rounded-lg px-3 py-3 text-base font-medium text-foreground transition-colors hover:bg-secondary hover:text-accent"
                   onClick={() => setMobileOpen(false)}
                 >
                   {item.label}
@@ -219,7 +219,7 @@ export function SiteHeader() {
               <MVButton href="/login" variant="outline" size="md">
                 Đăng nhập
               </MVButton>
-              <MVButton href="/register" variant="gold" size="md">
+              <MVButton href="/register" variant="accent" size="md">
                 Đăng ký
               </MVButton>
             </div>

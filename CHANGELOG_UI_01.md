@@ -173,3 +173,43 @@
 
 ### Còn tồn đọng (mới)
 7. Mục tiêu "ngắn hơn ~30%" chưa đạt (mới đạt ~13%) — muốn đạt được cần hoặc giảm số lượng Tour Card hiển thị trên Homepage (vd. 6→4), hoặc thu nhỏ Hero (cả hai đều là thay đổi **nội dung/Hero**, ngoài phạm vi task "chỉ spacing" này, cần task riêng nếu muốn theo đuổi tiếp mục tiêu 30%.
+
+---
+
+## Hotfix — Brand Statement → Utility Bar + Phóng to Logo (2026-07-24)
+
+**Phạm vi:** Chỉ khu vực Header Brand (`components/site/site-header.tsx`). Không sửa Hero Banner, Homepage, Menu Navigation, màu, font, spacing của section khác.
+
+### Vấn đề & giải pháp
+Yêu cầu trước đó (tăng logo 1.8–2 lần ngay trong Header Level 2 cũ, vốn còn chứa cả Brand Statement 3 cụm) không đủ chỗ vì Header là `fixed` đè lên Hero Banner, và Hero Banner có `padding-top` cố định không được sửa. Giải pháp: **chuyển hẳn Brand Statement từ Header Level 2 sang Header Level 1 (Utility Bar)** — nhờ vậy Level 2 chỉ còn một mình Logo, giải phóng đủ không gian để phóng to logo mà không cần đụng Hero.
+
+### Đã sửa
+- **File:** `components/site/site-header.tsx`
+- **Header 1 (Utility Bar):** đổi từ layout 2 cột (trái/phải) sang **grid 3 cột** (`grid-cols-[auto_1fr_auto]`) — trái: Hotline (giữ nguyên); **giữa: Brand Statement mới** (2 đường line vàng mảnh · "TOUR THIẾT KẾ TRỌN GÓI" Navy · kim cương vàng · "MICE" Gold đậm · kim cương vàng · "TOUR GHÉP QUỐC TẾ" Navy · 2 đường line vàng), canh giữa tuyệt đối theo chiều ngang của cả Header 1 (không phải chỉ theo khoảng trống còn lại) nhờ cột giữa `1fr`; phải: Về chúng tôi/Tin tức/Tư vấn/Ngôn ngữ/Đăng nhập/Đăng ký (giữ nguyên, chỉ giảm gap để đủ chỗ — xem mục kỹ thuật bên dưới).
+- **Header 2 (Brand):** bỏ hẳn khối Brand Statement 3 dòng cũ — giờ chỉ còn `<Logo>` canh giữa. Logo image gốc (`/logo-minhviet.png`) đã có sẵn dòng "Khám phá cảm xúc bất tận" nằm trong chính file ảnh (dưới chữ MINHVIET), nên khi phóng to Logo, slogan tự động phóng to theo — đúng yêu cầu "giữ nguyên font/màu/style" vì không có node text riêng nào bị đổi, chỉ ảnh phóng to.
+- **Logo:** tăng từ 50px → **90px (đúng 1.8 lần)**, dùng thẳng prop `height` của component `Logo` (Next.js `<Image>` tự tính `width` theo tỷ lệ khoá sẵn `ratio = 1.415`) — **không dùng `transform: scale()`**, ảnh luôn render đúng kích thước gốc nên nét, không vỡ.
+
+### Quyết định kỹ thuật (đo thật, không ước lượng)
+- Header 1 tăng nhẹ (36.67px → 41px) để đủ chỗ cho Brand Statement chen vào cùng hàng với Hotline.
+- Ban đầu thử phóng logo lên 96px (~1.9 lần) → **âm khoảng cách với headline Hero (-2px tại 1024–1152px)** — đã giảm lại còn 90px (đúng 1.8 lần, cận dưới khoảng brief cho phép) để có biên an toàn dương.
+- **Phát hiện & sửa lỗi phát sinh khi thêm cột giữa:** ở đúng ngưỡng breakpoint `lg` (1024px, "Laptop"), grid 3 cột với `whitespace-nowrap` ban đầu bị tràn ngang trong chính hàng Utility Bar (nội dung rộng hơn ~48px so với chỗ có) khiến nút "Đăng ký" bị đẩy khuất — đã sửa bằng cách giảm gap/kích thước chữ Brand Statement và cụm bên phải ở `lg`, mở rộng lại về kích thước gốc từ `xl` (1280px) trở lên. Xác nhận lại bằng đo `scrollWidth` = `clientWidth` của hàng Utility Bar ở cả 1024/1152/1280/1440px.
+- Kết quả đo cuối cùng — khoảng hở giữa đáy Header và đỉnh headline Hero (`h1`), dương ở mọi mốc:
+
+  | Viewport | Chiều cao Header (trước → sau) | Logo (trước → sau) | Khoảng hở còn lại |
+  |---|---|---|---|
+  | 1024–1152px (Laptop) | 173.75px → 204px | 60px → 90px | +12px |
+  | 1280–1440px (Desktop) | 173.75px → 185px | 60px → 90px | +16px |
+  | Tablet (768px) | — → 105px | 60px → 90px | không áp dụng (Hero dùng `pt-32`, không đo `h1Top` riêng — kiểm tra bằng mắt qua ảnh, không chồng) |
+  | Mobile (375px) | — → 105px | 60px → 90px | không áp dụng — kiểm tra bằng mắt qua ảnh, không chồng |
+
+### Đã kiểm tra
+- Desktop (1440px)/Laptop (1024, 1152, 1280px): Logo 90px canh giữa chính xác, Brand Statement 1 dòng không xuống dòng, không overflow ngang, không đè headline Hero (khoảng hở +12 đến +16px).
+- Tablet (768px)/Mobile (375px): Logo 90px canh giữa, không crop, không tràn ngang (`scrollWidth === clientWidth`) — Utility Bar (và do đó Brand Statement) vẫn ẩn dưới `lg` như hành vi gốc trước mọi hotfix header trong sprint này (không đổi breakpoint hiển thị, đúng yêu cầu "không sửa Responsive layout").
+- `npx tsc --noEmit`, `npx eslint .`, `npx next build` — cả 3 sạch.
+- **Phát hiện ngoài phạm vi (không sửa):** ở đúng 1024–1152px, hàng Main Navigation (Level 3, không đụng tới trong hotfix này) tự xuống 2 dòng do 10 mục menu không đủ chỗ trên 1 hàng — đây là vấn đề tồn tại từ trước (không phải do hotfix này gây ra, đã xác nhận bằng cách so trước/sau chỉ riêng khu vực Utility+Brand), nằm ngoài phạm vi "không sửa Menu Navigation" của task này.
+
+### Không đụng tới
+`sections/hero-section.tsx`, Main Navigation (Level 3), Hero Banner, các section Homepage khác, màu sắc, font, backend/logic/CMS.
+
+### Còn tồn đọng (mới)
+8. Main Navigation tự xuống 2 dòng ở 1024–1152px (xem "Đã kiểm tra" ở trên) — cần một task riêng được phép sửa Menu Navigation để xử lý (vd. ẩn bớt mục hoặc thu gọn ở đúng khoảng này).

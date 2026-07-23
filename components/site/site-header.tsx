@@ -23,12 +23,14 @@ const navItems = [
 ]
 
 /**
- * 3-level header — Utility (contact/account/language) → Brand (centered
- * logo + positioning line) → Main nav. Total height is deliberately kept
- * at ~160px at the `lg` breakpoint (unchanged from the previous 1-level-
- * shorter header) because `sections/hero-section.tsx` uses a hardcoded
- * `lg:pt-40` to clear this fixed header and is out of scope to touch —
- * see Sprint UI-01.1 changelog entry for the exact budget breakdown.
+ * 3-level header — Utility (contact/positioning statement/account) →
+ * Brand (centered logo only — the wordmark PNG already contains the
+ * "Khám phá cảm xúc bất tận" tagline, so Level 2 needs no extra text
+ * node) → Main nav. Total height is kept under ~200px at `lg` because
+ * `sections/hero-section.tsx` uses a hardcoded `lg:pt-40`/headline
+ * offset to clear this fixed header and is out of scope to touch —
+ * see CHANGELOG_UI_01.md "Hotfix — Brand Statement → Utility Bar" for
+ * the exact budget breakdown.
  */
 export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false)
@@ -57,15 +59,33 @@ export function SiteHeader() {
       )}
     >
       {/* Level 1 — Utility bar. Always visible (not hidden on scroll) so
-          contact/account/language stay reachable at every scroll position. */}
+          contact/positioning/account stay reachable at every scroll
+          position. 3-column grid so the Brand Statement sits exactly
+          centered on the row regardless of how wide the left (hotline)
+          and right (links/language/account) clusters are. */}
       <div className="hidden border-b border-border bg-secondary/60 lg:block">
-        <div className="container-mv flex h-9 items-center justify-between text-[12px] text-muted-foreground">
-          <div className="flex items-center gap-2">
+        <div className="container-mv grid h-10 grid-cols-[auto_1fr_auto] items-center gap-2 text-[12px] text-muted-foreground xl:gap-4">
+          <div className="flex items-center gap-2 whitespace-nowrap">
             <Phone className="size-3.5 text-accent" />
             <span>Hotline 24/7</span>
             <span className="font-bold text-primary">0934 368 132</span>
           </div>
-          <div className="flex items-center gap-5">
+
+          <div className="flex items-center justify-center gap-1.5 whitespace-nowrap xl:gap-2">
+            <span className="h-px w-4 shrink-0 bg-gold/50 xl:w-6" aria-hidden />
+            <span className="text-[9.5px] font-semibold uppercase tracking-wide text-primary xl:text-[10px]">
+              Tour Thiết Kế Trọn Gói
+            </span>
+            <span className="size-1 shrink-0 rotate-45 bg-gold/70" aria-hidden />
+            <span className="text-[9.5px] font-bold uppercase tracking-wide text-gold xl:text-[10px]">MICE</span>
+            <span className="size-1 shrink-0 rotate-45 bg-gold/70" aria-hidden />
+            <span className="text-[9.5px] font-semibold uppercase tracking-wide text-primary xl:text-[10px]">
+              Tour Ghép Quốc Tế
+            </span>
+            <span className="h-px w-4 shrink-0 bg-gold/50 xl:w-6" aria-hidden />
+          </div>
+
+          <div className="flex items-center gap-3 whitespace-nowrap xl:gap-5">
             <Link href="/about" className="transition-colors hover:text-accent">
               Về chúng tôi
             </Link>
@@ -87,27 +107,16 @@ export function SiteHeader() {
         </div>
       </div>
 
-      {/* Level 2 — Brand: centered logo + positioning statement, no hotline. */}
+      {/* Level 2 — Brand: centered logo only. The wordmark PNG already
+          renders the "Khám phá cảm xúc bất tận" tagline beneath the
+          MINHVIET lockup, so no separate slogan text node is needed —
+          growing the logo grows that tagline with it, unchanged font/
+          color/style since it's the same source image. */}
       <div className="border-b border-border">
-        <div className="container-mv flex flex-col items-center gap-1 py-1.5 lg:py-2">
+        <div className="container-mv flex items-center justify-center py-1">
           <Link href="/" aria-label="Minh Việt Travel — Trang chủ">
-            <Logo height={scrolled ? 48 : 60} className="transition-all duration-300" />
+            <Logo height={scrolled ? 78 : 90} className="transition-all duration-300" />
           </Link>
-          <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-0.5 px-4 text-center leading-none">
-            <span className="hidden h-px w-8 bg-gold/50 sm:block" aria-hidden />
-            <span className="text-[10.5px] font-semibold uppercase tracking-wide text-primary sm:text-[11px]">
-              Tour Thiết Kế Trọn Gói
-            </span>
-            <span className="size-1 shrink-0 rotate-45 bg-gold/70" aria-hidden />
-            <span className="text-[10.5px] font-bold uppercase tracking-wide text-gold sm:text-[11px]">
-              MICE
-            </span>
-            <span className="size-1 shrink-0 rotate-45 bg-gold/70" aria-hidden />
-            <span className="text-[10.5px] font-semibold uppercase tracking-wide text-primary sm:text-[11px]">
-              Tour Ghép Quốc Tế
-            </span>
-            <span className="hidden h-px w-8 bg-gold/50 sm:block" aria-hidden />
-          </div>
         </div>
       </div>
 

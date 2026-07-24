@@ -16,7 +16,7 @@ export async function FeaturedJourneysSection() {
             eyebrow={featuredJourneys.eyebrow}
             title={
               <>
-                {featuredJourneys.title} <span className="text-primary">{featuredJourneys.titleAccent}</span>
+                {featuredJourneys.title} <span className="text-mv-journey-blue">{featuredJourneys.titleAccent}</span>
               </>
             }
             className="max-w-2xl"

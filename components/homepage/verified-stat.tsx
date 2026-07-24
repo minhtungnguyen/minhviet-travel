@@ -42,7 +42,7 @@ export function VerifiedStat({
         ref={ref}
         className={cn(
           'font-display text-3xl font-extrabold tracking-tight sm:text-4xl',
-          onDark ? 'text-paper' : 'text-foreground',
+          onDark ? 'text-paper' : 'text-mv-brand-blue',
         )}
       >
         {display.toLocaleString('vi-VN')}

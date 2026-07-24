@@ -33,45 +33,45 @@ export function JourneyCard({ journey }: { journey: JourneyContent }) {
   const availability = AVAILABILITY_COPY[journey.availability]
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl bg-card shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-lg">
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-transparent bg-card shadow-soft transition-all duration-mv-normal ease-mv-standard hover:border-mv-sky-cyan hover:shadow-soft-lg">
       <Link href={journey.href} className="relative block aspect-[16/11] overflow-hidden">
         <Image
           src={journey.image.src}
           alt={journey.image.alt}
           fill
           sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
-          className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
+          className="object-cover transition-transform duration-mv-slow ease-mv-standard group-hover:scale-[1.035]"
         />
         <span className="absolute left-4 top-4">
           <Badge variant={availability.variant}>{availability.label}</Badge>
         </span>
-        <span className="absolute bottom-4 left-4 flex items-center gap-1.5 rounded-full bg-deep/80 px-2.5 py-1 text-xs font-medium text-white backdrop-blur">
+        <span className="absolute bottom-4 left-4 flex items-center gap-1.5 rounded-full bg-mv-deep-navy/80 px-2.5 py-1 text-xs font-medium text-white backdrop-blur">
           <Clock className="size-3.5" /> {journey.duration}
         </span>
       </Link>
 
       <div className="flex flex-1 flex-col p-5">
-        <span className="eyebrow text-[10px] text-primary">{journey.country}</span>
+        <span className="eyebrow text-[10px] text-mv-journey-blue">{journey.country}</span>
 
-        <h3 className="mt-1.5 line-clamp-2 text-pretty font-display text-xl font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
+        <h3 className="mt-1.5 line-clamp-2 text-pretty font-display text-xl font-bold leading-snug text-mv-deep-navy transition-colors group-hover:text-mv-journey-blue">
           <Link href={journey.href}>{journey.title}</Link>
         </h3>
 
-        <p className="mt-2 text-xs text-muted-foreground">
+        <p className="mt-2 text-xs text-mv-slate">
           Khởi hành {journey.nextDeparture} · Điểm đi {journey.departure}
           {journey.reviewScore && journey.reviewCount
             ? ` · ${journey.reviewScore.toFixed(1)}/5 (${journey.reviewCount} đánh giá)`
             : null}
         </p>
 
-        <div className="mt-4 flex items-end justify-between border-t border-border pt-3">
+        <div className="mt-4 flex items-end justify-between border-t border-mv-border-soft pt-3">
           <div>
-            <p className="eyebrow text-[10px] text-muted-foreground">
+            <p className="eyebrow text-[10px] text-mv-slate">
               {journey.priceType === 'estimate' ? 'Giá tham khảo' : 'Giá'}
             </p>
-            <p className="text-base font-bold text-primary">{formatPrice(journey.priceFrom)}</p>
+            <p className="text-base font-bold text-mv-journey-blue">{formatPrice(journey.priceFrom)}</p>
           </div>
-          <Button variant="outline" size="sm" render={<Link href={journey.href} />}>
+          <Button variant="outline" size="sm" className="border-mv-border-soft hover:border-mv-sky-cyan" render={<Link href={journey.href} />}>
             Khám phá tour
           </Button>
         </div>

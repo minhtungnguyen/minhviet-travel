@@ -13,8 +13,8 @@ export function NewsletterForm() {
 
   if (state.status === 'success') {
     return (
-      <p className="flex items-center gap-2 text-sm text-white" aria-live="polite">
-        <CheckCircle2 className="size-4 text-accent" />
+      <p className="flex items-center gap-2 text-sm text-mv-deep-navy" aria-live="polite">
+        <CheckCircle2 className="size-4 text-mv-journey-blue" />
         {state.message}
       </p>
     )
@@ -30,9 +30,9 @@ export function NewsletterForm() {
           placeholder="Nhập email của bạn"
           aria-label="Email"
           aria-invalid={state.status === 'error'}
-          className="h-12 flex-1 border-white/15 bg-white/5 text-white placeholder:text-white/45 focus-visible:border-accent/50 focus-visible:ring-accent/20"
+          className="h-12 flex-1 border-mv-border-soft bg-white text-mv-deep-navy placeholder:text-mv-slate/60 focus-visible:border-mv-sky-cyan/60 focus-visible:ring-mv-sky-cyan/25"
         />
-        <Button type="submit" variant="accent" size="lg" disabled={isPending}>
+        <Button type="submit" variant="journey" size="lg" disabled={isPending}>
           {isPending ? 'Đang gửi...' : 'Đăng ký'}
         </Button>
       </div>

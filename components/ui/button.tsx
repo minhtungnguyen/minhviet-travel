@@ -25,6 +25,8 @@ const buttonVariants = cva(
         gold: 'bg-gold text-deep [a]:hover:bg-gold-soft hover:bg-gold-soft',
         /** Sky-blue primary action — the homepage's default CTA fill, sampled from the logo mark. */
         accent: 'bg-accent text-white [a]:hover:bg-royal hover:bg-royal',
+        /** Sprint UI-02 "Modern Blue Travel Premium" primary CTA — Journey Blue fill, Sky Cyan hover. Additive: existing `accent`/`default` call sites are untouched. */
+        journey: 'bg-mv-journey-blue text-white [a]:hover:bg-mv-sky-cyan hover:bg-mv-sky-cyan',
       },
       size: {
         default:

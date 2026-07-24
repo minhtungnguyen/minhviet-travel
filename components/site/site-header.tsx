@@ -72,35 +72,39 @@ export function SiteHeader() {
           </div>
 
           <div className="flex items-center justify-center gap-1.5 whitespace-nowrap xl:gap-2">
-            <span className="h-px w-4 shrink-0 bg-gold/50 xl:w-6" aria-hidden />
-            <span className="text-[9.5px] font-semibold uppercase tracking-wide text-primary xl:text-[10px]">
+            {/* Sprint UI-02: Gold reserved for the MICE section itself
+                (premium accent) — this bar spans 3 unrelated service
+                lines, so it now reads in-palette Deep Navy / Journey Blue
+                instead of the old blanket Gold treatment. */}
+            <span className="h-px w-4 shrink-0 bg-mv-journey-blue/35 xl:w-6" aria-hidden />
+            <span className="text-[9.5px] font-semibold uppercase tracking-wide text-mv-deep-navy xl:text-[10px]">
               Tour Thiết Kế Trọn Gói
             </span>
-            <span className="size-1 shrink-0 rotate-45 bg-gold/70" aria-hidden />
-            <span className="text-[9.5px] font-bold uppercase tracking-wide text-gold xl:text-[10px]">MICE</span>
-            <span className="size-1 shrink-0 rotate-45 bg-gold/70" aria-hidden />
-            <span className="text-[9.5px] font-semibold uppercase tracking-wide text-primary xl:text-[10px]">
+            <span className="size-1 shrink-0 rotate-45 bg-mv-journey-blue/60" aria-hidden />
+            <span className="text-[9.5px] font-bold uppercase tracking-wide text-mv-journey-blue xl:text-[10px]">MICE</span>
+            <span className="size-1 shrink-0 rotate-45 bg-mv-journey-blue/60" aria-hidden />
+            <span className="text-[9.5px] font-semibold uppercase tracking-wide text-mv-deep-navy xl:text-[10px]">
               Tour Ghép Quốc Tế
             </span>
-            <span className="h-px w-4 shrink-0 bg-gold/50 xl:w-6" aria-hidden />
+            <span className="h-px w-4 shrink-0 bg-mv-journey-blue/35 xl:w-6" aria-hidden />
           </div>
 
           <div className="flex items-center gap-3 whitespace-nowrap xl:gap-5">
-            <Link href="/about" className="transition-colors hover:text-accent">
+            <Link href="/about" className="transition-colors hover:text-mv-sky-cyan">
               Về chúng tôi
             </Link>
-            <Link href="/brand/news" className="transition-colors hover:text-accent">
+            <Link href="/brand/news" className="transition-colors hover:text-mv-sky-cyan">
               Tin tức
             </Link>
-            <Link href="/contact" className="transition-colors hover:text-accent">
+            <Link href="/contact" className="transition-colors hover:text-mv-sky-cyan">
               Tư vấn
             </Link>
             <LanguageSwitcher />
             <span className="h-3.5 w-px bg-border" />
-            <Link href="/login" className="transition-colors hover:text-accent">
+            <Link href="/login" className="transition-colors hover:text-mv-sky-cyan">
               Đăng nhập
             </Link>
-            <Link href="/register" className="font-semibold text-accent transition-colors hover:text-royal">
+            <Link href="/register" className="font-semibold text-mv-journey-blue transition-colors hover:text-mv-sky-cyan">
               Đăng ký
             </Link>
           </div>
@@ -135,10 +139,10 @@ export function SiteHeader() {
                   className={cn(
                     'flex items-center gap-1 px-3.5 py-2.5 text-[12.5px] font-semibold uppercase tracking-wide transition-colors',
                     item.promo
-                      ? 'text-destructive hover:text-destructive/80'
+                      ? 'text-mv-offer-red hover:text-mv-offer-red/80'
                       : item.menu && item.menu === openMenu
-                        ? 'text-accent'
-                        : 'text-foreground/80 hover:text-accent',
+                        ? 'text-mv-journey-blue'
+                        : 'text-foreground/80 hover:text-mv-journey-blue',
                   )}
                 >
                   {item.label}
@@ -149,7 +153,7 @@ export function SiteHeader() {
           </nav>
           <Link
             href="/tours"
-            className="grid size-9 place-items-center rounded-lg text-foreground/80 transition-colors hover:text-accent"
+            className="grid size-9 place-items-center rounded-lg text-foreground/80 transition-colors hover:text-mv-journey-blue"
             aria-label="Tìm kiếm tour"
           >
             <Search className="size-5" />

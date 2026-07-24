@@ -4,6 +4,7 @@ import { getHomepageContent } from '@/lib/cms/client'
 import { SectionHeading } from '@/components/homepage/section-heading'
 import { SERVICE_ICONS } from '@/components/homepage/icon-map'
 import { Reveal } from '@/components/homepage/reveal'
+import { cn } from '@/lib/utils'
 
 /**
  * Two labeled clusters instead of one flat 6-tile grid — the split
@@ -24,23 +25,36 @@ export async function CoreServicesSection() {
         <Reveal className="flex flex-col gap-6">
           {bespoke && (
             <div>
-              <p className="eyebrow mb-3 text-[11px] font-semibold text-accent">{bespoke.label}</p>
+              <p className="eyebrow mb-3 text-[11px] font-semibold text-mv-sky-cyan">{bespoke.label}</p>
               <div className="grid gap-4 sm:grid-cols-2">
                 {bespoke.services.map((service) => {
                   const Icon = SERVICE_ICONS[service.icon]
+                  // Sprint UI-02: the two tiles no longer share one flat
+                  // Navy fill — "Tour đoàn" gets the Brand→Journey Blue
+                  // gradient, "MICE & Sự kiện" keeps Deep Navy + Gold as
+                  // the section's dedicated premium accent.
+                  const isMice = service.id === 'mice'
                   return (
                     <Link
                       key={service.id}
                       href={service.href}
-                      className="group flex items-center justify-between gap-6 rounded-3xl bg-primary p-7 text-primary-foreground transition-transform duration-300 hover:-translate-y-0.5 sm:p-8"
+                      className={cn(
+                        'group flex items-center justify-between gap-6 rounded-2xl p-7 text-white transition-transform duration-300 hover:-translate-y-0.5 sm:p-8',
+                        isMice ? 'bg-mv-deep-navy' : 'bg-gradient-mv-brand',
+                      )}
                     >
                       <div className="flex items-center gap-5">
                         <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-white/10">
-                          <Icon className="size-6" strokeWidth={1.5} />
+                          <Icon className={cn('size-6', isMice && 'text-mv-mice-gold')} strokeWidth={1.5} />
                         </span>
                         <p className="font-display text-xl font-bold sm:text-2xl">{service.title}</p>
                       </div>
-                      <ArrowUpRight className="size-5 shrink-0 text-primary-foreground/60 transition-all group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-primary-foreground" />
+                      <ArrowUpRight
+                        className={cn(
+                          'size-5 shrink-0 transition-all group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-white',
+                          isMice ? 'text-mv-mice-gold/70' : 'text-white/60',
+                        )}
+                      />
                     </Link>
                   )
                 })}
@@ -58,12 +72,12 @@ export async function CoreServicesSection() {
                     <Link
                       key={service.id}
                       href={service.href}
-                      className="group flex flex-col items-center gap-3 rounded-2xl border border-border/70 p-6 text-center transition-colors duration-200 hover:border-primary/30 hover:bg-secondary/50"
+                      className="group flex flex-col items-center gap-3 rounded-2xl border border-mv-border-soft p-6 text-center transition-colors duration-mv-normal hover:border-mv-sky-cyan hover:bg-mv-mist-blue/60"
                     >
-                      <span className="grid size-11 place-items-center rounded-xl bg-secondary text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                      <span className="grid size-11 place-items-center rounded-xl bg-mv-mist-blue text-mv-journey-blue transition-colors group-hover:bg-mv-journey-blue group-hover:text-white">
                         <Icon className="size-5" strokeWidth={1.75} />
                       </span>
-                      <span className="text-sm font-semibold leading-tight text-foreground">{service.title}</span>
+                      <span className="text-sm font-semibold leading-tight text-mv-deep-navy">{service.title}</span>
                     </Link>
                   )
                 })}

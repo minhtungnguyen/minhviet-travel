@@ -11,7 +11,7 @@ export async function FinalCtaSection() {
     }))
 
   return (
-    <section className="section-py-md bg-deep">
+    <section className="section-py-md bg-gradient-mv-consultation">
       <div className="container-mv">
         <DualPathCta content={finalCta} serviceOptions={serviceOptions} />
       </div>

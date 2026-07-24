@@ -25,7 +25,7 @@ export function LeadForm({
         <span className="grid size-12 place-items-center rounded-full bg-success/10 text-success">
           <CheckCircle2 className="size-6" />
         </span>
-        <p className="font-display text-lg font-bold text-foreground">Đã ghi nhận yêu cầu</p>
+        <p className="font-display text-lg font-bold text-mv-deep-navy">Đã ghi nhận yêu cầu</p>
         <p className="max-w-sm text-sm text-muted-foreground">{state.message}</p>
       </div>
     )
@@ -87,7 +87,7 @@ export function LeadForm({
         <Textarea name="message" rows={4} />
       </Field>
 
-      <Button type="submit" size="lg" className="mt-2 w-full sm:w-auto" disabled={isPending}>
+      <Button type="submit" variant="journey" size="lg" className="mt-2 w-full sm:w-auto" disabled={isPending}>
         {isPending ? 'Đang gửi...' : 'Gửi yêu cầu tư vấn'}
       </Button>
     </form>

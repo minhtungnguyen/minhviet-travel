@@ -36,10 +36,10 @@ export function SectionHeading({
           className={cn(
             'eyebrow flex items-center gap-3 text-[11px] font-semibold',
             align === 'center' && 'justify-center',
-            onDark ? 'text-paper/75' : 'text-primary',
+            onDark ? 'text-paper/75' : 'text-mv-journey-blue',
           )}
         >
-          <span className={cn('h-px w-8', onDark ? 'bg-paper/40' : 'bg-foreground/30')} />
+          <span className={cn('h-px w-8', onDark ? 'bg-paper/40' : 'divider-mv-gradient')} />
           {eyebrow}
         </p>
       )}
@@ -47,7 +47,7 @@ export function SectionHeading({
         id={headingId}
         className={cn(
           'text-balance font-display text-3xl font-bold leading-[1.1] tracking-tight sm:text-4xl lg:text-[2.75rem]',
-          onDark ? 'text-paper' : 'text-foreground',
+          onDark ? 'text-paper' : 'text-mv-deep-navy',
         )}
       >
         {title}

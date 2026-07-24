@@ -49,6 +49,23 @@
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
 
+  /* Sprint UI-02 — Modern Blue Travel Premium token family. Additive:
+     registered under their own `mv-*` names so no existing `bg-primary` /
+     `text-accent` / etc. call site anywhere else in the app changes
+     behavior. Only Homepage-scoped files (sections/*, components/homepage/*,
+     the shared Header/Footer chrome) are wired to consume these. */
+  --color-mv-deep-navy: var(--mv-deep-navy);
+  --color-mv-brand-blue: var(--mv-brand-blue);
+  --color-mv-journey-blue: var(--mv-journey-blue);
+  --color-mv-sky-cyan: var(--mv-sky-cyan);
+  --color-mv-mist-blue: var(--mv-mist-blue);
+  --color-mv-ice-blue: var(--mv-ice-blue);
+  --color-mv-slate: var(--mv-slate-text);
+  --color-mv-warm-white: var(--mv-warm-white);
+  --color-mv-mice-gold: var(--mv-mice-gold);
+  --color-mv-offer-red: var(--mv-offer-red);
+  --color-mv-border-soft: var(--mv-border-soft);
+
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: calc(var(--radius) - 1px);
   --radius-lg: var(--radius);
@@ -118,6 +135,52 @@
   --chart-3: #35a9e0;
   --chart-4: #c7a86b;
   --chart-5: #5b6472;
+
+  /* ===================================================================
+     Sprint UI-02 — Modern Blue Travel Premium
+     Sampled against public/logo-minhviet.png (blue plane/globe mark +
+     "MINHVIET" wordmark, both rendered in a cyan → indigo-navy gradient).
+     The brief's starting hex values already matched that gradient family
+     closely on visual comparison, so they are kept as-is (no drift from
+     the brand mark) — only wired in as a new additive token layer here.
+     Homepage-only; does not replace --primary/--accent/--foreground etc.
+     used by Tour Detail, Booking, CRM, Auth and other out-of-scope pages.
+     =================================================================== */
+  --mv-deep-navy: #071d3a;
+  --mv-brand-blue: #2148a5;
+  --mv-journey-blue: #1677d2;
+  --mv-sky-cyan: #25a9e0;
+  --mv-mist-blue: #eaf4fc;
+  --mv-ice-blue: #f5fafe;
+  --mv-slate-text: #465569;
+  --mv-warm-white: #fcfcfa;
+  --mv-mice-gold: #c89a36;
+  --mv-offer-red: #d92d20;
+  --mv-border-soft: #dce7f2;
+  --mv-shadow-color: rgba(7, 29, 58, 0.08);
+
+  /* Motion tokens (Sprint UI-02 §14) */
+  --motion-fast: 160ms;
+  --motion-normal: 240ms;
+  --motion-slow: 360ms;
+  --ease-mv-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Spacing reference tokens (Sprint UI-02 §12) — documented aliases for
+     the section-py-lg/md/sm tiers already in use below. Kept at their
+     current (already-tuned) pixel values rather than the brief's larger
+     72–88/56–72px example range: a prior sprint deliberately cut section
+     padding ~13% to shorten an overlong page (see CHANGELOG_UI_01.md,
+     "Global UI Spacing Optimization"), and this sprint's own instruction
+     ("giảm khoảng trống thừa, tránh section nào cũng dùng padding rất
+     lớn") argues for continuity with that work over the illustrative
+     numbers. Documented here so the values have a named reference point
+     without a second, larger spacing scale competing with the first. */
+  --section-space-lg: 4rem; /* 64px desktop tier, see .section-py-lg */
+  --section-space-md: 3.5rem; /* 56px desktop tier, see .section-py-md */
+  --section-space-sm: 2.5rem; /* 40px desktop tier, see .section-py-sm */
+  --content-gap-lg: 2rem;
+  --content-gap-md: 1.5rem;
+  --card-gap: 1.25rem;
 }
 
 @layer base {
@@ -157,6 +220,49 @@
 }
 
 @layer utilities {
+  /* Sprint UI-02 — motion tokens as utility classes, matching the
+     `@utility section-py-*` convention already established above. */
+  .duration-mv-fast { transition-duration: var(--motion-fast); }
+  .duration-mv-normal { transition-duration: var(--motion-normal); }
+  .duration-mv-slow { transition-duration: var(--motion-slow); }
+  .ease-mv-standard { transition-timing-function: var(--ease-mv-standard); }
+
+  /* Hero overlay — navy-blue tinted, replaces the near-black flat fade.
+     Still strong enough at the left (headline zone) for text contrast,
+     tapering through Journey Blue into a barely-there Sky Cyan wash on
+     the right so the photo/video keeps its own color instead of reading
+     as tinted-black. */
+  .bg-gradient-mv-hero {
+    background: linear-gradient(
+      90deg,
+      rgba(7, 29, 58, 0.84) 0%,
+      rgba(7, 29, 58, 0.62) 36%,
+      rgba(22, 119, 210, 0.14) 70%,
+      rgba(37, 169, 224, 0.04) 100%
+    );
+  }
+  /* Bespoke "Tour Thiết Kế Trọn Gói" tile — Brand Blue → Journey Blue */
+  .bg-gradient-mv-brand {
+    background: linear-gradient(135deg, var(--mv-brand-blue) 0%, var(--mv-journey-blue) 100%);
+  }
+  /* Consultation section — Deep Navy → Brand Blue, replaces flat bg-deep */
+  .bg-gradient-mv-consultation {
+    background: linear-gradient(160deg, var(--mv-deep-navy) 0%, var(--mv-brand-blue) 130%);
+  }
+  /* MICE image overlay — navy-blue tinted (see enterprise-mice-section.tsx) */
+  .bg-gradient-mv-mice {
+    background: linear-gradient(
+      90deg,
+      rgba(7, 29, 58, 0.94) 0%,
+      rgba(7, 29, 58, 0.82) 45%,
+      rgba(33, 72, 165, 0.35) 100%
+    );
+  }
+  /* Thin gradient divider — Brand Blue → Sky Cyan */
+  .divider-mv-gradient {
+    background: linear-gradient(90deg, var(--mv-brand-blue), var(--mv-sky-cyan));
+  }
+
   /* Thin uppercase editorial label */
   .eyebrow {
     letter-spacing: 0.24em;

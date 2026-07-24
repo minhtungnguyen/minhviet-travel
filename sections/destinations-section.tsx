@@ -6,13 +6,13 @@ export async function DestinationsSection() {
   const { destinations } = await getHomepageContent()
 
   return (
-    <section className="section-py-lg border-t border-border bg-background">
+    <section className="section-py-lg border-t border-mv-border-soft bg-mv-mist-blue">
       <div className="container-mv">
         <SectionHeading
           eyebrow={destinations.eyebrow}
           title={
             <>
-              {destinations.title} <span className="text-primary">{destinations.titleAccent}</span>
+              {destinations.title} <span className="text-mv-journey-blue">{destinations.titleAccent}</span>
             </>
           }
           className="max-w-2xl"

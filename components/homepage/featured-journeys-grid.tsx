@@ -20,21 +20,21 @@ export function FeaturedJourneysGrid({ content }: { content: FeaturedJourneysCon
             key={f.id}
             onClick={() => setFilter(f.id)}
             className={cn(
-              'relative pb-1 text-sm font-semibold transition-colors',
-              filter === f.id ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
+              'relative pb-1 text-sm font-semibold transition-colors duration-mv-fast',
+              filter === f.id ? 'text-mv-deep-navy' : 'text-mv-slate hover:text-mv-journey-blue',
             )}
             aria-pressed={filter === f.id}
           >
             {f.label}
-            {filter === f.id && <span className="absolute inset-x-0 -bottom-px h-0.5 bg-primary" />}
+            {filter === f.id && <span className="absolute inset-x-0 -bottom-px h-0.5 bg-mv-journey-blue" />}
           </button>
         ))}
       </div>
 
       {filtered.length === 0 ? (
-        <div className="mt-8 flex flex-col items-center justify-center border border-dashed border-border py-12 text-center">
-          <p className="font-display text-xl text-foreground">Chưa có hành trình phù hợp</p>
-          <p className="mt-2 text-sm text-muted-foreground">
+        <div className="mt-8 flex flex-col items-center justify-center border border-dashed border-mv-border-soft py-12 text-center">
+          <p className="font-display text-xl text-mv-deep-navy">Chưa có hành trình phù hợp</p>
+          <p className="mt-2 text-sm text-mv-slate">
             Vui lòng chọn khu vực khác hoặc để lại yêu cầu để được tư vấn riêng.
           </p>
           <Button size="lg" className="mt-4" render={<a href="#lead-form" />}>

@@ -22,7 +22,7 @@ import type { FinalCtaContent } from '@/types/homepage'
  * intended color regardless of generated CSS order.
  */
 const TAB_TRIGGER_CLASS =
-  'rounded-full px-6 py-2.5 text-sm font-semibold normal-case tracking-normal transition-colors outline-none data-[active]:!bg-white data-[active]:!text-primary data-[active]:shadow-soft not-data-[active]:!text-paper/70 not-data-[active]:hover:!text-paper focus-visible:ring-2 focus-visible:ring-accent/60'
+  'rounded-full px-6 py-2.5 text-sm font-semibold normal-case tracking-normal transition-colors duration-mv-fast outline-none data-[active]:!bg-white data-[active]:!text-mv-deep-navy data-[active]:shadow-soft not-data-[active]:!text-paper/70 not-data-[active]:hover:!text-paper focus-visible:ring-2 focus-visible:ring-mv-sky-cyan/60'
 
 /**
  * Single form, two tabs — showing the corporate and individual forms
@@ -69,12 +69,12 @@ export function DualPathCta({
       </Tabs>
 
       <div className="flex items-center gap-3 text-sm font-semibold text-paper">
-        <a href={`tel:${content.phone.replace(/\s/g, '')}`} className="flex items-center gap-2 hover:text-accent">
-          <Phone className="size-4 text-accent" /> Hotline 24/7 {content.phone}
+        <a href={`tel:${content.phone.replace(/\s/g, '')}`} className="flex items-center gap-2 hover:text-mv-sky-cyan">
+          <Phone className="size-4 text-mv-sky-cyan" /> Hotline 24/7 {content.phone}
         </a>
         <span className="h-4 w-px bg-paper/20" />
-        <a href={content.zaloHref} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-accent">
-          <MessageCircle className="size-4 text-accent" /> Zalo
+        <a href={content.zaloHref} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-mv-sky-cyan">
+          <MessageCircle className="size-4 text-mv-sky-cyan" /> Zalo
         </a>
       </div>
     </div>

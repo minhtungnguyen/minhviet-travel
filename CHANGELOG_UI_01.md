@@ -213,3 +213,43 @@ Yêu cầu trước đó (tăng logo 1.8–2 lần ngay trong Header Level 2 cũ
 
 ### Còn tồn đọng (mới)
 8. Main Navigation tự xuống 2 dòng ở 1024–1152px (xem "Đã kiểm tra" ở trên) — cần một task riêng được phép sửa Menu Navigation để xử lý (vd. ẩn bớt mục hoặc thu gọn ở đúng khoảng này).
+
+---
+
+## Sprint UI-02 — Homepage Color System, Visual Rhythm & Premium Motion Refinement (2026-07-24)
+
+**Phạm vi:** Màu sắc, typography colors, section rhythm, card styling, motion nhẹ, responsive liên quan — Homepage + shared Header/Footer chrome. Không sửa cấu trúc nghiệp vụ, backend, CMS, API, lead handling, route, menu architecture, hay Tour Detail/Booking/CRM/AI Import/Authentication. Không redesign toàn bộ — giữ nguyên Information Architecture. Chi tiết đầy đủ (token cuối cùng, section mapping, before/after, QA) ở `UI_COLOR_SYSTEM_IMPLEMENTATION.md`.
+
+### Vấn đề
+Homepage dùng quá nhiều chữ gần-đen (`text-foreground` trên heading), nhiều mảng Navy đặc liên tiếp (Hero/MICE/Consultation overlay đều là navy/đen phẳng), Header rò rỉ màu Gold ra ngoài phạm vi MICE (vi phạm Volume 01 §04), 2 tile "Bespoke" trong Core Services dùng chung một màu Navy, và Consultation/Newsletter/Footer nối liền thành một khối tối kéo dài không có điểm ngắt.
+
+### Đã sửa
+- **File mới trong `app/globals.css`:** bộ token `--mv-deep-navy/--mv-brand-blue/--mv-journey-blue/--mv-sky-cyan/--mv-mist-blue/--mv-ice-blue/--mv-slate-text/--mv-mice-gold/--mv-offer-red/--mv-border-soft` (đăng ký cộng thêm qua `@theme inline`, không đổi `--primary`/`--accent`/`--foreground` hiện có), token motion (`--motion-fast/normal/slow`, `--ease-mv-standard`), token spacing tham chiếu, và các utility gradient (`bg-gradient-mv-hero/-brand/-consultation/-mice`, `divider-mv-gradient`).
+- **`components/ui/button.tsx`:** thêm `variant="journey"` (Journey Blue → Sky Cyan hover) — additive, không đổi `default/accent/outline/gold` hiện có.
+- **`components/site/site-header.tsx`:** bỏ Gold khỏi utility bar (dải "Tour Thiết Kế Trọn Gói · MICE · Tour Ghép Quốc Tế" — Gold giờ chỉ còn trong chính section MICE), nav active/hover đổi sang Journey Blue, "Ưu đãi" đổi sang token `--mv-offer-red`.
+- **`sections/hero-section.tsx`:** overlay đổi từ gradient đen phẳng sang `bg-gradient-mv-hero` (navy → Journey Blue tail), CTA chính đổi `variant="accent"` → `variant="journey"`, eyebrow → Sky Cyan.
+- **`sections/trust-strip-section.tsx`:** nền `bg-paper` → `bg-mv-ice-blue`, heading/segment pill/border đổi sang Deep Navy + Mist Blue + border-soft.
+- **`components/homepage/verified-stat.tsx`:** số liệu ở chế độ sáng (`!onDark`) đổi từ `text-foreground` (gần đen) sang `text-mv-brand-blue`.
+- **`components/homepage/section-heading.tsx`:** heading `!onDark` → Deep Navy, eyebrow → Journey Blue, divider chuyển gradient Brand Blue → Sky Cyan — áp dụng đồng loạt cho Core Services/Featured Journeys/Destinations/Brand Center vì dùng chung component này.
+- **`sections/core-services-section.tsx`:** 2 tile Bespoke hết dùng chung `bg-primary` — "Tour đoàn" đổi gradient Brand→Journey Blue, "MICE & Sự kiện" giữ Deep Navy + icon/arrow Gold; 5 tile "Có sẵn" đổi sang Mist Blue/border-soft/icon Journey Blue.
+- **`sections/enterprise-mice-section.tsx`:** overlay ảnh đổi sang `bg-gradient-mv-mice` (navy-blue, không còn đen phẳng), badge → Sky Cyan + icon Gold, process-line → Cyan, CTA → `variant="journey"`; đồng thời thêm `border-t` còn thiếu (khớp pattern các section lân cận) và chuẩn hoá `rounded-3xl` → `rounded-2xl` cho đồng nhất với Journey/Destination card.
+- **`components/homepage/journey-card.tsx`:** title/price/label chuyển Deep Navy/Journey Blue/Slate; bỏ hiệu ứng nổi mạnh (`hover:-translate-y-1`), thay bằng border chuyển Sky Cyan khi hover; ảnh hover scale chuẩn hoá còn 1.035 ở 360ms (token `duration-mv-slow`).
+- **`components/homepage/featured-journeys-grid.tsx`, `sections/featured-journeys-section.tsx`, `sections/destinations-section.tsx`, `components/homepage/destinations-rail.tsx`, `components/homepage/destination-card.tsx`, `sections/brand-center-section.tsx`:** đồng bộ theo cùng token (tab active, nền Mist Blue xen kẽ, arrow button Ice Blue→Journey Blue, radius `rounded-2xl` thống nhất, accent-word heading đổi từ `text-primary` — trùng màu heading, gần như vô hình — sang Journey Blue).
+- **`sections/final-cta-section.tsx`:** nền `bg-deep` phẳng → `bg-gradient-mv-consultation` (Deep Navy → Brand Blue).
+- **`components/homepage/lead-form.tsx`, `components/homepage/dual-path-cta.tsx`:** submit CTA → `variant="journey"`; tab active/focus ring đổi sang token mới.
+- **`components/site/site-footer.tsx`:** tách **Newsletter thành băng `bg-mv-mist-blue` riêng** (không còn dùng chung `bg-deep` với phần Footer chính) — sửa đúng vấn đề "form, newsletter và footer nối thành một khối tối quá dài" nêu trong brief; Footer chính đổi `bg-deep` → `bg-mv-deep-navy`; sửa luôn lỗi có sẵn — 3 icon mạng xã hội trước đó dùng chung 1 `aria-label`, nay có nhãn riêng cho Facebook/YouTube/LinkedIn.
+- **`components/homepage/newsletter-form.tsx`:** lật toàn bộ style từ surface-tối (input `bg-white/5 text-white`) sang surface-sáng (input `bg-white text-mv-deep-navy border-mv-border-soft`) cho khớp băng Mist Blue mới của Newsletter.
+
+### Đã kiểm tra
+- `npx eslint .`, `npx tsc --noEmit`, `npx next build` — cả 3 sạch, 22/22 route generate.
+- Responsive: `document.documentElement.scrollWidth === clientWidth` ở cả 4 mốc (1440/1280/768/390) — không overflow ngang.
+- Console runtime trên dev server sạch (restart mới): 0 lỗi, chỉ còn 1 warning tiền tồn tại không liên quan (`Logo` width/height ratio).
+- Ảnh Before/After: `docs/sprint-ui-02/{before,after}-{desktop,mobile}-full.png`.
+
+### Không đụng tới
+`components/site/tour-card.tsx` (Tour Card của `/tours`, khác `journey-card.tsx` của Homepage), `components/ui/badge.tsx`, token toàn cục `--primary/--accent/--foreground/--muted-foreground/--border`, backend/CMS/API/lead handling/route/menu architecture, Tour Detail/Booking/CRM/AI Import/Authentication.
+
+### Còn tồn đọng (mới)
+9. Bug hiển thị giá trị thô `group-tours` (thay vì nhãn tiếng Việt) trong dropdown "Nhu cầu quan tâm" của Consultation form — lỗi resolve label của `Select.Value` (Base UI), đã ghi nhận từ trước ở `UI_MASTER_REVIEW.md` P0 #2, không phải màu sắc nên ngoài phạm vi sprint này.
+10. Mật độ nội dung của card MICE (7 khối chữ chồng trên một ảnh) chưa được rút gọn — chỉ màu/overlay/motion được chỉnh trong sprint này, đúng chỉ thị "không redesign toàn bộ".
+11. Mega menu Header vẫn chỉ mở bằng hover, chưa hỗ trợ `onFocus` cho bàn phím — thuộc về hành vi/component logic, ngoài phạm vi "màu sắc/motion nhẹ" của sprint này.

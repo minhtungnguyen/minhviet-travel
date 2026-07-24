@@ -17,14 +17,14 @@ export function DestinationsRail({ destinations }: { destinations: DestinationCo
       <div className="hidden justify-end gap-2 sm:flex">
         <button
           onClick={() => scrollBy(-1)}
-          className="grid size-12 place-items-center rounded-full border border-foreground/25 text-foreground transition-colors hover:border-foreground hover:bg-foreground hover:text-background"
+          className="grid size-12 place-items-center rounded-full border border-mv-border-soft bg-mv-ice-blue text-mv-deep-navy transition-colors duration-mv-fast hover:border-mv-journey-blue hover:bg-mv-journey-blue hover:text-white"
           aria-label="Cuộn trái"
         >
           <ChevronLeft className="size-5" />
         </button>
         <button
           onClick={() => scrollBy(1)}
-          className="grid size-12 place-items-center rounded-full border border-foreground/25 text-foreground transition-colors hover:border-foreground hover:bg-foreground hover:text-background"
+          className="grid size-12 place-items-center rounded-full border border-mv-border-soft bg-mv-ice-blue text-mv-deep-navy transition-colors duration-mv-fast hover:border-mv-journey-blue hover:bg-mv-journey-blue hover:text-white"
           aria-label="Cuộn phải"
         >
           <ChevronRight className="size-5" />

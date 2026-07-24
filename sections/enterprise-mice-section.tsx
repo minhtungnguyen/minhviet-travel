@@ -15,10 +15,10 @@ export async function EnterpriseMiceSection() {
   const { enterpriseMice } = await getHomepageContent()
 
   return (
-    <section className="section-py-md bg-background">
+    <section className="section-py-md border-t border-mv-border-soft bg-background">
       <div className="container-mv">
         <Reveal>
-          <div className="relative overflow-hidden rounded-3xl shadow-soft-lg">
+          <div className="relative overflow-hidden rounded-2xl shadow-soft-lg">
             <div className="relative min-h-[480px] w-full lg:min-h-[520px]">
               <Image
                 src={enterpriseMice.image.src}
@@ -27,19 +27,23 @@ export async function EnterpriseMiceSection() {
                 sizes="100vw"
                 className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-deep via-deep/85 to-deep/40" />
+              {/* Sprint UI-02: navy-blue tinted overlay (Brand Blue tail)
+                  instead of a flat near-black fade — keeps this as the
+                  section's one deliberately dark, formal surface without
+                  reading as pure black. */}
+              <div className="absolute inset-0 bg-gradient-mv-mice" />
             </div>
 
             <div className="absolute inset-0 flex items-center">
               <div className="max-w-xl p-8 sm:p-12 lg:p-16">
-                <span className="inline-flex items-center gap-2 rounded-full bg-accent/15 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-accent">
-                  <Sparkles className="size-3.5" />
+                <span className="inline-flex items-center gap-2 rounded-full bg-mv-sky-cyan/15 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-mv-sky-cyan">
+                  <Sparkles className="size-3.5 text-mv-mice-gold" />
                   {enterpriseMice.badge}
                 </span>
                 <h2 className="mt-3 text-balance font-display text-3xl font-bold leading-[1.1] tracking-tight text-paper sm:text-4xl lg:text-[2.75rem]">
                   {enterpriseMice.title}
                 </h2>
-                <p className="mt-3 max-w-md text-pretty leading-relaxed text-paper/75">
+                <p className="mt-3 max-w-md text-pretty leading-relaxed text-paper/78">
                   {enterpriseMice.description}
                 </p>
 
@@ -47,7 +51,7 @@ export async function EnterpriseMiceSection() {
                   {enterpriseMice.story}
                 </p>
 
-                <p className="mt-3 max-w-md text-pretty text-[11px] font-semibold uppercase tracking-wide text-paper/55">
+                <p className="mt-3 max-w-md text-pretty text-[11px] font-semibold uppercase tracking-wide text-mv-sky-cyan/80">
                   {enterpriseMice.process.join(' · ')}
                 </p>
 
@@ -55,7 +59,7 @@ export async function EnterpriseMiceSection() {
                   <VerifiedStat stat={enterpriseMice.proofStat} onDark />
                 </div>
 
-                <Button variant="accent" size="lg" className="mt-5" render={<Link href={enterpriseMice.cta.href} />}>
+                <Button variant="journey" size="lg" className="mt-5" render={<Link href={enterpriseMice.cta.href} />}>
                   {enterpriseMice.cta.label} <ArrowUpRight className="size-5" />
                 </Button>
               </div>

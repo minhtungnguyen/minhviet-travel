@@ -14,31 +14,31 @@ export async function TrustStripSection() {
   const { trustStrip } = await getHomepageContent()
 
   return (
-    <section className="section-py-sm border-b border-border bg-paper">
+    <section className="section-py-sm border-b border-mv-border-soft bg-mv-ice-blue">
       <div className="container-mv">
         <Reveal>
-          <div className="max-w-3xl border-b border-border pb-5">
-            <h2 className="text-balance font-display text-2xl font-bold leading-snug tracking-tight text-foreground sm:text-3xl">
+          <div className="max-w-3xl border-b border-mv-border-soft pb-5">
+            <h2 className="text-balance font-display text-2xl font-bold leading-snug tracking-tight text-mv-deep-navy sm:text-3xl">
               {trustStrip.positioning.headline}
             </h2>
-            <p className="mt-2 text-pretty leading-relaxed text-muted-foreground">
+            <p className="mt-2 text-pretty leading-relaxed text-mv-slate">
               {trustStrip.positioning.description}
             </p>
           </div>
         </Reveal>
 
         <Reveal>
-          <div className="mt-5 flex flex-col gap-4 border-b border-border pb-5 lg:flex-row lg:items-center lg:justify-between">
-            <p className="eyebrow text-[11px] font-semibold text-primary">{trustStrip.eyebrow}</p>
+          <div className="mt-5 flex flex-col gap-4 border-b border-mv-border-soft pb-5 lg:flex-row lg:items-center lg:justify-between">
+            <p className="eyebrow text-[11px] font-semibold text-mv-journey-blue">{trustStrip.eyebrow}</p>
             <ul className="flex flex-wrap gap-2.5">
               {trustStrip.segments.map((segment) => {
                 const Icon = SEGMENT_ICONS[segment.icon]
                 return (
                   <li
                     key={segment.id}
-                    className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-background px-3.5 py-1.5 text-xs font-semibold text-primary"
+                    className="inline-flex items-center gap-2 rounded-full border border-mv-border-soft bg-mv-mist-blue px-3.5 py-1.5 text-xs font-semibold text-mv-deep-navy"
                   >
-                    <Icon className="size-3.5 text-royal" strokeWidth={1.75} />
+                    <Icon className="size-3.5 text-mv-journey-blue" strokeWidth={1.75} />
                     {segment.label}
                   </li>
                 )

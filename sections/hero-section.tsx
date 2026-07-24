@@ -20,13 +20,15 @@ export async function HeroSection() {
         <HeroVideoRotator />
         {/* Rest of the site is white-dominant now — the hero is the one
             section allowed to stay a dark "stage" for the video, so the
-            overlay only needs to be strong enough for text legibility. */}
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,22,43,0.6)_0%,rgba(7,22,43,0.4)_42%,rgba(7,22,43,0.15)_72%,rgba(7,22,43,0.05)_100%)]" />
+            overlay only needs to be strong enough for text legibility.
+            Sprint UI-02: navy-blue tinted (Journey Blue tail) instead of
+            a flat near-black fade, so the footage keeps its own color. */}
+        <div className="absolute inset-0 bg-gradient-mv-hero" />
       </div>
 
       <div className="container-mv relative flex flex-col justify-center pt-28 pb-14 sm:pt-32 lg:min-h-[760px] lg:pt-40 lg:pb-20">
         <div className="max-w-[720px]">
-          <p className="eyebrow flex items-center gap-3 text-[11px] font-semibold text-accent">
+          <p className="eyebrow flex items-center gap-3 text-[11px] font-semibold text-mv-sky-cyan">
             <span className="h-px w-10 bg-accent/50" />
             {hero.eyebrow}
           </p>
@@ -40,7 +42,7 @@ export async function HeroSection() {
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-4">
-            <Button variant="accent" size="lg" render={<Link href={hero.primaryCta.href} />}>
+            <Button variant="journey" size="lg" render={<Link href={hero.primaryCta.href} />}>
               {hero.primaryCta.label} <ArrowUpRight className="size-5" />
             </Button>
             <Button

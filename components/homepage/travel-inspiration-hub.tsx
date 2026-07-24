@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { ArrowUpRight } from 'lucide-react'
 import type { HomepageInspirationResolution } from '@/lib/inspiration/inspiration-demo-data'
 import { FeaturedInspirationVideo } from '@/components/homepage/featured-inspiration-video'
-import { InspirationCard } from '@/components/homepage/inspiration-card'
+import { SupportingInspirationCarousel } from '@/components/homepage/supporting-inspiration-carousel'
 
 /**
  * Right column of the Consultation + Inspiration section. Takes the
@@ -56,10 +56,8 @@ export function TravelInspirationHub({
       </div>
 
       {supporting.length > 0 && (
-        <div className="mt-5 flex gap-4 overflow-x-auto pb-1 [scrollbar-width:none] snap-x snap-mandatory [&::-webkit-scrollbar]:hidden">
-          {supporting.map((item) => (
-            <InspirationCard key={item.id} item={item} />
-          ))}
+        <div className="mt-5">
+          <SupportingInspirationCarousel items={supporting} />
         </div>
       )}
     </div>

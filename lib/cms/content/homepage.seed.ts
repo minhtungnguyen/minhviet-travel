@@ -350,17 +350,20 @@ export const homepageContentSeed: HomepageContent = {
   },
   finalCta: {
     corporate: {
+      eyebrow: 'DOANH NGHIỆP / TỔ CHỨC',
       label: 'Doanh nghiệp / Tổ chức',
       title: 'Nâng tầm hành trình doanh nghiệp của bạn',
       description:
-        'Đội ngũ chuyên gia sẵn sàng thiết kế giải pháp du lịch, sự kiện và MICE phù hợp với quy mô và mục tiêu tổ chức của bạn.',
-      cta: { label: 'Nhận tư vấn giải pháp', href: '#lead-form' },
+        'Đội ngũ chuyên gia Minh Việt sẵn sàng thiết kế giải pháp du lịch, sự kiện và MICE phù hợp với quy mô, ngân sách và mục tiêu của tổ chức.',
+      cta: { label: 'Gửi yêu cầu tư vấn', href: '#lead-form' },
     },
     individual: {
-      label: 'Khách cá nhân',
+      eyebrow: 'KHÁCH HÀNG CÁ NHÂN',
+      label: 'Khách hàng cá nhân',
       title: 'Sẵn sàng cho chuyến đi tiếp theo',
-      description: 'Gửi yêu cầu và chuyên viên tư vấn sẽ liên hệ để xác nhận hành trình phù hợp với bạn.',
-      cta: { label: 'Gửi yêu cầu đặt chỗ', href: '#lead-form' },
+      description:
+        'Chia sẻ nhu cầu của bạn, chuyên viên Minh Việt sẽ tư vấn hành trình phù hợp với thời gian, ngân sách và sở thích.',
+      cta: { label: 'Gửi yêu cầu tư vấn', href: '#lead-form' },
     },
     phone: '0934 368 132',
     zaloHref: 'https://zalo.me/0934368132',

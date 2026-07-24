@@ -179,12 +179,14 @@ export const homepageContentSchema = z.object({
   }),
   finalCta: z.object({
     corporate: z.object({
+      eyebrow: z.string().min(1),
       label: z.string().min(1),
       title: z.string().min(1),
       description: z.string().min(1),
       cta: cmsLinkSchema,
     }),
     individual: z.object({
+      eyebrow: z.string().min(1),
       label: z.string().min(1),
       title: z.string().min(1),
       description: z.string().min(1),

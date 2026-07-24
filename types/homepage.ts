@@ -154,12 +154,14 @@ export interface BrandCenterContent {
 
 export interface FinalCtaContent {
   corporate: {
+    eyebrow: string
     label: string
     title: string
     description: string
     cta: CmsLink
   }
   individual: {
+    eyebrow: string
     label: string
     title: string
     description: string

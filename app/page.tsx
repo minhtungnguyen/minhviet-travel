@@ -10,7 +10,7 @@ import { EnterpriseMiceSection } from '@/sections/enterprise-mice-section'
 import { FeaturedJourneysSection } from '@/sections/featured-journeys-section'
 import { DestinationsSection } from '@/sections/destinations-section'
 import { BrandCenterSection } from '@/sections/brand-center-section'
-import { FinalCtaSection } from '@/sections/final-cta-section'
+import { ConsultationInspirationSection } from '@/sections/consultation-inspiration-section'
 
 export async function generateMetadata(): Promise<Metadata> {
   const { seo } = await getHomepageContent()
@@ -42,7 +42,7 @@ export default async function HomePage() {
       <FeaturedJourneysSection />
       <DestinationsSection />
       <BrandCenterSection />
-      <FinalCtaSection />
+      <ConsultationInspirationSection />
     </SiteChrome>
   )
 }

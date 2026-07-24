@@ -253,3 +253,37 @@ Homepage dùng quá nhiều chữ gần-đen (`text-foreground` trên heading), 
 9. Bug hiển thị giá trị thô `group-tours` (thay vì nhãn tiếng Việt) trong dropdown "Nhu cầu quan tâm" của Consultation form — lỗi resolve label của `Select.Value` (Base UI), đã ghi nhận từ trước ở `UI_MASTER_REVIEW.md` P0 #2, không phải màu sắc nên ngoài phạm vi sprint này.
 10. Mật độ nội dung của card MICE (7 khối chữ chồng trên một ảnh) chưa được rút gọn — chỉ màu/overlay/motion được chỉnh trong sprint này, đúng chỉ thị "không redesign toàn bộ".
 11. Mega menu Header vẫn chỉ mở bằng hover, chưa hỗ trợ `onFocus` cho bàn phím — thuộc về hành vi/component logic, ngoài phạm vi "màu sắc/motion nhẹ" của sprint này.
+
+---
+
+## Sprint UI-03 — Consultation Form + Travel Inspiration Hub V1 (2026-07-24)
+
+**Phạm vi:** Section tư vấn gần cuối Homepage — chia 2 cột (form trái, Travel Inspiration Hub phải mới). Không sửa Header, Hero, section tour, MICE, Footer, Database production, Lead API, logic submit, Authentication, Tour Detail, CMS Admin, AI Import. Chi tiết đầy đủ (data contract, CMS V1 spec, curator contract, acceptance test) ở `TRAVEL_INSPIRATION_HUB_V1.md`.
+
+### Đã sửa
+- **File mới:** `sections/consultation-inspiration-section.tsx` (`ConsultationInspirationSection`) — thay thế `sections/final-cta-section.tsx` (đã xoá). Grid 2 cột `lg:grid-cols-[0.46fr_0.54fr]` (46/54 đúng brief), 1 cột dưới `lg` (form trước theo thứ tự DOM — tự đáp ứng cả yêu cầu Tablet "nếu chật thì 1 cột" lẫn Mobile "form trước"). Nền dùng lại `bg-gradient-mv-consultation` (Deep Navy → Brand Blue) từ Sprint UI-02, padding riêng `py-16 lg:py-20` (64/80px, đúng khoảng brief yêu cầu cho section này).
+- **File mới:** `components/homepage/consultation-tabs.tsx` (`ConsultationTabs`) — thay thế `components/homepage/dual-path-cta.tsx` (đã xoá). Dùng lại primitive `@base-ui/react/tabs` như trước (đầy đủ `role`/`aria-selected`/`aria-controls`/keyboard ArrowLeft-Right/Enter-Space có sẵn), nhưng thêm `keepMounted` trên cả 2 `TabsPanel` — Base UI mặc định **unmount** panel không active (xem Sprint UI-01 hotfix note), nghĩa là trước sprint này chuyển tab sẽ xoá sạch dữ liệu đã nhập; `keepMounted` giữ cả 2 form trong DOM (ẩn bằng `hidden` attribute thật) nên dữ liệu sống sót qua việc đổi tab — đúng yêu cầu mới của brief.
+- **File mới:** `components/homepage/consultation-forms.tsx` — `OrganizationConsultationForm`/`IndividualConsultationForm` (export), dùng chung 1 hàm nội bộ `ConsultationFormPanel` để không lặp JSX. Field/logic submit của `LeadForm` giữ nguyên 100%, chỉ thêm eyebrow + copy đúng brief phía trên form.
+- **File mới:** `components/homepage/travel-inspiration-hub.tsx`, `featured-inspiration-video.tsx`, `inspiration-card.tsx`, `video-modal.tsx` — cột phải mới. `VideoModal` dùng `<dialog>` gốc trình duyệt (không cài thư viện modal mới) — `showModal()` tự trap focus, Escape tự đóng, backdrop click tự đóng (so `e.target` với chính phần tử dialog).
+- **File mới:** `types/inspiration.ts`, `lib/inspiration/inspiration-demo-data.ts` — data contract CMS-ready (`TravelInspirationItem`, `TravelInspirationHomepageConfig`, enum loại/trạng thái đúng brief) + mock data (1 video nổi bật "Cảm xúc hành trình", 3 nội dung phụ, ảnh thật có sẵn trong `public/`) + `getHomepageInspiration()` — logic resolve featured/supporting từ config (lọc Draft/Archived/hết hạn, fallback theo `priority`, không trùng id giữa featured/supporting).
+- **`types/homepage.ts`, `lib/cms/schema.ts`, `lib/cms/content/homepage.seed.ts`:** thêm field `eyebrow` vào `FinalCtaContent.corporate`/`.individual`; cập nhật `description`/`cta.label`/`individual.label` khớp đúng copy trong brief.
+- **`app/page.tsx`:** đổi `FinalCtaSection` → `ConsultationInspirationSection`.
+
+### Lỗi phát hiện & sửa trong QA
+- Grid 2 cột bị lệch nghiêm trọng (210px/812px thay vì ~535px/629px) — cột phải có hàng supporting-card cuộn ngang (`overflow-x-auto`) khiến CSS Grid tính `fr` theo min-content của nó thay vì tỷ lệ 46/54 khai báo. Sửa bằng `[&>*]:min-w-0` trên grid cha (kinh điển "CSS Grid `fr` + overflow child" gotcha).
+- Tab pill vỡ chữ trên mobile (chỉ hiện "chức"/"nhân") — label dài tự xuống dòng trong pill cao cố định, dòng trên bị che khuất. Sửa bằng `whitespace-nowrap` trên tab + cho `TabsList` tự cuộn ngang khi không đủ chỗ, thay vì ép chữ xuống dòng.
+
+### Đã kiểm tra
+- `npx eslint .`, `npx tsc --noEmit`, `npx next build` — cả 3 sạch, 22/22 route generate.
+- Responsive 1440/1280/768/390px: `scrollWidth === clientWidth` cả 4 mốc.
+- Tab: role/aria-selected/aria-controls đúng (xác nhận qua DOM thật); `ArrowRight` di chuyển + tự kích hoạt tab kế tiếp; dữ liệu nhập ở tab Doanh nghiệp còn nguyên sau khi chuyển sang tab Cá nhân rồi quay lại.
+- Video modal: mở bằng Play (`aria-label` đúng tên item), đóng bằng nút đóng/phím Escape thật/click backdrop — cả 3 đường đều xác nhận qua DOM (`dialog.open`).
+- Ảnh Before/After: `docs/sprint-ui-03/*.png` (desktop/tablet/mobile, 2 trạng thái tab, trạng thái video modal desktop + mobile).
+
+### Không đụng tới
+`components/site/site-header.tsx`, `sections/hero-section.tsx`, mọi section tour (`featured-journeys-section.tsx`, `destinations-section.tsx`, `core-services-section.tsx`), `sections/enterprise-mice-section.tsx`, `components/site/site-footer.tsx`, `lib/actions/lead-action.ts`, `hooks/use-lead-form.ts`, `leadFormSchema` (giá trị `intent` gửi lên server vẫn là `corporate`/`individual` như cũ — xem "Còn tồn đọng" bên dưới), Authentication, Tour Detail, CMS Admin, AI Import, database production.
+
+### Còn tồn đọng (mới)
+12. `leadFormSchema.intent` vẫn nhận `'corporate' | 'individual'`, chưa đổi thành `ORGANIZATION`/`INDIVIDUAL` như brief §III.10 gợi ý — chỉ đổi ở tầng hiển thị/tên component (`OrganizationConsultationForm`/`IndividualConsultationForm`) để không phá payload hiện có gửi lên `submitLeadAction`. Cần một quyết định + task riêng ở sprint Backend nếu muốn đổi enum thực sự gửi lên server.
+13. CMS Admin cho Travel Inspiration Hub (23 mục ở brief §X: list, CRUD mềm, workflow Draft→Published, homepage placement, preview desktop/mobile...) chưa xây — V1 chỉ có mock repository + type contract, đúng phạm vi được giao.
+14. Chưa có video thương hiệu/testimonial thật trong project — `videoUrl` của item nổi bật để `null` có chủ đích; cần gắn video thật khi có, không cần đổi code (chỉ đổi data).

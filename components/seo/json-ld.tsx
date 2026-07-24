@@ -11,6 +11,23 @@ import {
 import type { HomepageContent, JourneyContent } from '@/types/homepage'
 import type { Tour } from '@/lib/site-data'
 import type { AvailabilityStatus } from '@/types/cms'
+import { buildTourCardViewModel } from '@/lib/tours/availability'
+import type { TourAvailabilityStatus } from '@/types/tour-availability'
+
+/**
+ * schema.org's ItemAvailability doesn't have a direct match for CHECKING
+ * (unconfirmed, not literally out of stock) — InStock is the closest
+ * accurate signal since we haven't confirmed the opposite. CLOSED means
+ * the sale window itself ended, which reads to a shopper the same as
+ * SoldOut even though the tour "resumes" aren't ruled out.
+ */
+const SCHEMA_AVAILABILITY: Record<TourAvailabilityStatus, string> = {
+  AVAILABLE: 'https://schema.org/InStock',
+  LIMITED: 'https://schema.org/LimitedAvailability',
+  CHECKING: 'https://schema.org/InStock',
+  SOLD_OUT: 'https://schema.org/SoldOut',
+  CLOSED: 'https://schema.org/SoldOut',
+}
 
 /**
  * Server-rendered JSON-LD. Structured data lives here, not scattered
@@ -39,25 +56,25 @@ export function HomepageJsonLd({ content }: { content: HomepageContent }) {
   const itemList = {
     '@type': 'ItemList',
     name: featuredJourneys.title + ' ' + featuredJourneys.titleAccent,
-    itemListElement: featuredJourneys.journeys.map((journey: JourneyContent, index: number) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      url: `${SITE_URL}${journey.href}`,
-      item: {
-        '@type': 'TouristTrip',
-        name: journey.title,
-        touristType: journey.category,
-        offers: {
-          '@type': 'Offer',
-          priceCurrency: journey.currency,
-          price: journey.priceFrom,
-          availability:
-            journey.availability === 'closed'
-              ? 'https://schema.org/SoldOut'
-              : 'https://schema.org/InStock',
+    itemListElement: featuredJourneys.journeys.map((journey: JourneyContent, index: number) => {
+      const { availability } = buildTourCardViewModel(journey)
+      return {
+        '@type': 'ListItem',
+        position: index + 1,
+        url: `${SITE_URL}${journey.href}`,
+        item: {
+          '@type': 'TouristTrip',
+          name: journey.title,
+          touristType: journey.category,
+          offers: {
+            '@type': 'Offer',
+            priceCurrency: journey.currency,
+            price: journey.priceFrom,
+            availability: SCHEMA_AVAILABILITY[availability.status],
+          },
         },
-      },
-    })),
+      }
+    }),
   }
 
   const graph = {

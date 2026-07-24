@@ -66,6 +66,12 @@
   --color-mv-offer-red: var(--mv-offer-red);
   --color-mv-border-soft: var(--mv-border-soft);
 
+  --color-mv-limited-bg: var(--mv-limited-bg);
+  --color-mv-limited-text: var(--mv-limited-text);
+  --color-mv-checking-bg: var(--mv-checking-bg);
+  --color-mv-soldout-bg: var(--mv-soldout-bg);
+  --color-mv-soldout-text: var(--mv-soldout-text);
+
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: calc(var(--radius) - 1px);
   --radius-lg: var(--radius);
@@ -181,6 +187,19 @@
   --content-gap-lg: 2rem;
   --content-gap-md: 1.5rem;
   --card-gap: 1.25rem;
+
+  /* Tour availability status badge — AVAILABLE reuses mv-mist-blue/
+     mv-deep-navy above; CLOSED reuses the existing neutral --secondary/
+     --muted-foreground. Only LIMITED/CHECKING/SOLD_OUT need dedicated
+     tokens: LIMITED is a muted amber (never --mv-mice-gold — that stays
+     reserved for the MICE section — and never --mv-offer-red, which
+     already means "Ưu đãi"), CHECKING a neutral slate-blue (waiting, not
+     good/bad), SOLD_OUT a muted deep red (not the brighter offer-red). */
+  --mv-limited-bg: #fbf0dc;
+  --mv-limited-text: #92600c;
+  --mv-checking-bg: #e9edf5;
+  --mv-soldout-bg: #fbeae8;
+  --mv-soldout-text: #9a2e24;
 }
 
 @layer base {

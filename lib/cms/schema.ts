@@ -62,13 +62,30 @@ const aiAdvisorQuestionSchema = z.object({
   options: z.array(z.object({ value: z.string().min(1), label: z.string().min(1) })).min(1),
 })
 
-const availabilitySchema = z.enum([
-  'open',
-  'limited',
-  'almost-full',
-  'closed',
-  'pending-confirmation',
-])
+/**
+ * `tourAvailabilityStatusSchema` is intentionally separate from Tour
+ * Detail's own availability enum (out of scope for this task) — see
+ * `types/tour-availability.ts`'s file header for why the two don't share
+ * a type. `null` is a valid, expected value (status not yet known),
+ * never coerced to a default.
+ */
+const tourAvailabilityStatusSchema = z.enum(['AVAILABLE', 'LIMITED', 'CHECKING', 'SOLD_OUT', 'CLOSED'])
+
+const tourDepartureSchema = z.object({
+  id: z.string().min(1),
+  tourId: z.string().min(1),
+  departureDate: z.string().min(1),
+  departurePoint: z.string().min(1),
+  availabilityStatus: tourAvailabilityStatusSchema.nullable(),
+  capacity: z.number().nonnegative().nullable(),
+  bookedSeats: z.number().nonnegative().nullable(),
+  availableSeats: z.number().nonnegative().nullable(),
+  saleOpenAt: z.string().nullable(),
+  saleCloseAt: z.string().nullable(),
+  price: z.number().nonnegative().nullable(),
+  currency: z.literal('VND'),
+  isActive: z.boolean(),
+})
 
 const journeyContentSchema = z.object({
   id: z.string().min(1),
@@ -76,12 +93,10 @@ const journeyContentSchema = z.object({
   country: z.string().min(1),
   category: z.enum(['asia', 'europe', 'domestic']),
   duration: z.string().min(1),
-  departure: z.string().min(1),
-  nextDeparture: z.string().min(1),
   priceFrom: z.number().nonnegative(),
   priceType: z.enum(['estimate', 'confirmed']),
   currency: z.literal('VND'),
-  availability: availabilitySchema,
+  departures: z.array(tourDepartureSchema),
   reviewScore: z.number().min(0).max(5).optional(),
   reviewCount: z.number().nonnegative().optional(),
   image: cmsImageSchema,

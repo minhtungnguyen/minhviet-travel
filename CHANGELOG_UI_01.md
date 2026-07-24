@@ -287,3 +287,38 @@ Homepage dùng quá nhiều chữ gần-đen (`text-foreground` trên heading), 
 12. `leadFormSchema.intent` vẫn nhận `'corporate' | 'individual'`, chưa đổi thành `ORGANIZATION`/`INDIVIDUAL` như brief §III.10 gợi ý — chỉ đổi ở tầng hiển thị/tên component (`OrganizationConsultationForm`/`IndividualConsultationForm`) để không phá payload hiện có gửi lên `submitLeadAction`. Cần một quyết định + task riêng ở sprint Backend nếu muốn đổi enum thực sự gửi lên server.
 13. CMS Admin cho Travel Inspiration Hub (23 mục ở brief §X: list, CRUD mềm, workflow Draft→Published, homepage placement, preview desktop/mobile...) chưa xây — V1 chỉ có mock repository + type contract, đúng phạm vi được giao.
 14. Chưa có video thương hiệu/testimonial thật trong project — `videoUrl` của item nổi bật để `null` có chủ đích; cần gắn video thật khi có, không cần đổi code (chỉ đổi data).
+
+---
+
+## Tour Availability As Logical Sales Signal (2026-07-24)
+
+**Phạm vi:** Tour Card trên Homepage, availability badge, CTA theo trạng thái, data type/interface liên quan, demo data. Không sửa Tour Detail, CMS Admin, Database production, Booking Engine, Payment, CRM, hay `components/site/tour-card.tsx` (Tour Card của `/tours`, component khác hoàn toàn). Chi tiết đầy đủ (business rules, data contract, selection logic, test cases) ở `TOUR_AVAILABILITY_SALES_SIGNAL.md`.
+
+### Vấn đề
+Badge trạng thái chỗ ("Còn nhận khách"/"Kín chỗ") gắn cố định vào cả tour thay vì từng ngày khởi hành, không có logic thật đứng sau, và CTA luôn là "Khám phá tour" bất kể trạng thái — không phản ánh đúng khả năng nhận khách thực tế của từng ngày.
+
+### Đã sửa
+- **File mới:** `types/tour-availability.ts` — enum `TourAvailabilityStatus` (AVAILABLE/LIMITED/CHECKING/SOLD_OUT/CLOSED), **tách biệt hoàn toàn** với `AvailabilityStatus` cũ trong `types/cms.ts` (enum cũ vẫn dùng bởi Tour Detail/AI Advisor, không đụng); `TourDeparture`, `DerivedAvailability`, `AvailabilityCta`, `TourCardViewModel`, `AvailabilityConfig`.
+- **File mới:** `lib/tours/availability.ts` — 3 hàm thuần: `selectPrimaryDeparture()` (bỏ qua ngày đã qua/inactive, ưu tiên ngày gần nhất còn nhận khách, fallback ngày SOLD_OUT gần nhất), `deriveDepartureAvailability()` (không suy đoán khi thiếu dữ liệu → CHECKING; `saleCloseAt` đã qua → CLOSED bất kể status thô; `availableSeats <= 5` trên status AVAILABLE thô → nâng cấp thành LIMITED), `mapAvailabilityToCTA()` (5 CTA khác nhau theo đúng trạng thái) + `buildTourCardViewModel()` orchestrate cả ba.
+- **File mới:** `lib/tours/availability.test.ts` — 14 test case (`node:test` + `node:assert/strict`, chạy qua `npx tsx --test`, không thêm dependency framework test mới), phủ đủ 9/10 test case bắt buộc (#10 xác minh bằng cấu trúc code, không phải unit test — xem báo cáo).
+- **File mới:** `components/homepage/availability-badge.tsx` — badge góc trên-trái, nhỏ gọn (12px, dot icon, radius pill), `role="status"` + `aria-label="Trạng thái tour: {label}"`, màu theo token semantic riêng cho từng trạng thái.
+- **`app/globals.css`:** thêm 5 token badge (`--mv-limited-bg/-text`, `--mv-checking-bg`, `--mv-soldout-bg/-text`) — AVAILABLE/CLOSED dùng lại token có sẵn (`--mv-mist-blue`/`--mv-deep-navy`, `--secondary`/`--muted-foreground`), LIMITED/SOLD_OUT cố tình khác `--mv-mice-gold`/`--mv-offer-red` để không trùng nghĩa màu đã dùng nơi khác.
+- **`types/homepage.ts`, `lib/cms/schema.ts`:** `JourneyContent` bỏ `availability`/`nextDeparture`/`departure` (tour-level), thêm `departures: TourDeparture[]` (departure-level) — chỉ áp dụng cho type Homepage-only, không đụng `AvailabilityStatus` dùng chung.
+- **`lib/cms/content/homepage.seed.ts`:** 6 journey chuyển sang `departures[]` — mỗi tour minh hoạ đúng 1 trong 5 trạng thái (Tokyo=AVAILABLE, Seoul=LIMITED qua suy luận từ seat count thật, Thụy Sĩ=CHECKING do thiếu dữ liệu, Bali=AVAILABLE, Phú Quốc=SOLD_OUT với 1 ngày quá khứ bị bỏ qua đúng luật, Singapore=CLOSED qua `saleCloseAt` đã hết hạn).
+- **`components/homepage/journey-card.tsx`:** nhận `viewModel: TourCardViewModel` thay vì `journey` thô; render `AvailabilityBadge` + CTA/label/href theo đúng `viewModel.cta`; ngày khởi hành + điểm đi lấy từ `primaryDeparture` (có fallback text khi không có departure nào).
+- **`components/homepage/featured-journeys-grid.tsx`:** build `TourCardViewModel[]` qua `buildTourCardViewModel()` (một lần, `useMemo`), lọc theo `vm.tour.category`.
+- **`components/seo/json-ld.tsx`:** `HomepageJsonLd`'s `Offer.availability` tính từ trạng thái đã derive thay vì field `journey.availability` đã xoá; map 5 trạng thái mới sang đúng enum `schema.org/ItemAvailability` (LIMITED → LimitedAvailability, CLOSED → SoldOut, CHECKING → InStock).
+
+### Đã kiểm tra
+- `npx eslint .`, `npx tsc --noEmit`, `npx next build` — cả 3 sạch, 22/22 route (kể cả `/tour/[slug]` — xác nhận Tour Detail không bị ảnh hưởng).
+- `npx tsx --test lib/tours/availability.test.ts` — **14/14 pass**.
+- Phát hiện & sửa ngay trong demo data lúc QA: `saleCloseAt` ở Tokyo/Seoul/Phú Quốc ban đầu vô tình đặt trước "hôm nay" (2026-07-24) khiến các thẻ này rơi vào CLOSED ngoài ý muốn — đúng ra là bằng chứng luật "hết hạn bán → CLOSED" hoạt động chính xác, chỉ là dữ liệu demo cần chỉnh lại ngày cho đúng kịch bản minh hoạ.
+- Ảnh Before/After: `docs/tour-availability/*.png` — lưới 6 card desktop (2 ảnh, đủ 5 trạng thái), mobile (2 ảnh, không overflow, badge không vỡ dòng, không che CTA sticky bar).
+- `aria-label` xác nhận đúng cho cả 6 badge qua DOM thật (`role="status"`).
+
+### Không đụng tới
+`components/site/tour-card.tsx`, `lib/site-data.ts`, `components/site/tour-detail/*`, `lib/tours/tour-detail-content.ts`, `lib/ai/match-engine.ts`, `types/cms.ts`'s `AvailabilityStatus`, CMS Admin, Database production, Booking Engine, Payment, CRM.
+
+### Còn tồn đọng (mới)
+15. CTA LIMITED (`?departure={id}`) và SOLD_OUT (`#departures`) trỏ tới các phần Tour Detail hiện chưa tồn tại (query param chưa được đọc, anchor chưa có section tương ứng) — vô hại ở hiện tại (không lỗi, chỉ chưa có hành vi đặc biệt), cần Tour Detail sprint sau tiếp nhận.
+16. Ngưỡng LIMITED (`limitedSeatsThreshold: 5`) đang nằm trong code (`DEFAULT_AVAILABILITY_CONFIG`) vì chưa có hệ thống settings — cần chuyển thành cấu hình CMS/admin khi có.

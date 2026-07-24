@@ -1,16 +1,21 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { JourneyCard } from '@/components/homepage/journey-card'
+import { buildTourCardViewModel } from '@/lib/tours/availability'
 import { cn } from '@/lib/utils'
 import type { FeaturedJourneysContent } from '@/types/homepage'
 
 export function FeaturedJourneysGrid({ content }: { content: FeaturedJourneysContent }) {
   const [filter, setFilter] = useState<(typeof content.filters)[number]['id']>('all')
 
-  const filtered =
-    filter === 'all' ? content.journeys : content.journeys.filter((j) => j.category === filter)
+  // Computed once per `content.journeys` identity, not per render — `now`
+  // is read a single time here rather than inside JourneyCard, so every
+  // card in the grid resolves availability against the same instant.
+  const viewModels = useMemo(() => content.journeys.map((journey) => buildTourCardViewModel(journey)), [content.journeys])
+
+  const filtered = filter === 'all' ? viewModels : viewModels.filter((vm) => vm.tour.category === filter)
 
   return (
     <div>
@@ -43,8 +48,8 @@ export function FeaturedJourneysGrid({ content }: { content: FeaturedJourneysCon
         </div>
       ) : (
         <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((journey) => (
-            <JourneyCard key={journey.id} journey={journey} />
+          {filtered.map((viewModel) => (
+            <JourneyCard key={viewModel.tour.id} viewModel={viewModel} />
           ))}
         </div>
       )}

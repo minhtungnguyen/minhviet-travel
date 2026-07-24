@@ -1,11 +1,5 @@
-import type {
-  AvailabilityStatus,
-  CmsImage,
-  CmsLink,
-  ConfidenceLevel,
-  PriceType,
-  VerifiedStat,
-} from '@/types/cms'
+import type { CmsImage, CmsLink, ConfidenceLevel, PriceType, VerifiedStat } from '@/types/cms'
+import type { TourDeparture } from '@/types/tour-availability'
 
 export interface HeroContent {
   eyebrow: string
@@ -95,12 +89,18 @@ export interface JourneyContent {
   country: string
   category: 'asia' | 'europe' | 'domestic'
   duration: string
-  departure: string
-  nextDeparture: string
   priceFrom: number
   priceType: PriceType
   currency: 'VND'
-  availability: AvailabilityStatus
+  /**
+   * Availability/departure-point/next-date all now live per departure
+   * (see `types/tour-availability.ts`), not on the tour — a tour can
+   * have departures in every status at once. `lib/tours/availability.ts`'s
+   * `buildTourCardViewModel()` resolves which one the card actually
+   * shows. Can be empty (a tour with no scheduled departures yet) —
+   * the resolver handles that as an honest CHECKING state, not an error.
+   */
+  departures: TourDeparture[]
   reviewScore?: number
   reviewCount?: number
   image: CmsImage

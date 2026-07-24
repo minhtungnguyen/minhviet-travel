@@ -18,7 +18,7 @@ export const homepageContentSeed: HomepageContent = {
     headlineAccent: 'doanh nghiệp',
     subhead:
       'Giải pháp du lịch, sự kiện và công tác trọn gói dành cho doanh nghiệp, tổ chức và khách hàng cao cấp — thẩm định bởi chuyên gia, hỗ trợ bởi AI.',
-    primaryCta: { label: 'Thiết kế chương trình riêng', href: '/contact?intent=corporate' },
+    primaryCta: { label: 'Thiết kế chương trình riêng', href: '/tour-thiet-ke' },
     secondaryCta: { label: 'Khám phá tour có sẵn', href: '#tour-ghep-quoc-te' },
     backgroundImage: {
       src: '/editorial-hero.webp',

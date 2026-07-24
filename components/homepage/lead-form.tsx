@@ -12,10 +12,21 @@ export function LeadForm({
   intent,
   serviceOptions,
   aiContext,
+  source,
+  landingIntent,
+  serviceType,
+  defaultServiceInterest,
 }: {
   intent: 'corporate' | 'individual'
   serviceOptions: { value: string; label: string }[]
   aiContext?: string
+  /** CRM origin tag, e.g. "CUSTOM_TOUR_LANDING". Defaults server-side to "homepage" when omitted. */
+  source?: string
+  /** CRM routing tag distinct from `intent` (which is the corporate/individual panel choice), e.g. "CUSTOM_DESIGN". */
+  landingIntent?: string
+  serviceType?: string
+  /** Overrides the "Nhu cầu quan tâm" select's default selection — must match one of `serviceOptions`' values. */
+  defaultServiceInterest?: string
 }) {
   const { state, formAction, isPending } = useLeadForm()
 
@@ -37,6 +48,9 @@ export function LeadForm({
     <form action={formAction} className="flex flex-col gap-4 rounded-2xl bg-card p-6 shadow-soft-lg sm:p-8">
       <input type="hidden" name="intent" value={intent} />
       {aiContext && <input type="hidden" name="aiContext" value={aiContext} />}
+      {source && <input type="hidden" name="source" value={source} />}
+      {landingIntent && <input type="hidden" name="landingIntent" value={landingIntent} />}
+      {serviceType && <input type="hidden" name="serviceType" value={serviceType} />}
 
       {state.status === 'error' && (
         <div role="alert" className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
@@ -68,7 +82,7 @@ export function LeadForm({
 
       <Field name="serviceInterest">
         <FieldLabel>Nhu cầu quan tâm</FieldLabel>
-        <Select name="serviceInterest" defaultValue={serviceOptions[0]?.value ?? null}>
+        <Select name="serviceInterest" defaultValue={defaultServiceInterest ?? serviceOptions[0]?.value ?? null}>
           <SelectTrigger aria-label="Nhu cầu quan tâm">
             <SelectValue />
           </SelectTrigger>

@@ -37,12 +37,18 @@ const TAB_TRIGGER_CLASS =
 export function ConsultationTabs({
   content,
   serviceOptions,
+  defaultTab = 'organization',
+  prefill,
 }: {
   content: FinalCtaContent
   serviceOptions: { value: string; label: string }[]
+  /** Which tab opens by default — a landing page whose audience is exclusively organizations can still show both tabs but start on "organization". */
+  defaultTab?: 'organization' | 'individual'
+  /** CRM-routing metadata forwarded as hidden fields on whichever panel the visitor submits — see `LeadForm`. */
+  prefill?: { source?: string; landingIntent?: string; serviceType?: string; defaultServiceInterest?: string }
 }) {
   return (
-    <Tabs defaultValue="organization" className="flex flex-col gap-5">
+    <Tabs defaultValue={defaultTab} className="flex flex-col gap-5">
       <TabsList
         className="inline-flex w-full max-w-full gap-1 overflow-x-auto rounded-full bg-white/10 p-1 [scrollbar-width:none] sm:w-fit [&::-webkit-scrollbar]:hidden"
         aria-label="Chọn loại yêu cầu tư vấn"
@@ -61,6 +67,7 @@ export function ConsultationTabs({
           serviceOptions={serviceOptions}
           phone={content.phone}
           zaloHref={content.zaloHref}
+          prefill={prefill}
         />
       </TabsPanel>
       <TabsPanel value="individual" keepMounted>
@@ -69,6 +76,7 @@ export function ConsultationTabs({
           serviceOptions={serviceOptions}
           phone={content.phone}
           zaloHref={content.zaloHref}
+          prefill={prefill}
         />
       </TabsPanel>
     </Tabs>

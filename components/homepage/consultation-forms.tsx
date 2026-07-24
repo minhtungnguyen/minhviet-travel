@@ -12,18 +12,27 @@ type ConsultationCopy = FinalCtaContent['corporate'] | FinalCtaContent['individu
  * Submit logic is untouched: both still go through the existing
  * `LeadForm` -> `useLeadForm` -> `submitLeadAction` path.
  */
+type FormPrefill = {
+  source?: string
+  landingIntent?: string
+  serviceType?: string
+  defaultServiceInterest?: string
+}
+
 function ConsultationFormPanel({
   copy,
   intent,
   serviceOptions,
   phone,
   zaloHref,
+  prefill,
 }: {
   copy: ConsultationCopy
   intent: 'corporate' | 'individual'
   serviceOptions: { value: string; label: string }[]
   phone: string
   zaloHref: string
+  prefill?: FormPrefill
 }) {
   return (
     <div className="flex flex-col gap-4">
@@ -35,7 +44,7 @@ function ConsultationFormPanel({
         <p className="mt-2 max-w-md text-pretty text-sm leading-relaxed text-white/78">{copy.description}</p>
       </div>
 
-      <LeadForm intent={intent} serviceOptions={serviceOptions} />
+      <LeadForm intent={intent} serviceOptions={serviceOptions} {...prefill} />
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm font-semibold text-white/85">
         <a href={`tel:${phone.replace(/\s/g, '')}`} className="flex items-center gap-2 hover:text-mv-sky-cyan">
@@ -55,11 +64,13 @@ export function OrganizationConsultationForm({
   serviceOptions,
   phone,
   zaloHref,
+  prefill,
 }: {
   content: FinalCtaContent
   serviceOptions: { value: string; label: string }[]
   phone: string
   zaloHref: string
+  prefill?: FormPrefill
 }) {
   return (
     <ConsultationFormPanel
@@ -68,6 +79,7 @@ export function OrganizationConsultationForm({
       serviceOptions={serviceOptions}
       phone={phone}
       zaloHref={zaloHref}
+      prefill={prefill}
     />
   )
 }
@@ -77,11 +89,13 @@ export function IndividualConsultationForm({
   serviceOptions,
   phone,
   zaloHref,
+  prefill,
 }: {
   content: FinalCtaContent
   serviceOptions: { value: string; label: string }[]
   phone: string
   zaloHref: string
+  prefill?: FormPrefill
 }) {
   return (
     <ConsultationFormPanel
@@ -90,6 +104,7 @@ export function IndividualConsultationForm({
       serviceOptions={serviceOptions}
       phone={phone}
       zaloHref={zaloHref}
+      prefill={prefill}
     />
   )
 }

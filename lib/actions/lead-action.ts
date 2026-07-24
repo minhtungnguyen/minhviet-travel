@@ -46,7 +46,13 @@ export async function submitLeadAction(
 
   const payload = {
     ...parsed.data,
-    source: 'homepage',
+    source: (formData.get('source') as string) || 'homepage',
+    // Optional CRM-routing tags a landing page can attach without touching
+    // `intent` (which already means "corporate vs individual" panel choice)
+    // — e.g. the /tour-thiet-ke page sends landingIntent=CUSTOM_DESIGN,
+    // serviceType=GROUP_TOUR so a lead can be triaged by campaign origin.
+    landingIntent: (formData.get('landingIntent') as string) || undefined,
+    serviceType: (formData.get('serviceType') as string) || undefined,
     submittedAt: new Date().toISOString(),
   }
 

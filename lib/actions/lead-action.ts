@@ -53,6 +53,14 @@ export async function submitLeadAction(
     // serviceType=GROUP_TOUR so a lead can be triaged by campaign origin.
     landingIntent: (formData.get('landingIntent') as string) || undefined,
     serviceType: (formData.get('serviceType') as string) || undefined,
+    audienceType: (formData.get('audienceType') as string) || undefined,
+    // MICE landing's optional "Thông tin bổ sung" fields — absent (and
+    // omitted from the payload) on every other form that doesn't render
+    // them.
+    eventGuestCount: (formData.get('eventGuestCount') as string) || undefined,
+    eventDate: (formData.get('eventDate') as string) || undefined,
+    eventLocation: (formData.get('eventLocation') as string) || undefined,
+    eventBudget: (formData.get('eventBudget') as string) || undefined,
     submittedAt: new Date().toISOString(),
   }
 

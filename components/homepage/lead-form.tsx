@@ -15,7 +15,9 @@ export function LeadForm({
   source,
   landingIntent,
   serviceType,
+  audienceType,
   defaultServiceInterest,
+  showEventDetails = false,
 }: {
   intent: 'corporate' | 'individual'
   serviceOptions: { value: string; label: string }[]
@@ -25,8 +27,17 @@ export function LeadForm({
   /** CRM routing tag distinct from `intent` (which is the corporate/individual panel choice), e.g. "CUSTOM_DESIGN". */
   landingIntent?: string
   serviceType?: string
+  /** e.g. "ORGANIZATION" — a coarser CRM segment than `intent`, set by a landing page. */
+  audienceType?: string
   /** Overrides the "Nhu cầu quan tâm" select's default selection — must match one of `serviceOptions`' values. */
   defaultServiceInterest?: string
+  /**
+   * Renders 4 extra optional inputs (guest count / date / location /
+   * budget) under a "Thông tin bổ sung" group — off by default so the
+   * Homepage and `/tour-thiet-ke` forms are unaffected; the `/mice`
+   * landing page turns it on for a richer V1 form per its brief §XVII.
+   */
+  showEventDetails?: boolean
 }) {
   const { state, formAction, isPending } = useLeadForm()
 
@@ -51,6 +62,7 @@ export function LeadForm({
       {source && <input type="hidden" name="source" value={source} />}
       {landingIntent && <input type="hidden" name="landingIntent" value={landingIntent} />}
       {serviceType && <input type="hidden" name="serviceType" value={serviceType} />}
+      {audienceType && <input type="hidden" name="audienceType" value={audienceType} />}
 
       {state.status === 'error' && (
         <div role="alert" className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
@@ -96,8 +108,34 @@ export function LeadForm({
         </Select>
       </Field>
 
+      {showEventDetails && (
+        <div className="flex flex-col gap-4 border-t border-border pt-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Thông tin bổ sung (không bắt buộc)
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field name="eventGuestCount">
+              <FieldLabel>Số lượng khách dự kiến</FieldLabel>
+              <Input name="eventGuestCount" placeholder="Ví dụ: 150 khách" />
+            </Field>
+            <Field name="eventDate">
+              <FieldLabel>Thời gian dự kiến</FieldLabel>
+              <Input name="eventDate" placeholder="Ví dụ: Quý 3/2026" />
+            </Field>
+            <Field name="eventLocation">
+              <FieldLabel>Địa điểm dự kiến</FieldLabel>
+              <Input name="eventLocation" placeholder="Ví dụ: Hạ Long, Đà Nẵng..." />
+            </Field>
+            <Field name="eventBudget">
+              <FieldLabel>Ngân sách dự kiến</FieldLabel>
+              <Input name="eventBudget" placeholder="Ví dụ: 500 triệu" />
+            </Field>
+          </div>
+        </div>
+      )}
+
       <Field name="message">
-        <FieldLabel>Nội dung yêu cầu</FieldLabel>
+        <FieldLabel>{showEventDetails ? 'Nội dung yêu cầu / Mục tiêu chương trình' : 'Nội dung yêu cầu'}</FieldLabel>
         <Textarea name="message" rows={4} />
       </Field>
 

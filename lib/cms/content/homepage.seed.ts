@@ -139,7 +139,7 @@ export const homepageContentSeed: HomepageContent = {
       width: 1600,
       height: 1200,
     },
-    cta: { label: 'Yêu cầu thiết kế chương trình', href: '/contact?intent=corporate' },
+    cta: { label: 'Yêu cầu thiết kế chương trình', href: '/mice' },
   },
   aiAdvisor: {
     eyebrow: 'Công nghệ & con người',

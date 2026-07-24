@@ -45,7 +45,14 @@ export function ConsultationTabs({
   /** Which tab opens by default — a landing page whose audience is exclusively organizations can still show both tabs but start on "organization". */
   defaultTab?: 'organization' | 'individual'
   /** CRM-routing metadata forwarded as hidden fields on whichever panel the visitor submits — see `LeadForm`. */
-  prefill?: { source?: string; landingIntent?: string; serviceType?: string; defaultServiceInterest?: string }
+  prefill?: {
+    source?: string
+    landingIntent?: string
+    serviceType?: string
+    audienceType?: string
+    defaultServiceInterest?: string
+    showEventDetails?: boolean
+  }
 }) {
   return (
     <Tabs defaultValue={defaultTab} className="flex flex-col gap-5">

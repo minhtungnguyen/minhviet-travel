@@ -16,7 +16,9 @@ type FormPrefill = {
   source?: string
   landingIntent?: string
   serviceType?: string
+  audienceType?: string
   defaultServiceInterest?: string
+  showEventDetails?: boolean
 }
 
 function ConsultationFormPanel({

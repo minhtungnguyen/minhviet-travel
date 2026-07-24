@@ -12,7 +12,6 @@ import {
   Sparkles,
   Clock,
   Globe,
-  Headphones,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -24,21 +23,20 @@ export type NavColumn = {
 export const megaMenu: Record<string, NavColumn[]> = {
   Tours: [
     {
-      heading: 'Loại hình tour',
+      heading: 'Tour thiết kế riêng',
       links: [
-        { label: 'Tour đoàn', href: '/tours?type=group', desc: 'Tổ chức riêng cho doanh nghiệp' },
-        { label: 'Tour ghép', href: '/tours?type=join', desc: 'Khởi hành hằng tuần' },
-        { label: 'Tour quốc tế', href: '/tours?type=intl', desc: 'Châu Á, Âu, Úc, Mỹ' },
-        { label: 'Tour nội địa', href: '/tours?type=domestic', desc: 'Khắp ba miền Việt Nam' },
+        { label: 'Tour Thiết kế trọn gói', href: '/tours?type=custom', desc: 'Thiết kế theo yêu cầu riêng' },
+        { label: 'Tour Doanh nghiệp', href: '/tours?type=corporate', desc: 'Công tác, khảo sát, đối tác' },
+        { label: 'Tour Gia đình', href: '/tours?type=family', desc: 'Hành trình cho cả gia đình' },
+        { label: 'Tour MICE', href: '/mice', desc: 'Hội nghị, sự kiện doanh nghiệp' },
       ],
     },
     {
-      heading: 'Điểm đến nổi bật',
+      heading: 'Tour ghép theo lịch',
       links: [
-        { label: 'Nhật Bản', href: '/destinations/japan' },
-        { label: 'Hàn Quốc', href: '/destinations/korea' },
-        { label: 'Châu Âu', href: '/destinations/europe' },
-        { label: 'Đông Nam Á', href: '/destinations/sea' },
+        { label: 'Tour Ghép Quốc tế', href: '/tours?type=intl', desc: 'Khởi hành định kỳ, ghép đoàn' },
+        { label: 'Tour Ghép Trong nước', href: '/tours?type=domestic', desc: 'Khắp ba miền Việt Nam' },
+        { label: 'Tour Team Building', href: '/mice#teambuilding', desc: 'Gắn kết đội ngũ' },
       ],
     },
   ],
@@ -153,8 +151,6 @@ export type Tour = {
   category: 'Châu Á' | 'Châu Âu' | 'Nội địa'
   duration: string
   price: string
-  originalPrice?: string
-  discount?: number
   departure: string
   date: string
   image: string
@@ -171,8 +167,6 @@ export const tours: Tour[] = [
     category: 'Châu Á',
     duration: '5N4Đ',
     price: '27.900.000₫',
-    originalPrice: '29.900.000₫',
-    discount: 7,
     departure: 'Hà Nội',
     date: '25/07/2026',
     image: '/tour-tokyo.webp',
@@ -187,8 +181,6 @@ export const tours: Tour[] = [
     category: 'Châu Á',
     duration: '5N4Đ',
     price: '16.900.000₫',
-    originalPrice: '18.500.000₫',
-    discount: 9,
     departure: 'Hà Nội',
     date: '28/07/2026',
     image: '/tour-korea.webp',
@@ -202,8 +194,6 @@ export const tours: Tour[] = [
     category: 'Châu Âu',
     duration: '9N8Đ',
     price: '64.900.000₫',
-    originalPrice: '69.900.000₫',
-    discount: 7,
     departure: 'TP. Hồ Chí Minh',
     date: '02/08/2026',
     image: '/tour-europe.webp',
@@ -218,8 +208,6 @@ export const tours: Tour[] = [
     category: 'Châu Á',
     duration: '4N3Đ',
     price: '13.900.000₫',
-    originalPrice: '15.900.000₫',
-    discount: 12,
     departure: 'TP. Hồ Chí Minh',
     date: '30/07/2026',
     image: '/tour-bali.webp',
@@ -233,8 +221,6 @@ export const tours: Tour[] = [
     category: 'Nội địa',
     duration: '3N2Đ',
     price: '4.990.000₫',
-    originalPrice: '6.390.000₫',
-    discount: 22,
     departure: 'TP. Hồ Chí Minh',
     date: '21/07/2026',
     image: '/dest-vietnam.webp',
@@ -249,8 +235,6 @@ export const tours: Tour[] = [
     category: 'Châu Á',
     duration: '4N3Đ',
     price: '12.900.000₫',
-    originalPrice: '14.500.000₫',
-    discount: 11,
     departure: 'Hà Nội',
     date: '26/07/2026',
     image: '/dest-singapore.webp',
@@ -260,80 +244,6 @@ export const tours: Tour[] = [
 ]
 
 export const tourFilters = ['Tất cả', 'Châu Á', 'Châu Âu', 'Nội địa'] as const
-
-export type FlashDeal = {
-  id: string
-  title: string
-  code: string
-  departure: string
-  date: string
-  duration: string
-  price: string
-  originalPrice: string
-  discount: number
-  image: string
-  seats: string
-  endsInHours: number
-}
-
-export const flashDeals: FlashDeal[] = [
-  {
-    id: 'fd-phuquoc',
-    title: 'Siêu Sale Phú Quốc: Nam Đảo — Hòn Thơm — Grand World',
-    code: 'MV-PQ-2107',
-    departure: 'TP. Hồ Chí Minh',
-    date: '21/07/2026',
-    duration: '3N2Đ',
-    price: '4.990.000₫',
-    originalPrice: '6.390.000₫',
-    discount: 22,
-    image: '/dest-vietnam.webp',
-    seats: 'Còn 9 chỗ',
-    endsInHours: 7,
-  },
-  {
-    id: 'fd-bali',
-    title: 'Bali nghỉ dưỡng 5 sao — Ưu đãi cuối ngày',
-    code: 'MV-BALI-3007',
-    departure: 'TP. Hồ Chí Minh',
-    date: '30/07/2026',
-    duration: '4N3Đ',
-    price: '13.900.000₫',
-    originalPrice: '15.900.000₫',
-    discount: 12,
-    image: '/tour-bali.webp',
-    seats: 'Còn 4 chỗ',
-    endsInHours: 15,
-  },
-  {
-    id: 'fd-cruise',
-    title: 'Du thuyền Genting Dream — Trải nghiệm nghỉ dưỡng',
-    code: 'MV-CR-2707',
-    departure: 'TP. Hồ Chí Minh',
-    date: '27/07/2026',
-    duration: '5N4Đ',
-    price: '28.900.000₫',
-    originalPrice: '29.900.000₫',
-    discount: 3,
-    image: '/dest-singapore.webp',
-    seats: 'Còn 2 chỗ',
-    endsInHours: 31,
-  },
-  {
-    id: 'fd-tayninh',
-    title: 'Tây Ninh: Chinh phục Nóc Nhà Nam Bộ — Núi Bà Đen',
-    code: 'MV-TN-1907',
-    departure: 'TP. Hồ Chí Minh',
-    date: '19/07/2026',
-    duration: 'Trong ngày',
-    price: '1.190.000₫',
-    originalPrice: '1.390.000₫',
-    discount: 14,
-    image: '/dest-thailand.webp',
-    seats: 'Còn 5 chỗ',
-    endsInHours: 5,
-  },
-]
 
 export type SeoGroup = { heading: string; links: string[] }
 
@@ -378,23 +288,19 @@ export const destinations: Destination[] = [
   { name: 'Việt Nam', tagline: 'Di sản & thiên nhiên', tours: '52 tour', image: '/dest-vietnam.webp' },
 ]
 
-export type Stat = { value: number; suffix: string; label: string; icon: LucideIcon }
-
-export const stats: Stat[] = [
-  { value: 15, suffix: '+', label: 'Năm kinh nghiệm', icon: Clock },
-  { value: 5000, suffix: '+', label: 'Doanh nghiệp tin tưởng', icon: Briefcase },
-  { value: 200, suffix: 'K+', label: 'Khách hàng hài lòng', icon: Users },
-  { value: 1000, suffix: '+', label: 'Đối tác toàn cầu', icon: Globe },
-]
-
-export type WhyStat = { value: string; label: string; icon: LucideIcon }
+/**
+ * Every value here must match the sourced figures already verified for
+ * the homepage trust strip (`lib/cms/content/homepage.seed.ts`) — never
+ * a rounder or larger number invented for this page. See audit finding
+ * 3.3 (fabricated metrics with no source/asOf).
+ */
+export type WhyStat = { value: number; suffix: string; label: string; icon: LucideIcon; source: string; asOf: string }
 
 export const whyStats: WhyStat[] = [
-  { value: '15+', label: 'Năm kinh nghiệm', icon: Clock },
-  { value: '5000+', label: 'Doanh nghiệp tin tưởng', icon: Briefcase },
-  { value: '200K+', label: 'Khách hàng hài lòng', icon: Users },
-  { value: '1000+', label: 'Đối tác toàn cầu', icon: Globe },
-  { value: '24/7', label: 'Hỗ trợ toàn diện', icon: Headphones },
+  { value: 15, suffix: '+', label: 'Năm kinh nghiệm', icon: Clock, source: 'Hồ sơ năng lực Minh Việt Travel', asOf: '2026' },
+  { value: 5000, suffix: '+', label: 'Doanh nghiệp tin tưởng', icon: Briefcase, source: 'CRM nội bộ Minh Việt, tổng lũy kế', asOf: '2026-Q2' },
+  { value: 200, suffix: 'K+', label: 'Khách hàng hài lòng', icon: Users, source: 'Báo cáo vận hành nội bộ', asOf: '2026-Q2' },
+  { value: 60, suffix: '+', label: 'Đối tác toàn cầu', icon: Globe, source: 'Danh mục đối tác Minh Việt', asOf: '2026-Q2' },
 ]
 
 export type Experience = {

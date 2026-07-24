@@ -9,12 +9,23 @@ import { Logo } from '@/components/mv/logo'
 import { MVButton } from '@/components/mv/mv-button'
 import { LanguageSwitcher } from '@/components/site/language-switcher'
 
+/**
+ * `promo: true` drives the Offer Red treatment (`--mv-offer-red`) in both
+ * the desktop nav and the mobile drawer below — TOUR gets it for
+ * emphasis alongside its existing "Tours" mega menu (see
+ * lib/site-data.ts), Ưu đãi keeps it as before. Everything else renders
+ * with the default Deep Navy/Journey Blue treatment, including the new
+ * Combo item, which intentionally has no `menu` (no dropdown content was
+ * specified for it — a plain link styled like every other non-dropdown
+ * item, same brand-blue hover as Sự kiện & MICE's own hover state).
+ */
 const navItems = [
-  { label: 'Tour Thiết Kế', href: '/tours', menu: 'Tours' },
+  { label: 'Tour', href: '/tours', menu: 'Tours', promo: true },
   { label: 'Sự kiện & MICE', href: '/mice', menu: 'Doanh nghiệp & MICE' },
   { label: 'Dịch vụ', href: '/services', menu: 'Dịch vụ' },
   { label: 'Khách sạn', href: '/hotels' },
   { label: 'Du thuyền', href: '/cruises' },
+  { label: 'Combo', href: '/combo' },
   { label: 'Vé máy bay', href: '/flights' },
   { label: 'Vé vui chơi', href: '/tickets' },
   { label: 'Visa', href: '/visa' },
@@ -128,28 +139,33 @@ export function SiteHeader() {
       <div className="hidden lg:block" onMouseLeave={() => setOpenMenu(null)}>
         <div className="container-mv flex items-center justify-between">
           <nav className="flex items-center">
-            {navItems.map((item) => (
-              <div
-                key={item.label}
-                className="relative"
-                onMouseEnter={() => setOpenMenu(item.menu ?? null)}
-              >
-                <Link
-                  href={item.href}
-                  className={cn(
-                    'flex items-center gap-1 px-3.5 py-2.5 text-[12.5px] font-semibold uppercase tracking-wide transition-colors',
-                    item.promo
-                      ? 'text-mv-offer-red hover:text-mv-offer-red/80'
-                      : item.menu && item.menu === openMenu
-                        ? 'text-mv-journey-blue'
-                        : 'text-foreground/80 hover:text-mv-journey-blue',
-                  )}
+            {navItems.map((item) => {
+              const isOpen = Boolean(item.menu && item.menu === openMenu)
+              return (
+                <div
+                  key={item.label}
+                  className="relative"
+                  onMouseEnter={() => setOpenMenu(item.menu ?? null)}
                 >
-                  {item.label}
-                  {item.menu && <ChevronDown className="size-3.5" />}
-                </Link>
-              </div>
-            ))}
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      'flex items-center gap-1 px-3.5 py-2.5 text-[12.5px] font-semibold uppercase tracking-wide transition-colors',
+                      item.promo
+                        ? isOpen
+                          ? 'text-mv-offer-red/80'
+                          : 'text-mv-offer-red hover:text-mv-offer-red/80'
+                        : isOpen
+                          ? 'text-mv-journey-blue'
+                          : 'text-foreground/80 hover:text-mv-journey-blue',
+                    )}
+                  >
+                    {item.label}
+                    {item.menu && <ChevronDown className="size-3.5" />}
+                  </Link>
+                </div>
+              )
+            })}
           </nav>
           <Link
             href="/tours"
@@ -231,7 +247,7 @@ export function SiteHeader() {
                   href={item.href}
                   className={cn(
                     'block rounded-lg px-3 py-3 text-base font-medium transition-colors hover:bg-secondary',
-                    item.promo ? 'text-destructive hover:text-destructive' : 'text-foreground hover:text-accent',
+                    item.promo ? 'text-mv-offer-red hover:text-mv-offer-red/80' : 'text-foreground hover:text-accent',
                   )}
                   onClick={() => setMobileOpen(false)}
                 >

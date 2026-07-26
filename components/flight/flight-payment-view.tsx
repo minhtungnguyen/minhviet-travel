@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { loadBookingDraft } from '@/lib/flight/flight-booking-draft'
+import { useBookingDraft } from '@/lib/flight/use-booking-draft'
 import { resolveBookingContext } from '@/lib/flight/flight-booking-context'
 import { FlightPaymentBookingNotFound } from '@/components/flight/flight-payment-booking-not-found'
 import { FlightPaymentBookingSummary } from '@/components/flight/flight-payment-booking-summary'
@@ -14,33 +14,24 @@ import { FlightPaymentPendingPanel } from '@/components/flight/flight-payment-pe
 import { FlightPaymentLoadingSkeleton } from '@/components/flight/flight-payment-loading-skeleton'
 import { FlightSupportBox } from '@/components/flight/flight-support-box'
 import { MVButton } from '@/components/mv/mv-button'
-import type { FlightBookingDraft, PaymentMethod } from '@/types/flight'
+import type { PaymentMethod } from '@/types/flight'
 
 const PENDING_WINDOW_MINUTES = 5
 
 /**
  * Payment page (EPIC-005) — `/ve-may-bay/thanh-toan/[bookingId]`. Reads
  * the draft from `sessionStorage` (client-only, see
- * `flight-booking-draft.ts`), re-derives flight/fare/price via
- * `resolveBookingContext`, then walks Method Selection → Pending
- * entirely client-side (no server round-trip, no real gateway).
- *
- * The draft read is deferred to a post-mount effect (rather than a
- * `useState` lazy initializer) so the server render and the first
- * client render both show the loading skeleton — reading
- * `sessionStorage` during render would make that first client render
- * diverge from the server's (which has no `sessionStorage`) and throw
- * a hydration mismatch.
+ * `flight-booking-draft.ts`) via `useBookingDraft` — see that hook's doc
+ * comment for why a hydration-safe read matters here — re-derives
+ * flight/fare/price via `resolveBookingContext`, then walks Method
+ * Selection → Pending entirely client-side (no server round-trip, no
+ * real gateway).
  */
 export function FlightPaymentView({ bookingId }: { bookingId: string }) {
   const router = useRouter()
-  const [draft, setDraft] = useState<FlightBookingDraft | null | undefined>(undefined)
+  const draft = useBookingDraft(bookingId)
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null)
   const [expiresAt, setExpiresAt] = useState<string | null>(null)
-
-  useEffect(() => {
-    setDraft(loadBookingDraft(bookingId))
-  }, [bookingId])
 
   if (draft === undefined) {
     return <FlightPaymentLoadingSkeleton />

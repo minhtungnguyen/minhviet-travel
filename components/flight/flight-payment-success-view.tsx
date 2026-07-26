@@ -1,27 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { CheckCircle2 } from 'lucide-react'
-import { loadBookingDraft } from '@/lib/flight/flight-booking-draft'
+import { useBookingDraft } from '@/lib/flight/use-booking-draft'
 import { resolveBookingContext } from '@/lib/flight/flight-booking-context'
 import { FlightPaymentBookingNotFound } from '@/components/flight/flight-payment-booking-not-found'
 import { FlightPaymentBookingSummary } from '@/components/flight/flight-payment-booking-summary'
 import { FlightPaymentActionButtons } from '@/components/flight/flight-payment-action-buttons'
 import { FlightPaymentLoadingSkeleton } from '@/components/flight/flight-payment-loading-skeleton'
-import type { FlightBookingDraft } from '@/types/flight'
 
 /**
  * Success Page (EPIC-005 §4) — `/ve-may-bay/thanh-cong/[bookingId]`. The
- * draft read is deferred to a post-mount effect — see the doc comment on
- * `FlightPaymentView` for why reading `sessionStorage` during render
- * would throw a hydration mismatch.
+ * draft read goes through `useBookingDraft` — see that hook's doc
+ * comment for why a hydration-safe read matters here.
  */
 export function FlightPaymentSuccessView({ bookingId }: { bookingId: string }) {
-  const [draft, setDraft] = useState<FlightBookingDraft | null | undefined>(undefined)
-
-  useEffect(() => {
-    setDraft(loadBookingDraft(bookingId))
-  }, [bookingId])
+  const draft = useBookingDraft(bookingId)
 
   if (draft === undefined) {
     return <FlightPaymentLoadingSkeleton />

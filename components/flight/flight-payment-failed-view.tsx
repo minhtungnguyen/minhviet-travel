@@ -1,14 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { XCircle } from 'lucide-react'
-import { loadBookingDraft } from '@/lib/flight/flight-booking-draft'
+import { useBookingDraft } from '@/lib/flight/use-booking-draft'
 import { resolveBookingContext } from '@/lib/flight/flight-booking-context'
 import { FlightPaymentBookingNotFound } from '@/components/flight/flight-payment-booking-not-found'
 import { FlightPaymentBookingSummary } from '@/components/flight/flight-payment-booking-summary'
 import { FlightPaymentActionButtons } from '@/components/flight/flight-payment-action-buttons'
 import { FlightPaymentLoadingSkeleton } from '@/components/flight/flight-payment-loading-skeleton'
-import type { FlightBookingDraft, PaymentStatus } from '@/types/flight'
+import type { PaymentStatus } from '@/types/flight'
 
 const REASON_LABELS: Record<string, string> = {
   expired: 'Đã hết thời gian giữ chỗ trước khi nhận được xác nhận thanh toán.',
@@ -21,17 +20,12 @@ const DEFAULT_REASON = 'Đã có lỗi xảy ra trong quá trình xử lý thanh
  * Failed Page (EPIC-005 §4) — `/ve-may-bay/that-bai/[bookingId]`. `reason`
  * also doubles as which mock outcome to display (`expired` vs a
  * declined/failed transaction) — both funnel here per PRD's route list
- * (only 3 routes for 4 logical states). The draft read is deferred to a
- * post-mount effect — see the doc comment on `FlightPaymentView` for why
- * reading `sessionStorage` during render would throw a hydration
- * mismatch.
+ * (only 3 routes for 4 logical states). The draft read goes through
+ * `useBookingDraft` — see that hook's doc comment for why a
+ * hydration-safe read matters here.
  */
 export function FlightPaymentFailedView({ bookingId, reason }: { bookingId: string; reason?: string }) {
-  const [draft, setDraft] = useState<FlightBookingDraft | null | undefined>(undefined)
-
-  useEffect(() => {
-    setDraft(loadBookingDraft(bookingId))
-  }, [bookingId])
+  const draft = useBookingDraft(bookingId)
 
   if (draft === undefined) {
     return <FlightPaymentLoadingSkeleton />

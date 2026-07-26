@@ -9,8 +9,9 @@ import type { FlightSearchQuery } from '@/types/flight'
  * Booking Flow (EPIC-004, `/ve-may-bay/dat-ve/[flightId]`) via
  * `buildFlightBookingPath` — the "coming soon" inline-confirmation
  * treatment this component used before EPIC-004 existed has moved
- * forward to `FlightBookingSuccess` (Booking's own CTA), the same way
- * `FlightCard`'s "Chọn" stopped being a dead end once Flight Detail shipped.
+ * forward again to Booking's own submit (now a real navigation into
+ * Payment, EPIC-005), the same way `FlightCard`'s "Chọn" stopped being a
+ * dead end once Flight Detail shipped.
  */
 export function FlightBookingCTA({
   flightId,

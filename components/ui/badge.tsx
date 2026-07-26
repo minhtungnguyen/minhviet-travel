@@ -13,6 +13,7 @@ const badgeVariants = cva(
         success: 'bg-success/10 text-success',
         warning: 'bg-warning/15 text-warning',
         info: 'bg-royal/10 text-royal',
+        destructive: 'bg-destructive/10 text-destructive',
       },
     },
     defaultVariants: { variant: 'neutral' },

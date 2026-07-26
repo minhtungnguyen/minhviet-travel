@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { FlightBookingSummaryCard } from '@/components/flight/flight-booking-summary-card'
 import { FlightBookingContactForm } from '@/components/flight/flight-booking-contact-form'
 import { FlightBookingPassengerList } from '@/components/flight/flight-booking-passenger-list'
@@ -8,10 +9,10 @@ import { FlightBookingExtraServiceCard } from '@/components/flight/flight-bookin
 import { FlightBookingPriceSummarySection } from '@/components/flight/flight-booking-price-summary'
 import { FlightBookingTermsCheckbox } from '@/components/flight/flight-booking-terms-checkbox'
 import { FlightBookingActions } from '@/components/flight/flight-booking-actions'
-import { FlightBookingSuccess } from '@/components/flight/flight-booking-success'
 import { bookingContactSchema, createPassengerSchema, bookingTermsSchema } from '@/lib/flight/flight-booking-schema'
 import { computeBookingPriceSummary } from '@/lib/flight/flight-booking-price'
 import { flightExtraServices } from '@/lib/flight/flight-booking-data'
+import { generateBookingId, saveBookingDraft } from '@/lib/flight/flight-booking-draft'
 import type { BookingContactInfo, BookingPassenger, BookingPassengerType, FareOption, FlightDetail } from '@/types/flight'
 
 function buildInitialPassengers(query: FlightDetail['query']): BookingPassenger[] {
@@ -46,6 +47,7 @@ export function FlightBookingView({
   fareOption: FareOption
   backHref: string
 }) {
+  const router = useRouter()
   const [contact, setContact] = useState<BookingContactInfo>({ fullName: '', email: '', phone: '' })
   const [passengers, setPassengers] = useState<BookingPassenger[]>(() => buildInitialPassengers(detail.query))
   const [selectedExtraServiceIds, setSelectedExtraServiceIds] = useState<string[]>([])
@@ -53,7 +55,6 @@ export function FlightBookingView({
   const [contactErrors, setContactErrors] = useState<Partial<Record<keyof BookingContactInfo, string>>>()
   const [passengerErrors, setPassengerErrors] = useState<PassengerErrors>()
   const [termsError, setTermsError] = useState<string>()
-  const [submitted, setSubmitted] = useState(false)
 
   const selectedExtraServices = flightExtraServices.filter((service) => selectedExtraServiceIds.includes(service.id))
   const priceSummary = computeBookingPriceSummary(fareOption, detail.query, selectedExtraServices)
@@ -90,15 +91,20 @@ export function FlightBookingView({
     setTermsError(termsResult.success ? undefined : termsResult.error.issues[0]?.message)
 
     const isValid = contactResult.success && Object.keys(nextPassengerErrors).length === 0 && termsResult.success
-    if (isValid) setSubmitted(true)
-  }
+    if (!isValid) return
 
-  if (submitted) {
-    return (
-      <div className="pb-16">
-        <FlightBookingSuccess grandTotal={priceSummary.grandTotal} />
-      </div>
-    )
+    const bookingId = generateBookingId()
+    saveBookingDraft({
+      bookingId,
+      flightId: detail.id,
+      fareOptionId: fareOption.id,
+      query: detail.query,
+      contact,
+      passengers,
+      selectedExtraServiceIds,
+      createdAt: new Date().toISOString(),
+    })
+    router.push(`/ve-may-bay/thanh-toan/${bookingId}`)
   }
 
   return (

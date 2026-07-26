@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { flightSearchQuerySchema } from '@/lib/flight/flight-schema'
 import type { BookingPassengerType } from '@/types/flight'
 
 /**
@@ -82,4 +83,35 @@ export type PassengerInput = {
 
 export const bookingTermsSchema = z.boolean().refine((accepted) => accepted === true, {
   message: 'Vui lòng đồng ý điều khoản đặt vé',
+})
+
+/**
+ * Structural re-validation of a `FlightBookingDraft` read back from
+ * `sessionStorage` (EPIC-005) — unlike `createPassengerSchema`, this
+ * doesn't re-run the age-vs-departure-date business rule (already
+ * enforced once at input time in EPIC-004); it only guards against a
+ * malformed/corrupted storage entry, same boundary rule as every other
+ * "trust nothing that didn't just come from our own generator" schema
+ * in this module.
+ */
+const bookingPassengerStructSchema = z.object({
+  id: z.string().min(1),
+  type: z.enum(['adult', 'child', 'infant']),
+  fullName: z.string().min(1),
+  gender: z.enum(['male', 'female', 'other']),
+  dateOfBirth: z.string().min(1),
+  nationality: z.string().min(1),
+  documentType: z.enum(['cccd', 'passport']),
+  documentNumber: z.string().min(1),
+})
+
+export const flightBookingDraftSchema = z.object({
+  bookingId: z.string().min(1),
+  flightId: z.string().min(1),
+  fareOptionId: z.string().min(1),
+  query: flightSearchQuerySchema,
+  contact: bookingContactSchema,
+  passengers: z.array(bookingPassengerStructSchema).min(1),
+  selectedExtraServiceIds: z.array(z.string()),
+  createdAt: z.string().min(1),
 })

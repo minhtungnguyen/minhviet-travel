@@ -346,3 +346,37 @@ export interface FlightBookingPriceSummary {
   grandTotal: number
   currency: 'VND'
 }
+
+/**
+ * Payment & Confirmation contracts (EPIC-005,
+ * `/ve-may-bay/thanh-toan|thanh-cong|that-bai/[bookingId]`).
+ *
+ * There is deliberately no server-side "booking" persistence — a real
+ * one needs a Booking domain (database, ownership, auth) this platform
+ * doesn't have yet (see `docs/backend/sprint-1b2-implementation-report.md`
+ * §A.10 "Flight Hub placeholder": Booking depends on Product Core +
+ * Pricing, neither built). Passenger contact/document data is also not
+ * something that belongs in a URL (never put personal data in query
+ * strings/params). So `FlightBookingDraft` — everything EPIC-004's form
+ * collected — is saved to the browser's `sessionStorage` keyed by
+ * `bookingId` (see `lib/flight/flight-booking-draft.ts`) and read back
+ * entirely client-side; the flight/fare details are re-derived from
+ * `flightId`/`query` the same deterministic way every other page in this
+ * module does, never persisted either.
+ */
+
+export type PaymentMethod = 'qr' | 'bank_transfer' | 'domestic_card' | 'international_card'
+export type PaymentStatus = 'pending' | 'success' | 'failed' | 'expired'
+
+/** Everything needed to resume a booking on the Payment pages — the sessionStorage record `bookingId` keys into. */
+export interface FlightBookingDraft {
+  bookingId: string
+  flightId: string
+  fareOptionId: string
+  query: FlightSearchQuery
+  contact: BookingContactInfo
+  passengers: BookingPassenger[]
+  selectedExtraServiceIds: string[]
+  /** ISO datetime — when the draft was created, used to derive whether the mock payment window has expired. */
+  createdAt: string
+}

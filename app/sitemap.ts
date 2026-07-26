@@ -17,6 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/hotels`, changeFrequency: 'weekly', priority: 0.6 },
     { url: `${SITE_URL}/cruises`, changeFrequency: 'weekly', priority: 0.6 },
     { url: `${SITE_URL}/flights`, changeFrequency: 'weekly', priority: 0.6 },
+    { url: `${SITE_URL}/ve-may-bay`, changeFrequency: 'daily', priority: 0.8 },
     { url: `${SITE_URL}/tickets`, changeFrequency: 'weekly', priority: 0.6 },
     { url: `${SITE_URL}/visa`, changeFrequency: 'weekly', priority: 0.6 },
     { url: `${SITE_URL}/about`, changeFrequency: 'monthly', priority: 0.5 },

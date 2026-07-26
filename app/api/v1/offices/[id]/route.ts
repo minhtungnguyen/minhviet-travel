@@ -1,0 +1,36 @@
+import type { NextRequest } from 'next/server'
+import { recordAuditLog } from '@/modules/audit/application/audit.service'
+import { withParamsRoute } from '@/shared/http/handle-route'
+import { ok } from '@/shared/http/response'
+import { AppError } from '@/shared/errors/app-error'
+import { resolveActor } from '@/shared/auth/session'
+import { getServerSupabaseClient } from '@/shared/supabase/server-client'
+import { uuidSchema } from '@/shared/validation/common'
+import { officeUpdateSchema } from '@/modules/organization/schemas/organization.schema'
+import { OrganizationService } from '@/modules/organization/application/organization.service'
+import { SupabaseOrganizationRepository } from '@/modules/organization/infrastructure/organization.repository'
+
+async function getService() {
+  return new OrganizationService(new SupabaseOrganizationRepository(await getServerSupabaseClient()), recordAuditLog)
+}
+
+export const PATCH = withParamsRoute<{ id: string }>(async (req: NextRequest, { id }, requestId) => {
+  const idResult = uuidSchema.safeParse(id)
+  if (!idResult.success) throw AppError.validation('Invalid office id')
+  const body = await req.json()
+  const parsed = officeUpdateSchema.safeParse(body)
+  if (!parsed.success) throw AppError.validation('Invalid office payload', { issues: parsed.error.issues })
+  const actor = await resolveActor()
+  const service = await getService()
+  const office = await service.updateOffice(actor, idResult.data, parsed.data, requestId)
+  return ok(office, requestId)
+})
+
+export const DELETE = withParamsRoute<{ id: string }>(async (_req, { id }, requestId) => {
+  const idResult = uuidSchema.safeParse(id)
+  if (!idResult.success) throw AppError.validation('Invalid office id')
+  const actor = await resolveActor()
+  const service = await getService()
+  const office = await service.archiveOffice(actor, idResult.data, requestId)
+  return ok(office, requestId)
+})

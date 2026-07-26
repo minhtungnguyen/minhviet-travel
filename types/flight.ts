@@ -21,7 +21,12 @@ export interface FlightCabinClassOption {
 /** One searchable airport/city in the Flight Search Box's origin/destination lists. */
 export interface FlightAirport {
   code: string
-  /** URL-safe city slug used in the Search Results friendly URL (`/ve-may-bay/{originSlug}/{destinationSlug}`, EPIC-002 §6). */
+  /**
+   * URL-safe city slug, reserved for the future SEO Landing Engine route
+   * (`/ve-may-bay/{originSlug}/{destinationSlug}`, EPIC-008). Search
+   * Results (EPIC-002) uses `code` in query params instead — see
+   * docs/Handover/Flight/EPIC-002-HANDOVER.md's Architecture Update.
+   */
   slug: string
   city: string
   name: string

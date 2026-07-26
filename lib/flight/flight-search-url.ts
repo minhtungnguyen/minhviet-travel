@@ -1,39 +1,45 @@
-import type { FlightCabinClass, FlightTripType } from '@/types/flight'
+import type { FlightCabinClass, FlightSearchQuery, FlightTripType } from '@/types/flight'
 
 /**
- * Single place that knows the Search Results URL shape
- * (`/ve-may-bay/{originSlug}/{destinationSlug}?ngayDi=...`, EPIC-002 §6) —
+ * Single place that knows the Search Results URL shape —
+ * `/ve-may-bay/tim-kiem?from=..&to=..&departureDate=..&...` (EPIC-002,
+ * post-handover Architecture Update: see
+ * docs/Handover/Flight/EPIC-002-HANDOVER.md). `/ve-may-bay/{from}/{to}`
+ * (path-segment slugs) is reserved for the future SEO Landing Engine
+ * (EPIC-008) and must never be reused for search — only `slug` fields on
+ * `FlightAirport` still exist for that route to use later.
+ *
  * `FlightSearchBox` (navigate on submit), `flight-data-seed.ts` (Flash
- * Sale / Popular Route CTAs) and `app/ve-may-bay/[from]/[to]/page.tsx`
- * (parsing back) all go through this instead of building query strings
- * inline, so the URL contract only has one place to change.
+ * Sale / Popular Route CTAs), `flight-search-results.tsx` (Fare Calendar
+ * re-search) and `app/ve-may-bay/tim-kiem/page.tsx` (parsing back) all go
+ * through this instead of building query strings inline.
  */
 
 /** How far out Flash Sale / Popular Route CTAs default the search date when the mock content itself doesn't carry one. */
 export const DEFAULT_FLASH_SALE_SEARCH_OFFSET_DAYS = 14
 
+/** Fallback route when `from`/`to`/`departureDate` are missing or malformed — mirrors the Homepage Search Box's own defaults. */
+export const DEFAULT_ORIGIN_CODE = 'HPH'
+export const DEFAULT_DESTINATION_CODE = 'SGN'
+
+export const FLIGHT_SEARCH_PATH = '/ve-may-bay/tim-kiem'
+
 const QUERY_KEYS = {
-  tripType: 'loai',
-  departDate: 'ngayDi',
-  returnDate: 'ngayVe',
-  adults: 'nguoiLon',
-  children: 'treEm',
-  infants: 'emBe',
-  cabinClass: 'hang',
+  from: 'from',
+  to: 'to',
+  tripType: 'tripType',
+  departDate: 'departureDate',
+  returnDate: 'returnDate',
+  adults: 'adults',
+  children: 'children',
+  infants: 'infants',
+  cabinClass: 'cabinClass',
 } as const
 
-export interface FlightSearchUrlQuery {
-  tripType: FlightTripType
-  departDate: string
-  returnDate?: string
-  adults: number
-  children: number
-  infants: number
-  cabinClass: FlightCabinClass
-}
-
-export function buildFlightSearchQueryString(query: FlightSearchUrlQuery): string {
+export function buildFlightSearchQueryString(query: FlightSearchQuery): string {
   const params = new URLSearchParams()
+  params.set(QUERY_KEYS.from, query.originCode)
+  params.set(QUERY_KEYS.to, query.destinationCode)
   params.set(QUERY_KEYS.tripType, query.tripType)
   params.set(QUERY_KEYS.departDate, query.departDate)
   if (query.tripType === 'roundtrip' && query.returnDate) {
@@ -46,14 +52,12 @@ export function buildFlightSearchQueryString(query: FlightSearchUrlQuery): strin
   return params.toString()
 }
 
-export function buildFlightSearchPath(
-  route: { originSlug: string; destinationSlug: string },
-  query: FlightSearchUrlQuery,
-): string {
-  return `/ve-may-bay/${route.originSlug}/${route.destinationSlug}?${buildFlightSearchQueryString(query)}`
+export function buildFlightSearchUrl(query: FlightSearchQuery): string {
+  return `${FLIGHT_SEARCH_PATH}?${buildFlightSearchQueryString(query)}`
 }
 
 const CABIN_CLASSES: FlightCabinClass[] = ['economy', 'premium_economy', 'business', 'first']
+const AIRPORT_CODE_PATTERN = /^[A-Za-z]{3}$/
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10)
@@ -73,16 +77,23 @@ function parseCount(value: string | undefined, fallback: number, max: number): n
   return Math.min(parsed, max)
 }
 
+function parseAirportCode(value: string | undefined, fallback: string): string {
+  return value && AIRPORT_CODE_PATTERN.test(value) ? value.toUpperCase() : fallback
+}
+
 /**
- * Defensive parse of the raw `searchParams` Next.js hands to the route —
- * always returns a usable query (falling back to sane defaults for
- * missing/garbled values) rather than throwing, since the URL is
- * user-editable. `flight-search-repository.ts` still re-validates the
- * result with `flightSearchInputSchema` before generating mock offers.
+ * Defensive parse of the raw `searchParams` Next.js hands to
+ * `/ve-may-bay/tim-kiem` — always returns a usable, fully-shaped
+ * `FlightSearchQuery` (falling back to sane defaults for missing/garbled
+ * values) rather than throwing, since the URL is user-editable.
+ * `flight-search-repository.ts` still re-validates the result with
+ * `flightSearchQuerySchema` — including the "origin !== destination"
+ * business rule this function does not enforce on its own — before
+ * generating mock offers.
  */
 export function parseFlightSearchQueryParams(
   searchParams: Record<string, string | string[] | undefined>,
-): FlightSearchUrlQuery {
+): FlightSearchQuery {
   const tripTypeRaw = readParam(searchParams, QUERY_KEYS.tripType)
   const tripType: FlightTripType = tripTypeRaw === 'roundtrip' ? 'roundtrip' : 'oneway'
 
@@ -98,8 +109,16 @@ export function parseFlightSearchQueryParams(
     ? (cabinClassRaw as FlightCabinClass)
     : 'economy'
 
+  const originCode = parseAirportCode(readParam(searchParams, QUERY_KEYS.from), DEFAULT_ORIGIN_CODE)
+  let destinationCode = parseAirportCode(readParam(searchParams, QUERY_KEYS.to), DEFAULT_DESTINATION_CODE)
+  if (destinationCode === originCode) {
+    destinationCode = originCode === DEFAULT_DESTINATION_CODE ? DEFAULT_ORIGIN_CODE : DEFAULT_DESTINATION_CODE
+  }
+
   return {
     tripType,
+    originCode,
+    destinationCode,
     departDate,
     returnDate,
     adults: Math.max(1, parseCount(readParam(searchParams, QUERY_KEYS.adults), 1, 9)),

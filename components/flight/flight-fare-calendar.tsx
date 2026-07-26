@@ -5,7 +5,7 @@ import type { FareCalendarDay } from '@/types/flight'
 
 const WEEKDAY_LABELS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
 
-/** ±3-day cheap-fare strip (EPIC-002 §3 Fare Calendar). Selecting a day re-navigates the Search Results page with a new `ngayDi`, so prices reflect a real (mock) search for that date rather than an inline estimate. */
+/** ±3-day cheap-fare strip (EPIC-002 §3 Fare Calendar). Selecting a day re-navigates the Search Results page with a new `departureDate`, so prices reflect a real (mock) search for that date rather than an inline estimate. */
 export function FlightFareCalendar({
   days,
   onSelectDate,

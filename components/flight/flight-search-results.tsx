@@ -10,7 +10,7 @@ import { FlightList } from '@/components/flight/flight-list'
 import { FlightPagination } from '@/components/flight/flight-pagination'
 import { FlightEmptyState } from '@/components/flight/flight-empty-state'
 import { MVButton } from '@/components/mv/mv-button'
-import { buildFlightSearchPath } from '@/lib/flight/flight-search-url'
+import { buildFlightSearchUrl } from '@/lib/flight/flight-search-url'
 import {
   EMPTY_FLIGHT_FILTERS,
   filterFlightOffers,
@@ -66,12 +66,7 @@ export function FlightSearchResults({ results }: { results: FlightSearchResultsD
   const visibleOffers = sortedOffers.slice(0, visibleCount)
 
   function handleSelectDate(date: string) {
-    router.push(
-      buildFlightSearchPath(
-        { originSlug: results.origin.slug, destinationSlug: results.destination.slug },
-        { ...results.query, departDate: date },
-      ),
-    )
+    router.push(buildFlightSearchUrl({ ...results.query, departDate: date }))
   }
 
   const sidebarProps = {

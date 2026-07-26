@@ -10,7 +10,7 @@ import { FlightPassengerSelector, type FlightPassengerCounts } from '@/component
 import { FlightCabinClassSelector } from '@/components/flight/flight-cabin-class-selector'
 import { MVButton } from '@/components/mv/mv-button'
 import { flightSearchInputSchema } from '@/lib/flight/flight-schema'
-import { buildFlightSearchPath } from '@/lib/flight/flight-search-url'
+import { buildFlightSearchUrl } from '@/lib/flight/flight-search-url'
 import { cn } from '@/lib/utils'
 import type { FlightAirport, FlightCabinClass, FlightCabinClassOption, FlightTripType } from '@/types/flight'
 
@@ -92,15 +92,16 @@ export function FlightSearchBox({
     }
 
     setErrors({})
-    const origin = airports.find((a) => a.code === originCode)
-    const destination = airports.find((a) => a.code === destinationCode)
-    if (!origin || !destination) return
-
     router.push(
-      buildFlightSearchPath(
-        { originSlug: origin.slug, destinationSlug: destination.slug },
-        { tripType, departDate, returnDate: tripType === 'roundtrip' ? returnDate : undefined, ...passengers, cabinClass },
-      ),
+      buildFlightSearchUrl({
+        tripType,
+        originCode,
+        destinationCode,
+        departDate,
+        returnDate: tripType === 'roundtrip' ? returnDate : undefined,
+        ...passengers,
+        cabinClass,
+      }),
     )
   }
 

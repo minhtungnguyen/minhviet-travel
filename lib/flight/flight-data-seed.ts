@@ -1,9 +1,9 @@
 import type { FlightAirport, FlightHomeContent } from '@/types/flight'
-import { buildFlightSearchPath, DEFAULT_FLASH_SALE_SEARCH_OFFSET_DAYS } from '@/lib/flight/flight-search-url'
+import { buildFlightSearchUrl, DEFAULT_FLASH_SALE_SEARCH_OFFSET_DAYS } from '@/lib/flight/flight-search-url'
 
 /**
  * Mock repository data for /ve-may-bay (EPIC-001 – Flight Homepage) and its
- * Search Results route (EPIC-002 – `/ve-may-bay/[from]/[to]`), the
+ * Search Results route (EPIC-002 – `/ve-may-bay/tim-kiem`), the
  * CMS-ready seam described in `types/flight.ts`. This is Mock Data only —
  * no airline API is wired up (see `integrations/flight/contracts/flight-provider.ts`
  * for the eventual real-fare contract, out of scope here). Fare figures,
@@ -18,10 +18,11 @@ import { buildFlightSearchPath, DEFAULT_FLASH_SALE_SEARCH_OFFSET_DAYS } from '@/
  */
 
 /**
- * Single source of truth for every airport referenced below — `slug` is
- * hand-picked (not mechanically derived from `city`) so it matches
- * `docs/PRD/Flight/EPIC-002-Flight-Search-Results.md` §6's friendly-URL
- * example verbatim (`/ve-may-bay/hai-phong/ho-chi-minh`).
+ * Single source of truth for every airport referenced below. `slug` is
+ * hand-picked (not mechanically derived from `city`) and reserved for the
+ * future SEO Landing Engine route (`/ve-may-bay/{originSlug}/{destinationSlug}`,
+ * EPIC-008) — Search Results (EPIC-002) does NOT use it, see
+ * `docs/Handover/Flight/EPIC-002-HANDOVER.md` Architecture Update.
  */
 const airports: FlightAirport[] = [
   { code: 'HPH', slug: 'hai-phong', city: 'Hải Phòng', name: 'Sân bay Cát Bi', country: 'Việt Nam' },
@@ -51,9 +52,14 @@ function airport(code: string): FlightAirport {
   return found
 }
 
-/** Used by the Search Results route (EPIC-002) to resolve `[from]/[to]` slugs — returns `undefined` for an unknown slug so the caller can 404. */
+/** Reserved for the future SEO Landing Engine route (EPIC-008) — resolves `[from]/[to]` slugs. Not used by Search Results. */
 export function findFlightAirportBySlug(slug: string): FlightAirport | undefined {
   return airportBySlug.get(slug)
+}
+
+/** Used by the Search Results route (EPIC-002, `/ve-may-bay/tim-kiem`) to resolve `?from=`/`?to=` airport codes. */
+export function findFlightAirportByCode(code: string): FlightAirport | undefined {
+  return airportByCode.get(code)
 }
 
 /** Default departure date used by CTAs (Flash Sale, Popular Routes) that link into Search Results without a user-picked date yet. */
@@ -62,12 +68,16 @@ const defaultSearchDate = new Date(Date.now() + DEFAULT_FLASH_SALE_SEARCH_OFFSET
   .slice(0, 10)
 
 function searchResultsHref(originCode: string, destinationCode: string) {
-  const origin = airport(originCode)
-  const destination = airport(destinationCode)
-  return buildFlightSearchPath(
-    { originSlug: origin.slug, destinationSlug: destination.slug },
-    { tripType: 'oneway', departDate: defaultSearchDate, adults: 1, children: 0, infants: 0, cabinClass: 'economy' },
-  )
+  return buildFlightSearchUrl({
+    tripType: 'oneway',
+    originCode,
+    destinationCode,
+    departDate: defaultSearchDate,
+    adults: 1,
+    children: 0,
+    infants: 0,
+    cabinClass: 'economy',
+  })
 }
 
 export const flightAirlines = [

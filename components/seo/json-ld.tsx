@@ -13,7 +13,7 @@ import type { Tour } from '@/lib/site-data'
 import type { AvailabilityStatus } from '@/types/cms'
 import { buildTourCardViewModel } from '@/lib/tours/availability'
 import type { TourAvailabilityStatus } from '@/types/tour-availability'
-import type { FlightAirport, FlightHomeContent, FlightSearchQuery } from '@/types/flight'
+import type { FlightAirport, FlightHomeContent } from '@/types/flight'
 
 /**
  * schema.org's ItemAvailability doesn't have a direct match for CHECKING
@@ -187,15 +187,16 @@ export function FlightHomeJsonLd({ content }: { content: FlightHomeContent }) {
       '@type': 'SearchAction',
       /**
        * Points at the real Search Results route (EPIC-002,
-       * `/ve-may-bay/{originSlug}/{destinationSlug}`) now that it exists —
-       * `originSlug`/`destinationSlug` match `FlightAirport.slug`, not the
-       * IATA code, per `lib/flight/flight-search-url.ts`.
+       * `/ve-may-bay/tim-kiem`) — NOT `/ve-may-bay/{from}/{to}`, which is
+       * reserved for the future SEO Landing Engine (EPIC-008) and must
+       * stay a canonical indexable URL, not a search action target. `from`/
+       * `to` here are IATA codes, matching `lib/flight/flight-search-url.ts`.
        */
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: `${SITE_URL}/ve-may-bay/{originSlug}/{destinationSlug}?ngayDi={departDate}`,
+        urlTemplate: `${SITE_URL}/ve-may-bay/tim-kiem?from={from}&to={to}&departureDate={departureDate}`,
       },
-      'query-input': ['required name=originSlug', 'required name=destinationSlug', 'required name=departDate'],
+      'query-input': ['required name=from', 'required name=to', 'required name=departureDate'],
     },
   }
 
@@ -230,24 +231,26 @@ export function FlightHomeJsonLd({ content }: { content: FlightHomeContent }) {
 }
 
 /**
- * Structured data for `/ve-may-bay/[from]/[to]` (EPIC-002 §6: "Schema
+ * Structured data for `/ve-may-bay/tim-kiem` (EPIC-002 §6: "Schema
  * SearchResultsPage" + Breadcrumb). `SearchResultsPage` is a schema.org
  * `WebPage` subtype — there's no dedicated flight-offer schema in the
  * vocabulary, so `resultCount` is carried via `mainEntity.numberOfItems`
- * on a generic `ItemList` rather than inventing one.
+ * on a generic `ItemList` rather than inventing one. `pageUrl` is the
+ * actual `/ve-may-bay/tim-kiem?from=..&to=..` URL for this search — NOT
+ * `origin.slug`/`destination.slug`, which belong to the separate, reserved
+ * SEO Landing route (EPIC-008) this page must not claim to be.
  */
 export function FlightSearchResultsJsonLd({
   origin,
   destination,
   resultCount,
+  pageUrl,
 }: {
   origin: FlightAirport
   destination: FlightAirport
-  query: FlightSearchQuery
   resultCount: number
+  pageUrl: string
 }) {
-  const canonicalUrl = `${SITE_URL}/ve-may-bay/${origin.slug}/${destination.slug}`
-
   const breadcrumbList = {
     '@type': 'BreadcrumbList',
     itemListElement: [
@@ -257,15 +260,15 @@ export function FlightSearchResultsJsonLd({
         '@type': 'ListItem',
         position: 3,
         name: `${origin.city} → ${destination.city}`,
-        item: canonicalUrl,
+        item: pageUrl,
       },
     ],
   }
 
   const searchResultsPage = {
     '@type': 'SearchResultsPage',
-    '@id': `${canonicalUrl}#search-results`,
-    url: canonicalUrl,
+    '@id': `${pageUrl}#search-results`,
+    url: pageUrl,
     name: `Vé máy bay ${origin.city} đi ${destination.city}`,
     mainEntity: {
       '@type': 'ItemList',

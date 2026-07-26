@@ -5,13 +5,6 @@ import { whyStats } from '@/lib/site-data'
 import { CountUp } from '@/components/mv/count-up'
 import { cn } from '@/lib/utils'
 
-/** Split "5000+" -> { num: 5000, suffix: "+" }; non-numeric like "24/7" stays static */
-function parseStat(value: string) {
-  const match = value.match(/^(\d+)(.*)$/)
-  if (!match || value.includes('/')) return null
-  return { num: Number(match[1]), suffix: match[2] }
-}
-
 export function WhyChoose() {
   const ref = useRef<HTMLDivElement>(null)
   const [visible, setVisible] = useState(false)
@@ -50,10 +43,9 @@ export function WhyChoose() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-4">
             {whyStats.map((s, i) => {
               const Icon = s.icon
-              const parsed = parseStat(s.value)
               return (
                 <div
                   key={s.label}
@@ -69,13 +61,12 @@ export function WhyChoose() {
                     aria-hidden
                   />
                   <p className="mt-4 text-4xl font-extrabold tracking-tight text-paper lg:text-5xl">
-                    {parsed ? (
-                      <CountUp value={parsed.num} suffix={parsed.suffix} separator />
-                    ) : (
-                      s.value
-                    )}
+                    <CountUp value={s.value} suffix={s.suffix} separator />
                   </p>
                   <p className="mt-1 text-sm text-paper/60">{s.label}</p>
+                  <p className="mt-0.5 text-[11px] text-paper/40">
+                    Nguồn: {s.source} · {s.asOf}
+                  </p>
                 </div>
               )
             })}

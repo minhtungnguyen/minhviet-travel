@@ -19,10 +19,6 @@ export function TourCard({ tour }: { tour: Tour }) {
           <span className="absolute left-4 top-4 eyebrow rounded-full bg-gold px-3 py-1.5 text-[10px] font-semibold text-deep shadow-md">
             Bán chạy
           </span>
-        ) : tour.discount ? (
-          <span className="absolute left-4 top-4 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-md">
-            -{tour.discount}%
-          </span>
         ) : null}
         <span className="absolute bottom-4 left-4 flex items-center gap-1.5 rounded-full bg-deep/80 px-2.5 py-1 text-xs font-medium text-white backdrop-blur">
           <Clock className="size-3.5" /> {tour.duration}
@@ -61,11 +57,7 @@ export function TourCard({ tour }: { tour: Tour }) {
 
         <div className="mt-4 flex items-end justify-between border-t border-border pt-4">
           <div>
-            {tour.originalPrice ? (
-              <p className="text-xs text-muted-foreground line-through">{tour.originalPrice}</p>
-            ) : (
-              <p className="eyebrow text-[10px] text-muted-foreground">Giá từ</p>
-            )}
+            <p className="eyebrow text-[10px] text-muted-foreground">Giá từ</p>
             <p className="text-xl font-extrabold text-primary">{tour.price}</p>
           </div>
           <MVButton href={`/tour/${tour.id}`} variant="outline" size="sm">

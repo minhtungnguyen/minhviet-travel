@@ -13,7 +13,7 @@ import type { Tour } from '@/lib/site-data'
 import type { AvailabilityStatus } from '@/types/cms'
 import { buildTourCardViewModel } from '@/lib/tours/availability'
 import type { TourAvailabilityStatus } from '@/types/tour-availability'
-import type { FlightAirport, FlightHomeContent } from '@/types/flight'
+import type { FlightAirport, FlightDetail, FlightHomeContent } from '@/types/flight'
 
 /**
  * schema.org's ItemAvailability doesn't have a direct match for CHECKING
@@ -279,6 +279,65 @@ export function FlightSearchResultsJsonLd({
   const graph = {
     '@context': 'https://schema.org',
     '@graph': [breadcrumbList, searchResultsPage],
+  }
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(graph) }}
+    />
+  )
+}
+
+/**
+ * Structured data for `/ve-may-bay/chi-tiet/[flightId]` (EPIC-003 §8).
+ * schema.org's `Flight` (a `Trip` subtype) maps directly onto
+ * `FlightDetail` — the one case in this Flight module with a
+ * purpose-built schema.org type instead of a generic one.
+ */
+export function FlightDetailJsonLd({ detail, pageUrl }: { detail: FlightDetail; pageUrl: string }) {
+  const canonicalUrl = pageUrl.split('?')[0]
+
+  const breadcrumbList = {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Trang chủ', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Vé máy bay', item: `${SITE_URL}/ve-may-bay` },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: `${detail.origin.city} → ${detail.destination.city}`,
+        item: canonicalUrl,
+      },
+    ],
+  }
+
+  const flight = {
+    '@type': 'Flight',
+    '@id': `${canonicalUrl}#flight`,
+    url: canonicalUrl,
+    flightNumber: detail.flightNumber,
+    airline: { '@type': 'Airline', name: detail.airlineName, iataCode: detail.airlineCode },
+    departureAirport: {
+      '@type': 'Airport',
+      name: detail.origin.name,
+      iataCode: detail.origin.code,
+      address: { '@type': 'PostalAddress', addressLocality: detail.origin.city, addressCountry: detail.origin.country },
+    },
+    arrivalAirport: {
+      '@type': 'Airport',
+      name: detail.destination.name,
+      iataCode: detail.destination.code,
+      address: { '@type': 'PostalAddress', addressLocality: detail.destination.city, addressCountry: detail.destination.country },
+    },
+    departureTime: detail.segments[0].departTime,
+    arrivalTime: detail.segments.at(-1)!.arriveTime,
+    estimatedFlightDuration: `PT${detail.durationMinutes}M`,
+  }
+
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [breadcrumbList, flight],
   }
 
   return (

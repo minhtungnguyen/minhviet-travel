@@ -1,12 +1,9 @@
-'use client'
-
-import { useState } from 'react'
-import { Luggage, Phone, ChevronDown } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { MVButton } from '@/components/mv/mv-button'
+import { buildFlightDetailPath } from '@/lib/flight/flight-detail-id'
 import { formatClockTime, formatDuration, formatStopsLabel, formatVnd } from '@/lib/flight/flight-format'
 import { cn } from '@/lib/utils'
-import type { FlightOffer } from '@/types/flight'
+import type { FlightOffer, FlightSearchQuery } from '@/types/flight'
 
 const CABIN_LABELS: Record<string, string> = {
   economy: 'Phổ thông',
@@ -16,15 +13,13 @@ const CABIN_LABELS: Record<string, string> = {
 }
 
 /**
- * One bookable fare (EPIC-002 §3 Flight Card). "Chọn" doesn't link to a
- * Flight Detail/Booking page — those are EPIC-003/004, not built yet — it
- * expands an inline fare/baggage panel with a real hotline CTA instead of
- * a dead link, same honesty pattern as the homepage search box (see
- * `docs/Handover/Flight/EPIC-001-HANDOVER.md` Known Issues #3).
+ * One bookable fare (EPIC-002 §3 Flight Card). "Chọn" links to Flight
+ * Detail (EPIC-003, `/ve-may-bay/chi-tiet/[flightId]`) via
+ * `buildFlightDetailPath`, carrying `query`'s cabin/passenger context —
+ * the seeded generator needs it to regenerate this exact offer (see
+ * `lib/flight/flight-detail-id.ts`).
  */
-export function FlightCard({ offer }: { offer: FlightOffer }) {
-  const [expanded, setExpanded] = useState(false)
-
+export function FlightCard({ offer, query }: { offer: FlightOffer; query: FlightSearchQuery }) {
   return (
     <article className="rounded-2xl border border-border bg-card shadow-soft transition-shadow hover:shadow-soft-lg">
       <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
@@ -69,50 +64,19 @@ export function FlightCard({ offer }: { offer: FlightOffer }) {
             <p className="text-[11px] text-muted-foreground">Tổng giá / {CABIN_LABELS[offer.cabinClass]}</p>
           </div>
           <MVButton
-            type="button"
-            variant={expanded ? 'secondary' : 'accent'}
+            href={buildFlightDetailPath(offer.id, {
+              cabinClass: query.cabinClass,
+              adults: query.adults,
+              children: query.children,
+              infants: query.infants,
+            })}
+            variant="accent"
             size="sm"
-            onClick={() => setExpanded((current) => !current)}
-            aria-expanded={expanded}
           >
-            {expanded ? 'Đóng' : 'Chọn'}
-            <ChevronDown className={cn('size-4 transition-transform', expanded && 'rotate-180')} />
+            Chọn
           </MVButton>
         </div>
       </div>
-
-      {expanded && (
-        <div className="border-t border-border bg-secondary/40 px-5 py-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex items-start gap-2 text-sm text-foreground">
-              <Luggage className="mt-0.5 size-4 shrink-0 text-mv-journey-blue" />
-              <div>
-                <p className="font-semibold">Hành lý</p>
-                <p className="text-muted-foreground">
-                  Xách tay {offer.baggage.carryOnKg}kg · Ký gửi {offer.baggage.checkedKg}kg
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-2 text-sm text-foreground">
-              <span className="mt-0.5 size-4 shrink-0 text-center text-xs font-bold text-mv-journey-blue">%</span>
-              <div>
-                <p className="font-semibold">Điều kiện vé</p>
-                <p className="text-muted-foreground">Đổi/hủy áp dụng theo chính sách hãng bay, tư vấn viên xác nhận trước khi thanh toán.</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl bg-card p-3.5 text-sm text-foreground">
-            <span className="text-muted-foreground">
-              Đặt vé trực tuyến cho chuyến bay này sẽ sớm ra mắt — gọi hotline để giữ chỗ ngay hôm nay:
-            </span>
-            <MVButton href="tel:0934368132" variant="outline" size="sm">
-              <Phone className="size-4" />
-              0934 368 132
-            </MVButton>
-          </div>
-        </div>
-      )}
     </article>
   )
 }

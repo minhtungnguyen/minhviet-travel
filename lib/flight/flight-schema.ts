@@ -179,7 +179,8 @@ export const flightSearchQuerySchema = z
 
 const flightBaggageAllowanceSchema = z.object({
   carryOnKg: z.number().positive(),
-  checkedKg: z.number().positive(),
+  /** `0` is valid — the Economy Saver fare tier (EPIC-003) legitimately includes no checked baggage. */
+  checkedKg: z.number().nonnegative(),
 })
 
 const flightOfferSchema = z.object({
@@ -215,4 +216,73 @@ export const flightSearchResultsSchema = z.object({
   destination: flightAirportSchema,
   offers: z.array(flightOfferSchema),
   fareCalendar: z.array(fareCalendarDaySchema).length(7),
+})
+
+/**
+ * Flight Detail validation (EPIC-003). Mirrors the Search Results
+ * boundary rule — the mock generator's output is still parsed as
+ * untrusted input before reaching components.
+ */
+
+const flightSegmentSchema = z.object({
+  originCode: z.string().length(3),
+  destinationCode: z.string().length(3),
+  departTime: z.string().min(1),
+  arriveTime: z.string().min(1),
+  durationMinutes: z.number().positive(),
+  airlineCode: z.string().min(2).max(3),
+  airlineName: z.string().min(1),
+  flightNumber: z.string().min(1),
+  aircraft: z.string().min(1),
+})
+
+const flightLayoverSchema = z.object({
+  airportCode: z.string().length(3),
+  durationMinutes: z.number().positive(),
+})
+
+const fareOptionSchema = z.object({
+  id: z.string().min(1),
+  tier: z.enum(['economy_saver', 'economy_standard', 'economy_flex', 'business']),
+  name: z.string().min(1),
+  baseFare: z.number().nonnegative(),
+  taxes: z.number().nonnegative(),
+  serviceFee: z.number().nonnegative(),
+  totalPrice: z.number().positive(),
+  currency: z.literal('VND'),
+  baggage: flightBaggageAllowanceSchema,
+  mealIncluded: z.boolean(),
+  seatSelectionIncluded: z.boolean(),
+  changePolicy: z.string().min(1),
+  refundPolicy: z.string().min(1),
+  changeFee: z.number().nonnegative().nullable(),
+  refundFee: z.number().nonnegative().nullable(),
+  isRecommended: z.boolean(),
+})
+
+const flightFareRulesSchema = z.object({
+  changeConditions: z.string().min(1),
+  refundConditions: z.string().min(1),
+  noShowPolicy: z.string().min(1),
+  holdDeadlineMinutes: z.number().positive(),
+  priceDisclaimer: z.string().min(1),
+})
+
+export const flightDetailSchema = z.object({
+  id: z.string().min(1),
+  origin: flightAirportSchema,
+  destination: flightAirportSchema,
+  airlineCode: z.string().min(2).max(3),
+  airlineName: z.string().min(1),
+  flightNumber: z.string().min(1),
+  aircraft: z.string().min(1),
+  cabinClass: flightCabinClassSchema,
+  segments: z.array(flightSegmentSchema).min(1),
+  layovers: z.array(flightLayoverSchema),
+  durationMinutes: z.number().positive(),
+  stops: z.union([z.literal(0), z.literal(1), z.literal(2)]),
+  fareOptions: z.array(fareOptionSchema).min(1),
+  fareRules: flightFareRulesSchema,
+  defaultFareOptionId: z.string().min(1),
+  query: flightSearchQuerySchema,
 })

@@ -104,7 +104,7 @@ export function FlightSearchResults({ results }: { results: FlightSearchResultsD
                 <FlightEmptyState onResetFilters={() => setFilters(EMPTY_FLIGHT_FILTERS)} />
               ) : (
                 <>
-                  <FlightList offers={visibleOffers} />
+                  <FlightList offers={visibleOffers} query={results.query} />
                   <FlightPagination total={sortedOffers.length} visible={visibleOffers.length} onLoadMore={() => setVisibleCount((c) => c + PAGE_SIZE)} />
                 </>
               )}

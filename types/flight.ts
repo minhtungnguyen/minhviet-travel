@@ -195,3 +195,101 @@ export interface FlightSearchResults {
   offers: FlightOffer[]
   fareCalendar: FareCalendarDay[]
 }
+
+/**
+ * Flight Detail content contracts (EPIC-003, `/ve-may-bay/chi-tiet/[flightId]`).
+ * `flightId` is the same id `FlightOffer.id` already carries — it encodes
+ * origin/destination/departDate/index (see `lib/flight/flight-search-mock.ts`),
+ * so `flight-detail-repository.ts` can regenerate the exact same offer
+ * deterministically rather than needing persisted storage. Mirrors the
+ * shape rule of `FlightSearchResults`: every Flight Detail component
+ * depends only on these types, never on `lib/flight/flight-detail-mock.ts` directly.
+ */
+
+/** One leg of a (possibly multi-stop) flight. A direct flight has exactly one segment. */
+export interface FlightSegment {
+  originCode: string
+  destinationCode: string
+  departTime: string
+  arriveTime: string
+  durationMinutes: number
+  airlineCode: string
+  airlineName: string
+  flightNumber: string
+  aircraft: string
+}
+
+/** Layover between two segments — `layovers.length === segments.length - 1`. */
+export interface FlightLayover {
+  airportCode: string
+  durationMinutes: number
+}
+
+export type FareOptionTier = 'economy_saver' | 'economy_standard' | 'economy_flex' | 'business'
+
+/** One purchasable fare tier for a given physical flight (EPIC-003 §4.3 Fare Options). */
+export interface FareOption {
+  id: string
+  tier: FareOptionTier
+  name: string
+  baseFare: number
+  taxes: number
+  serviceFee: number
+  /** Per-passenger total (base + taxes + service fee), before multiplying by party size. */
+  totalPrice: number
+  currency: 'VND'
+  baggage: FlightBaggageAllowance
+  mealIncluded: boolean
+  seatSelectionIncluded: boolean
+  changePolicy: string
+  refundPolicy: string
+  /** `null` means changes/refunds are not allowed on this tier, not "free". */
+  changeFee: number | null
+  refundFee: number | null
+  isRecommended: boolean
+}
+
+/** Flight-level policy text (EPIC-003 §4.5), distinct from each `FareOption`'s short change/refundPolicy label. */
+export interface FlightFareRules {
+  changeConditions: string
+  refundConditions: string
+  noShowPolicy: string
+  holdDeadlineMinutes: number
+  /** PRD §4.6's mandated mock-data disclaimer, carried as data so it's never accidentally omitted from the UI. */
+  priceDisclaimer: string
+}
+
+/** Itemized price for the selected `FareOption`, scaled to the searched party size (EPIC-003 §4.6). */
+export interface FlightPriceBreakdown {
+  baseFarePerPax: number
+  taxesPerPax: number
+  airportFeePerPax: number
+  serviceFeePerPax: number
+  surchargePerPax: number
+  totalPerPax: number
+  totalForParty: number
+  currency: 'VND'
+  passengerCount: { adults: number; children: number; infants: number }
+}
+
+export interface FlightDetail {
+  /** Same value as the originating `FlightOffer.id`. */
+  id: string
+  origin: FlightAirport
+  destination: FlightAirport
+  airlineCode: string
+  airlineName: string
+  flightNumber: string
+  aircraft: string
+  cabinClass: FlightCabinClass
+  segments: FlightSegment[]
+  layovers: FlightLayover[]
+  durationMinutes: number
+  stops: FlightStopCount
+  fareOptions: FareOption[]
+  fareRules: FlightFareRules
+  /** The `FareOption.id` matching the price/cabin the user searched with — pre-selected on load. */
+  defaultFareOptionId: string
+  /** Search context this detail was generated for (drives `FlightPriceBreakdown` party-size scaling). */
+  query: FlightSearchQuery
+}

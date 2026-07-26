@@ -16,8 +16,13 @@ import type {
  * when a real fare API exists — every caller only depends on `FlightOffer`/`FareCalendarDay`.
  */
 
-/** mulberry32, seeded from a string hash — small, dependency-free, good enough for mock data (not cryptographic). */
-function createSeededRandom(seed: string) {
+/**
+ * mulberry32, seeded from a string hash — small, dependency-free, good
+ * enough for mock data (not cryptographic). Exported so
+ * `flight-detail-mock.ts` can derive its own deterministic values from
+ * the same family of seeds without duplicating the PRNG.
+ */
+export function createSeededRandom(seed: string) {
   let h = 1779033703 ^ seed.length
   for (let i = 0; i < seed.length; i++) {
     h = Math.imul(h ^ seed.charCodeAt(i), 3432918353)
@@ -32,7 +37,7 @@ function createSeededRandom(seed: string) {
   }
 }
 
-const CABIN_PRICE_MULTIPLIER: Record<FlightCabinClass, number> = {
+export const CABIN_PRICE_MULTIPLIER: Record<FlightCabinClass, number> = {
   economy: 1,
   premium_economy: 1.6,
   business: 3.2,
@@ -46,7 +51,7 @@ const CABIN_CHECKED_BAGGAGE_KG: Record<FlightCabinClass, number> = {
   first: 40,
 }
 
-function isInternationalRoute(origin: FlightAirport, destination: FlightAirport): boolean {
+export function isInternationalRoute(origin: FlightAirport, destination: FlightAirport): boolean {
   return origin.country !== destination.country
 }
 
@@ -55,13 +60,13 @@ function roundToNearest(value: number, step: number): number {
 }
 
 /** `minutesFromMidnight` may exceed 1440 (a long-haul flight departing late and arriving the next day) — `Date.UTC` normalizes the overflow into the date automatically. */
-function combineDateAndMinutes(dateIso: string, minutesFromMidnight: number): string {
+export function combineDateAndMinutes(dateIso: string, minutesFromMidnight: number): string {
   const [year, month, day] = dateIso.split('-').map(Number)
   return new Date(Date.UTC(year, month - 1, day, 0, minutesFromMidnight, 0)).toISOString()
 }
 
 /** Total party size (adults + children count as full seats; infants fly on lap and don't add a seat, matching `FlightPassengerSelector`). */
-function partySize(query: Pick<FlightSearchQuery, 'adults' | 'children'>): number {
+export function partySize(query: Pick<FlightSearchQuery, 'adults' | 'children'>): number {
   return query.adults + query.children
 }
 

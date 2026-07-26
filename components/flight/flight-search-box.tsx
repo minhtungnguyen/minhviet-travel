@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, type FormEvent } from 'react'
-import { ArrowLeftRight, PlaneTakeoff, PlaneLanding, Search, CheckCircle2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { ArrowLeftRight, PlaneTakeoff, PlaneLanding, Search } from 'lucide-react'
 import { FlightTripTypeTabs } from '@/components/flight/flight-trip-type-tabs'
 import { FlightAirportSelector } from '@/components/flight/flight-airport-selector'
 import { FlightDateSelector } from '@/components/flight/flight-date-selector'
@@ -9,6 +10,7 @@ import { FlightPassengerSelector, type FlightPassengerCounts } from '@/component
 import { FlightCabinClassSelector } from '@/components/flight/flight-cabin-class-selector'
 import { MVButton } from '@/components/mv/mv-button'
 import { flightSearchInputSchema } from '@/lib/flight/flight-schema'
+import { buildFlightSearchPath } from '@/lib/flight/flight-search-url'
 import { cn } from '@/lib/utils'
 import type { FlightAirport, FlightCabinClass, FlightCabinClassOption, FlightTripType } from '@/types/flight'
 
@@ -16,28 +18,43 @@ function todayIso() {
   return new Date().toISOString().slice(0, 10)
 }
 
+/** Prefill for the "Sửa tìm kiếm" panel on Search Results (EPIC-002) — omitted on the homepage, where the box starts empty. */
+export interface FlightSearchBoxInitialValues {
+  tripType: FlightTripType
+  originCode: string
+  destinationCode: string
+  departDate: string
+  returnDate?: string
+  passengers: FlightPassengerCounts
+  cabinClass: FlightCabinClass
+}
+
 export function FlightSearchBox({
   airports,
   cabinClasses,
   defaultOriginCode,
   defaultDestinationCode,
+  initialValues,
   className,
 }: {
   airports: FlightAirport[]
   cabinClasses: FlightCabinClassOption[]
   defaultOriginCode: string
   defaultDestinationCode: string
+  initialValues?: FlightSearchBoxInitialValues
   className?: string
 }) {
-  const [tripType, setTripType] = useState<FlightTripType>('oneway')
-  const [originCode, setOriginCode] = useState(defaultOriginCode)
-  const [destinationCode, setDestinationCode] = useState(defaultDestinationCode)
-  const [departDate, setDepartDate] = useState('')
-  const [returnDate, setReturnDate] = useState('')
-  const [passengers, setPassengers] = useState<FlightPassengerCounts>({ adults: 1, children: 0, infants: 0 })
-  const [cabinClass, setCabinClass] = useState<FlightCabinClass>(cabinClasses[0]?.value ?? 'economy')
+  const router = useRouter()
+  const [tripType, setTripType] = useState<FlightTripType>(initialValues?.tripType ?? 'oneway')
+  const [originCode, setOriginCode] = useState(initialValues?.originCode ?? defaultOriginCode)
+  const [destinationCode, setDestinationCode] = useState(initialValues?.destinationCode ?? defaultDestinationCode)
+  const [departDate, setDepartDate] = useState(initialValues?.departDate ?? '')
+  const [returnDate, setReturnDate] = useState(initialValues?.returnDate ?? '')
+  const [passengers, setPassengers] = useState<FlightPassengerCounts>(
+    initialValues?.passengers ?? { adults: 1, children: 0, infants: 0 },
+  )
+  const [cabinClass, setCabinClass] = useState<FlightCabinClass>(initialValues?.cabinClass ?? cabinClasses[0]?.value ?? 'economy')
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [confirmation, setConfirmation] = useState<string | null>(null)
 
   function swapAirports() {
     setOriginCode(destinationCode)
@@ -51,7 +68,6 @@ export function FlightSearchBox({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setConfirmation(null)
 
     const result = flightSearchInputSchema.safeParse({
       tripType,
@@ -78,14 +94,13 @@ export function FlightSearchBox({
     setErrors({})
     const origin = airports.find((a) => a.code === originCode)
     const destination = airports.find((a) => a.code === destinationCode)
-    const totalPassengers = passengers.adults + passengers.children + passengers.infants
-    const departLabel = new Date(departDate).toLocaleDateString('vi-VN')
-    const returnLabel =
-      tripType === 'roundtrip' && returnDate ? ` – ${new Date(returnDate).toLocaleDateString('vi-VN')}` : ''
+    if (!origin || !destination) return
 
-    setConfirmation(
-      `Đã ghi nhận: ${origin?.city ?? originCode} → ${destination?.city ?? destinationCode}, ${departLabel}${returnLabel}, ` +
-        `${totalPassengers} khách. Tính năng đặt vé trực tuyến sẽ sớm ra mắt — gọi 0934 368 132 để được hỗ trợ ngay.`,
+    router.push(
+      buildFlightSearchPath(
+        { originSlug: origin.slug, destinationSlug: destination.slug },
+        { tripType, departDate, returnDate: tripType === 'roundtrip' ? returnDate : undefined, ...passengers, cabinClass },
+      ),
     )
   }
 
@@ -161,17 +176,6 @@ export function FlightSearchBox({
           <Search className="size-5" />
           Tìm chuyến bay
         </MVButton>
-
-        {confirmation && (
-          <p
-            role="status"
-            aria-live="polite"
-            className="flex items-start gap-2 rounded-xl bg-mv-mist-blue px-4 py-3 text-sm leading-relaxed text-mv-deep-navy lg:basis-full"
-          >
-            <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-mv-journey-blue" />
-            {confirmation}
-          </p>
-        )}
       </form>
     </div>
   )

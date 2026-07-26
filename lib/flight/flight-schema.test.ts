@@ -1,5 +1,5 @@
 import { test, expect } from 'vitest'
-import { flightSearchInputSchema } from './flight-schema'
+import { flightSearchInputSchema, flightSearchQuerySchema } from './flight-schema'
 
 function input(overrides: Partial<Parameters<typeof flightSearchInputSchema.parse>[0]> = {}) {
   return {
@@ -47,5 +47,20 @@ test('same origin and destination fails', () => {
 
 test('more infants than adults fails', () => {
   const result = flightSearchInputSchema.safeParse(input({ adults: 1, infants: 2 }))
+  expect(result.success).toBe(false)
+})
+
+test('flightSearchQuerySchema accepts a valid Search Results query', () => {
+  const result = flightSearchQuerySchema.safeParse(input())
+  expect(result.success).toBe(true)
+})
+
+test('flightSearchQuerySchema rejects a malformed departDate', () => {
+  const result = flightSearchQuerySchema.safeParse(input({ departDate: '20/08/2026' }))
+  expect(result.success).toBe(false)
+})
+
+test('flightSearchQuerySchema rejects same origin and destination', () => {
+  const result = flightSearchQuerySchema.safeParse(input({ destinationCode: 'HPH' }))
   expect(result.success).toBe(false)
 })

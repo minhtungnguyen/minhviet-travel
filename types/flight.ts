@@ -21,6 +21,8 @@ export interface FlightCabinClassOption {
 /** One searchable airport/city in the Flight Search Box's origin/destination lists. */
 export interface FlightAirport {
   code: string
+  /** URL-safe city slug used in the Search Results friendly URL (`/ve-may-bay/{originSlug}/{destinationSlug}`, EPIC-002 §6). */
+  slug: string
   city: string
   name: string
   country: string
@@ -119,4 +121,72 @@ export interface FlightHomeContent {
     primaryCta: { label: string; href: string }
     secondaryCta: { label: string; href: string }
   }
+}
+
+/**
+ * Search Results content contracts (EPIC-002). Mirrors `FlightHomeContent`'s
+ * shape rule: every Search Results component depends only on these types,
+ * never on `lib/flight/flight-search-mock.ts` directly.
+ */
+
+export type FlightStopCount = 0 | 1 | 2
+
+export interface FlightBaggageAllowance {
+  carryOnKg: number
+  checkedKg: number
+}
+
+/** One bookable fare in the Search Results flight list (EPIC-002 §3 Flight Card). */
+export interface FlightOffer {
+  id: string
+  airlineCode: string
+  airlineName: string
+  flightNumber: string
+  originCode: string
+  destinationCode: string
+  /** ISO datetime (departure date + local time). */
+  departTime: string
+  /** ISO datetime (departure date + local time; may roll to the next day). */
+  arriveTime: string
+  durationMinutes: number
+  stops: FlightStopCount
+  stopAirportCodes: string[]
+  cabinClass: FlightCabinClass
+  baggage: FlightBaggageAllowance
+  /** Total fare for the whole party (all passengers), not per-passenger. */
+  price: number
+  currency: 'VND'
+  isRecommended: boolean
+}
+
+/** One day in the ±3-day Fare Calendar strip (EPIC-002 §3). */
+export interface FareCalendarDay {
+  /** ISO date (YYYY-MM-DD). */
+  date: string
+  priceFrom: number
+  currency: 'VND'
+  isCheapest: boolean
+  isSelected: boolean
+}
+
+export interface FlightSearchQuery {
+  tripType: FlightTripType
+  originCode: string
+  destinationCode: string
+  /** ISO date (YYYY-MM-DD). */
+  departDate: string
+  /** ISO date (YYYY-MM-DD), only meaningful when `tripType === 'roundtrip'`. */
+  returnDate?: string
+  adults: number
+  children: number
+  infants: number
+  cabinClass: FlightCabinClass
+}
+
+export interface FlightSearchResults {
+  query: FlightSearchQuery
+  origin: FlightAirport
+  destination: FlightAirport
+  offers: FlightOffer[]
+  fareCalendar: FareCalendarDay[]
 }

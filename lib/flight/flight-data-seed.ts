@@ -1,7 +1,9 @@
-import type { FlightHomeContent } from '@/types/flight'
+import type { FlightAirport, FlightHomeContent } from '@/types/flight'
+import { buildFlightSearchPath, DEFAULT_FLASH_SALE_SEARCH_OFFSET_DAYS } from '@/lib/flight/flight-search-url'
 
 /**
- * Mock repository data for /ve-may-bay (EPIC-001 – Flight Homepage), the
+ * Mock repository data for /ve-may-bay (EPIC-001 – Flight Homepage) and its
+ * Search Results route (EPIC-002 – `/ve-may-bay/[from]/[to]`), the
  * CMS-ready seam described in `types/flight.ts`. This is Mock Data only —
  * no airline API is wired up (see `integrations/flight/contracts/flight-provider.ts`
  * for the eventual real-fare contract, out of scope here). Fare figures,
@@ -14,6 +16,66 @@ import type { FlightHomeContent } from '@/types/flight'
  * available Vietnam landscape image rather than an exact city match;
  * swap for real route photography when a CMS/DAM is wired up.
  */
+
+/**
+ * Single source of truth for every airport referenced below — `slug` is
+ * hand-picked (not mechanically derived from `city`) so it matches
+ * `docs/PRD/Flight/EPIC-002-Flight-Search-Results.md` §6's friendly-URL
+ * example verbatim (`/ve-may-bay/hai-phong/ho-chi-minh`).
+ */
+const airports: FlightAirport[] = [
+  { code: 'HPH', slug: 'hai-phong', city: 'Hải Phòng', name: 'Sân bay Cát Bi', country: 'Việt Nam' },
+  { code: 'HAN', slug: 'ha-noi', city: 'Hà Nội', name: 'Sân bay Nội Bài', country: 'Việt Nam' },
+  { code: 'SGN', slug: 'ho-chi-minh', city: 'TP. Hồ Chí Minh', name: 'Sân bay Tân Sơn Nhất', country: 'Việt Nam' },
+  { code: 'DAD', slug: 'da-nang', city: 'Đà Nẵng', name: 'Sân bay Đà Nẵng', country: 'Việt Nam' },
+  { code: 'PQC', slug: 'phu-quoc', city: 'Phú Quốc', name: 'Sân bay Phú Quốc', country: 'Việt Nam' },
+  { code: 'CXR', slug: 'nha-trang', city: 'Nha Trang', name: 'Sân bay Cam Ranh', country: 'Việt Nam' },
+  { code: 'HUI', slug: 'hue', city: 'Huế', name: 'Sân bay Phú Bài', country: 'Việt Nam' },
+  { code: 'DLI', slug: 'da-lat', city: 'Đà Lạt', name: 'Sân bay Liên Khương', country: 'Việt Nam' },
+  { code: 'VCA', slug: 'can-tho', city: 'Cần Thơ', name: 'Sân bay Cần Thơ', country: 'Việt Nam' },
+  { code: 'VII', slug: 'vinh', city: 'Vinh', name: 'Sân bay Vinh', country: 'Việt Nam' },
+  { code: 'SIN', slug: 'singapore', city: 'Singapore', name: 'Sân bay Changi', country: 'Singapore' },
+  { code: 'BKK', slug: 'bangkok', city: 'Bangkok', name: 'Sân bay Suvarnabhumi', country: 'Thái Lan' },
+  { code: 'NRT', slug: 'tokyo', city: 'Tokyo', name: 'Sân bay Narita', country: 'Nhật Bản' },
+]
+
+/** Exported for the Search Results route (EPIC-002), which resolves `[from]/[to]` slugs against this same list. */
+export const flightAirports = airports
+
+const airportByCode = new Map(airports.map((airport) => [airport.code, airport]))
+const airportBySlug = new Map(airports.map((airport) => [airport.slug, airport]))
+
+function airport(code: string): FlightAirport {
+  const found = airportByCode.get(code)
+  if (!found) throw new Error(`Unknown mock airport code: ${code}`)
+  return found
+}
+
+/** Used by the Search Results route (EPIC-002) to resolve `[from]/[to]` slugs — returns `undefined` for an unknown slug so the caller can 404. */
+export function findFlightAirportBySlug(slug: string): FlightAirport | undefined {
+  return airportBySlug.get(slug)
+}
+
+/** Default departure date used by CTAs (Flash Sale, Popular Routes) that link into Search Results without a user-picked date yet. */
+const defaultSearchDate = new Date(Date.now() + DEFAULT_FLASH_SALE_SEARCH_OFFSET_DAYS * 24 * 60 * 60 * 1000)
+  .toISOString()
+  .slice(0, 10)
+
+function searchResultsHref(originCode: string, destinationCode: string) {
+  const origin = airport(originCode)
+  const destination = airport(destinationCode)
+  return buildFlightSearchPath(
+    { originSlug: origin.slug, destinationSlug: destination.slug },
+    { tripType: 'oneway', departDate: defaultSearchDate, adults: 1, children: 0, infants: 0, cabinClass: 'economy' },
+  )
+}
+
+export const flightAirlines = [
+  { id: 'air-vn', code: 'VN', name: 'Vietnam Airlines', shortName: 'Vietnam Airlines', isInternational: true, order: 1, isActive: true },
+  { id: 'air-vj', code: 'VJ', name: 'Vietjet Air', shortName: 'Vietjet Air', isInternational: true, order: 2, isActive: true },
+  { id: 'air-qh', code: 'QH', name: 'Bamboo Airways', shortName: 'Bamboo Airways', isInternational: true, order: 3, isActive: true },
+  { id: 'air-vu', code: 'VU', name: 'Vietravel Airlines', shortName: 'Vietravel Airlines', isInternational: false, order: 4, isActive: true },
+]
 
 export const flightHomeContentSeed: FlightHomeContent = {
   seo: {
@@ -38,21 +100,7 @@ export const flightHomeContentSeed: FlightHomeContent = {
   },
 
   searchBox: {
-    airports: [
-      { code: 'HPH', city: 'Hải Phòng', name: 'Sân bay Cát Bi', country: 'Việt Nam' },
-      { code: 'HAN', city: 'Hà Nội', name: 'Sân bay Nội Bài', country: 'Việt Nam' },
-      { code: 'SGN', city: 'TP. Hồ Chí Minh', name: 'Sân bay Tân Sơn Nhất', country: 'Việt Nam' },
-      { code: 'DAD', city: 'Đà Nẵng', name: 'Sân bay Đà Nẵng', country: 'Việt Nam' },
-      { code: 'PQC', city: 'Phú Quốc', name: 'Sân bay Phú Quốc', country: 'Việt Nam' },
-      { code: 'CXR', city: 'Nha Trang', name: 'Sân bay Cam Ranh', country: 'Việt Nam' },
-      { code: 'HUI', city: 'Huế', name: 'Sân bay Phú Bài', country: 'Việt Nam' },
-      { code: 'DLI', city: 'Đà Lạt', name: 'Sân bay Liên Khương', country: 'Việt Nam' },
-      { code: 'VCA', city: 'Cần Thơ', name: 'Sân bay Cần Thơ', country: 'Việt Nam' },
-      { code: 'VII', city: 'Vinh', name: 'Sân bay Vinh', country: 'Việt Nam' },
-      { code: 'SIN', city: 'Singapore', name: 'Sân bay Changi', country: 'Singapore' },
-      { code: 'BKK', city: 'Bangkok', name: 'Sân bay Suvarnabhumi', country: 'Thái Lan' },
-      { code: 'NRT', city: 'Tokyo', name: 'Sân bay Narita', country: 'Nhật Bản' },
-    ],
+    airports,
     cabinClasses: [
       { value: 'economy', label: 'Phổ thông' },
       { value: 'premium_economy', label: 'Phổ thông đặc biệt' },
@@ -74,7 +122,7 @@ export const flightHomeContentSeed: FlightHomeContent = {
       currency: 'VND',
       validUntil: '2026-08-31',
       image: { src: '/dest-vietnam.webp', alt: 'Phong cảnh Việt Nam từ trên cao', width: 1200, height: 900 },
-      href: '#tim-chuyen-bay',
+      href: searchResultsHref('HPH', 'SGN'),
       order: 1,
       isActive: true,
     },
@@ -88,7 +136,7 @@ export const flightHomeContentSeed: FlightHomeContent = {
       currency: 'VND',
       validUntil: '2026-08-15',
       image: { src: '/ninh-binh.jpg', alt: 'Phong cảnh thiên nhiên miền Trung Việt Nam', width: 1200, height: 900 },
-      href: '#tim-chuyen-bay',
+      href: searchResultsHref('HPH', 'DAD'),
       order: 2,
       isActive: true,
     },
@@ -102,7 +150,7 @@ export const flightHomeContentSeed: FlightHomeContent = {
       currency: 'VND',
       validUntil: '2026-09-10',
       image: { src: '/ha-long-bay.jpg', alt: 'Vịnh biển Việt Nam nhìn từ trên cao', width: 1200, height: 900 },
-      href: '#tim-chuyen-bay',
+      href: searchResultsHref('HAN', 'PQC'),
       order: 3,
       isActive: true,
     },
@@ -116,7 +164,7 @@ export const flightHomeContentSeed: FlightHomeContent = {
       currency: 'VND',
       validUntil: '2026-08-20',
       image: { src: '/sapa-terraces.jpg', alt: 'Phong cảnh Việt Nam mùa hè', width: 1200, height: 900 },
-      href: '#tim-chuyen-bay',
+      href: searchResultsHref('SGN', 'PQC'),
       order: 4,
       isActive: true,
     },
@@ -130,7 +178,7 @@ export const flightHomeContentSeed: FlightHomeContent = {
       currency: 'VND',
       validUntil: '2026-09-30',
       image: { src: '/dest-singapore.webp', alt: 'Đường chân trời Singapore về đêm', width: 1200, height: 900 },
-      href: '#tim-chuyen-bay',
+      href: searchResultsHref('HPH', 'SIN'),
       order: 5,
       isActive: true,
     },
@@ -144,7 +192,7 @@ export const flightHomeContentSeed: FlightHomeContent = {
       currency: 'VND',
       validUntil: '2026-10-15',
       image: { src: '/dest-japan.webp', alt: 'Cảnh sắc mùa hoa anh đào tại Nhật Bản', width: 1200, height: 900 },
-      href: '#tim-chuyen-bay',
+      href: searchResultsHref('HAN', 'NRT'),
       order: 6,
       isActive: true,
     },
@@ -153,78 +201,73 @@ export const flightHomeContentSeed: FlightHomeContent = {
   popularRoutes: [
     {
       id: 'route-hph-sgn',
-      origin: { code: 'HPH', city: 'Hải Phòng', name: 'Sân bay Cát Bi', country: 'Việt Nam' },
-      destination: { code: 'SGN', city: 'TP. Hồ Chí Minh', name: 'Sân bay Tân Sơn Nhất', country: 'Việt Nam' },
+      origin: airport('HPH'),
+      destination: airport('SGN'),
       priceFrom: 990000,
       currency: 'VND',
       popularAirlines: ['Vietnam Airlines', 'Vietjet Air'],
-      href: '#tim-chuyen-bay',
+      href: searchResultsHref('HPH', 'SGN'),
       order: 1,
       isActive: true,
     },
     {
       id: 'route-hph-dad',
-      origin: { code: 'HPH', city: 'Hải Phòng', name: 'Sân bay Cát Bi', country: 'Việt Nam' },
-      destination: { code: 'DAD', city: 'Đà Nẵng', name: 'Sân bay Đà Nẵng', country: 'Việt Nam' },
+      origin: airport('HPH'),
+      destination: airport('DAD'),
       priceFrom: 790000,
       currency: 'VND',
       popularAirlines: ['Vietjet Air', 'Bamboo Airways'],
-      href: '#tim-chuyen-bay',
+      href: searchResultsHref('HPH', 'DAD'),
       order: 2,
       isActive: true,
     },
     {
       id: 'route-hph-pqc',
-      origin: { code: 'HPH', city: 'Hải Phòng', name: 'Sân bay Cát Bi', country: 'Việt Nam' },
-      destination: { code: 'PQC', city: 'Phú Quốc', name: 'Sân bay Phú Quốc', country: 'Việt Nam' },
+      origin: airport('HPH'),
+      destination: airport('PQC'),
       priceFrom: 1290000,
       currency: 'VND',
       popularAirlines: ['Vietnam Airlines', 'Vietjet Air'],
-      href: '#tim-chuyen-bay',
+      href: searchResultsHref('HPH', 'PQC'),
       order: 3,
       isActive: true,
     },
     {
       id: 'route-han-dad',
-      origin: { code: 'HAN', city: 'Hà Nội', name: 'Sân bay Nội Bài', country: 'Việt Nam' },
-      destination: { code: 'DAD', city: 'Đà Nẵng', name: 'Sân bay Đà Nẵng', country: 'Việt Nam' },
+      origin: airport('HAN'),
+      destination: airport('DAD'),
       priceFrom: 690000,
       currency: 'VND',
       popularAirlines: ['Vietjet Air', 'Bamboo Airways', 'Vietravel Airlines'],
-      href: '#tim-chuyen-bay',
+      href: searchResultsHref('HAN', 'DAD'),
       order: 4,
       isActive: true,
     },
     {
       id: 'route-han-cxr',
-      origin: { code: 'HAN', city: 'Hà Nội', name: 'Sân bay Nội Bài', country: 'Việt Nam' },
-      destination: { code: 'CXR', city: 'Nha Trang', name: 'Sân bay Cam Ranh', country: 'Việt Nam' },
+      origin: airport('HAN'),
+      destination: airport('CXR'),
       priceFrom: 890000,
       currency: 'VND',
       popularAirlines: ['Vietnam Airlines', 'Vietjet Air'],
-      href: '#tim-chuyen-bay',
+      href: searchResultsHref('HAN', 'CXR'),
       order: 5,
       isActive: true,
     },
     {
       id: 'route-sgn-pqc',
-      origin: { code: 'SGN', city: 'TP. Hồ Chí Minh', name: 'Sân bay Tân Sơn Nhất', country: 'Việt Nam' },
-      destination: { code: 'PQC', city: 'Phú Quốc', name: 'Sân bay Phú Quốc', country: 'Việt Nam' },
+      origin: airport('SGN'),
+      destination: airport('PQC'),
       priceFrom: 590000,
       currency: 'VND',
       popularAirlines: ['Vietjet Air', 'Vietravel Airlines'],
-      href: '#tim-chuyen-bay',
+      href: searchResultsHref('SGN', 'PQC'),
       order: 6,
       isActive: true,
     },
   ],
 
-  airlines: [
-    { id: 'air-vn', code: 'VN', name: 'Vietnam Airlines', shortName: 'Vietnam Airlines', isInternational: true, order: 1, isActive: true },
-    { id: 'air-vj', code: 'VJ', name: 'Vietjet Air', shortName: 'Vietjet Air', isInternational: true, order: 2, isActive: true },
-    { id: 'air-qh', code: 'QH', name: 'Bamboo Airways', shortName: 'Bamboo Airways', isInternational: true, order: 3, isActive: true },
-    { id: 'air-vu', code: 'VU', name: 'Vietravel Airlines', shortName: 'Vietravel Airlines', isInternational: false, order: 4, isActive: true },
-  ],
+  airlines: flightAirlines,
 
   articles: [
     {

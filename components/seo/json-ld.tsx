@@ -13,7 +13,7 @@ import type { Tour } from '@/lib/site-data'
 import type { AvailabilityStatus } from '@/types/cms'
 import { buildTourCardViewModel } from '@/lib/tours/availability'
 import type { TourAvailabilityStatus } from '@/types/tour-availability'
-import type { FlightHomeContent } from '@/types/flight'
+import type { FlightAirport, FlightHomeContent, FlightSearchQuery } from '@/types/flight'
 
 /**
  * schema.org's ItemAvailability doesn't have a direct match for CHECKING
@@ -185,11 +185,17 @@ export function FlightHomeJsonLd({ content }: { content: FlightHomeContent }) {
     name: ORGANIZATION_NAME,
     potentialAction: {
       '@type': 'SearchAction',
+      /**
+       * Points at the real Search Results route (EPIC-002,
+       * `/ve-may-bay/{originSlug}/{destinationSlug}`) now that it exists —
+       * `originSlug`/`destinationSlug` match `FlightAirport.slug`, not the
+       * IATA code, per `lib/flight/flight-search-url.ts`.
+       */
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: `${canonicalUrl}?tu={origin}&den={destination}&ngayDi={departDate}`,
+        urlTemplate: `${SITE_URL}/ve-may-bay/{originSlug}/{destinationSlug}?ngayDi={departDate}`,
       },
-      'query-input': ['required name=origin', 'required name=destination', 'required name=departDate'],
+      'query-input': ['required name=originSlug', 'required name=destinationSlug', 'required name=departDate'],
     },
   }
 
@@ -213,6 +219,63 @@ export function FlightHomeJsonLd({ content }: { content: FlightHomeContent }) {
   const graph = {
     '@context': 'https://schema.org',
     '@graph': [organization, website, breadcrumbList, faqPage],
+  }
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(graph) }}
+    />
+  )
+}
+
+/**
+ * Structured data for `/ve-may-bay/[from]/[to]` (EPIC-002 §6: "Schema
+ * SearchResultsPage" + Breadcrumb). `SearchResultsPage` is a schema.org
+ * `WebPage` subtype — there's no dedicated flight-offer schema in the
+ * vocabulary, so `resultCount` is carried via `mainEntity.numberOfItems`
+ * on a generic `ItemList` rather than inventing one.
+ */
+export function FlightSearchResultsJsonLd({
+  origin,
+  destination,
+  resultCount,
+}: {
+  origin: FlightAirport
+  destination: FlightAirport
+  query: FlightSearchQuery
+  resultCount: number
+}) {
+  const canonicalUrl = `${SITE_URL}/ve-may-bay/${origin.slug}/${destination.slug}`
+
+  const breadcrumbList = {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Trang chủ', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Vé máy bay', item: `${SITE_URL}/ve-may-bay` },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: `${origin.city} → ${destination.city}`,
+        item: canonicalUrl,
+      },
+    ],
+  }
+
+  const searchResultsPage = {
+    '@type': 'SearchResultsPage',
+    '@id': `${canonicalUrl}#search-results`,
+    url: canonicalUrl,
+    name: `Vé máy bay ${origin.city} đi ${destination.city}`,
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: resultCount,
+    },
+  }
+
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [breadcrumbList, searchResultsPage],
   }
 
   return (

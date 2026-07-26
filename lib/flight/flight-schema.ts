@@ -15,6 +15,7 @@ const cmsImageSchema = z.object({
 
 const flightAirportSchema = z.object({
   code: z.string().length(3),
+  slug: z.string().min(1),
   city: z.string().min(1),
   name: z.string().min(1),
   country: z.string().min(1),
@@ -152,3 +153,66 @@ export const flightSearchInputSchema = z
   })
 
 export type FlightSearchInput = z.infer<typeof flightSearchInputSchema>
+
+/**
+ * Search Results validation (EPIC-002). `flightSearchQuerySchema` re-parses
+ * whatever `parseFlightSearchQueryParams` extracted from the URL — same
+ * boundary rule as the homepage content: never trust a shape just because
+ * it came from an internal helper.
+ */
+export const flightSearchQuerySchema = z
+  .object({
+    tripType: z.enum(['oneway', 'roundtrip']),
+    originCode: z.string().length(3),
+    destinationCode: z.string().length(3),
+    departDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Ngày đi không hợp lệ'),
+    returnDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    adults: z.number().int().min(1).max(9),
+    children: z.number().int().min(0).max(8),
+    infants: z.number().int().min(0).max(8),
+    cabinClass: flightCabinClassSchema,
+  })
+  .refine((data) => data.originCode !== data.destinationCode, {
+    message: 'Điểm đi và điểm đến không được trùng nhau',
+    path: ['destinationCode'],
+  })
+
+const flightBaggageAllowanceSchema = z.object({
+  carryOnKg: z.number().positive(),
+  checkedKg: z.number().positive(),
+})
+
+const flightOfferSchema = z.object({
+  id: z.string().min(1),
+  airlineCode: z.string().min(2).max(3),
+  airlineName: z.string().min(1),
+  flightNumber: z.string().min(1),
+  originCode: z.string().length(3),
+  destinationCode: z.string().length(3),
+  departTime: z.string().min(1),
+  arriveTime: z.string().min(1),
+  durationMinutes: z.number().positive(),
+  stops: z.union([z.literal(0), z.literal(1), z.literal(2)]),
+  stopAirportCodes: z.array(z.string()),
+  cabinClass: flightCabinClassSchema,
+  baggage: flightBaggageAllowanceSchema,
+  price: z.number().nonnegative(),
+  currency: z.literal('VND'),
+  isRecommended: z.boolean(),
+})
+
+const fareCalendarDaySchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  priceFrom: z.number().nonnegative(),
+  currency: z.literal('VND'),
+  isCheapest: z.boolean(),
+  isSelected: z.boolean(),
+})
+
+export const flightSearchResultsSchema = z.object({
+  query: flightSearchQuerySchema,
+  origin: flightAirportSchema,
+  destination: flightAirportSchema,
+  offers: z.array(flightOfferSchema),
+  fareCalendar: z.array(fareCalendarDaySchema).length(7),
+})

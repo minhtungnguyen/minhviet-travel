@@ -69,7 +69,7 @@ export function FlightDetailView({ detail, backHref }: { detail: FlightDetail; b
         <aside className="hidden lg:block">
           <div className="sticky top-24 flex flex-col gap-4">
             <FlightPriceSummary breakdown={breakdown} disclaimer={detail.fareRules.priceDisclaimer} />
-            <FlightBookingCTA fareName={selectedFareOption.name} totalForParty={breakdown.totalForParty} backHref={backHref} />
+            <FlightBookingCTA flightId={detail.id} fareOptionId={selectedFareOption.id} query={detail.query} backHref={backHref} />
           </div>
         </aside>
 
@@ -78,7 +78,7 @@ export function FlightDetailView({ detail, backHref }: { detail: FlightDetail; b
         </div>
       </div>
 
-      <FlightBookingCTA fareName={selectedFareOption.name} totalForParty={breakdown.totalForParty} backHref={backHref} sticky />
+      <FlightBookingCTA flightId={detail.id} fareOptionId={selectedFareOption.id} query={detail.query} backHref={backHref} sticky />
     </div>
   )
 }

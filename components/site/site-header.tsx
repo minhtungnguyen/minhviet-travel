@@ -27,7 +27,7 @@ const navItems = [
   { label: 'Du thuyền', href: '/cruises' },
   { label: 'Combo', href: '/combo' },
   { label: 'Vé máy bay', href: '/flights' },
-  { label: 'Vé vui chơi', href: '/tickets' },
+  { label: 'Vé vui chơi', href: '/ve-vui-choi' },
   { label: 'Visa', href: '/visa' },
   { label: 'Bảo hiểm', href: '/insurance' },
   { label: 'Ưu đãi', href: '/deals', promo: true },

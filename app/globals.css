@@ -66,11 +66,32 @@
   --color-mv-offer-red: var(--mv-offer-red);
   --color-mv-border-soft: var(--mv-border-soft);
 
+  /* Combo Emotion Layer (Volume 13 §13.2/13.3 — Combo = "Vacation",
+     Sunset Orange/Sand Beige accent). Additive, same exception pattern as
+     mv-mice-gold above: scoped to components/combo/* only, never a CTA
+     fill or a section's only accent — see COMBO-PAGE-VOLUME-13-AUDIT.md
+     P2-01. */
+  --color-mv-combo-sunset: var(--mv-combo-sunset);
+  --color-mv-combo-sunset-light: var(--mv-combo-sunset-light);
+  --color-mv-combo-sand: var(--mv-combo-sand);
+
   --color-mv-limited-bg: var(--mv-limited-bg);
   --color-mv-limited-text: var(--mv-limited-text);
   --color-mv-checking-bg: var(--mv-checking-bg);
   --color-mv-soldout-bg: var(--mv-soldout-bg);
   --color-mv-soldout-text: var(--mv-soldout-text);
+
+  /* Ticket Emotion Layer (Volume 13 §13.2/13.3 — "Vé vui chơi" = Excitement,
+     Festival Orange accent) as locked in docs/design/mv-ticket/04-design-
+     system.md §1: Orange is the ONLY accent (no purple — that option was
+     considered and explicitly rejected), reserved for CTA/price/badge only
+     ("money/action" signal). Category chips and all navigational/selection
+     state use the existing mv-journey-blue token instead — see
+     docs/design/DESIGN-BIBLE-v1.0.md decision D1. Same additive exception
+     pattern as mv-combo-sunset above: scoped to components/attraction-
+     ticket/* only, never a section background or the header/footer. */
+  --color-mv-ticket-orange: var(--mv-ticket-orange);
+  --color-mv-ticket-orange-light: var(--mv-ticket-orange-light);
 
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: calc(var(--radius) - 1px);
@@ -164,6 +185,27 @@
   --mv-offer-red: #d92d20;
   --mv-border-soft: #dce7f2;
   --mv-shadow-color: rgba(7, 29, 58, 0.08);
+
+  /* Combo module accent (Volume 13 §13.2/13.3 exception — see comment at
+     the @theme inline mapping above). Two tones, same "dark tone / light
+     tone" split as --gold/--gold-soft: `sunset` is dark enough for
+     icon/ring/text use on white card surfaces, `sunset-light` is bright
+     enough for icon use on the dark navy hero overlay. `sand` is a warm
+     light tint for a section background, distinct from the cooler
+     --sand/--secondary already used elsewhere. */
+  --mv-combo-sunset: #d97a3f;
+  --mv-combo-sunset-light: #f4a86b;
+  --mv-combo-sand: #f5e9d8;
+
+  /* Ticket module accent (Volume 13 §13.2/13.3 exception, docs/design/
+     mv-ticket/04-design-system.md §1 — D1: Festival Orange is the ONLY
+     accent for this module, no purple). Higher saturation than
+     --mv-combo-sunset on purpose: Ticket's emotion is "Excitement", not
+     Combo's "Vacation" — the two module accents must read as visibly
+     different in intensity, not just hue. `-light` is the badge/hover tint
+     on white card surfaces, never a button fill by itself. */
+  --mv-ticket-orange: #e8630a;
+  --mv-ticket-orange-light: #fde8d8;
 
   /* Motion tokens (Sprint UI-02 §14) */
   --motion-fast: 160ms;

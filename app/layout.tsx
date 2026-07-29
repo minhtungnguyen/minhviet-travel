@@ -2,6 +2,7 @@ import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Inter, Plus_Jakarta_Sans } from 'next/font/google'
 import { SkipLink } from '@/components/layout/skip-link'
+import { AnnouncementModal } from '@/components/site/announcement-modal'
 import { SITE_URL } from '@/constants/seo'
 import './globals.css'
 
@@ -54,6 +55,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <SkipLink />
         {children}
+        <AnnouncementModal />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

@@ -28,9 +28,9 @@ export const homepageContentSeed: HomepageContent = {
     },
     proofStat: {
       id: 'years-experience',
-      value: 15,
+      value: 5,
       suffix: '+',
-      label: 'Năm kinh nghiệm tổ chức du lịch & MICE',
+      label: 'Năm kinh nghiệm triển khai MICE',
       source: 'Hồ sơ năng lực Minh Việt Travel',
       asOf: '2026',
     },
@@ -51,15 +51,15 @@ export const homepageContentSeed: HomepageContent = {
     stats: [
       {
         id: 'clients-served',
-        value: 5000,
+        value: 200,
         suffix: '+',
-        label: 'Doanh nghiệp đã đồng hành',
+        label: 'Doanh nghiệp đã tin dùng',
         source: 'CRM nội bộ Minh Việt, tổng lũy kế',
         asOf: '2026-Q2',
       },
       {
         id: 'travelers-served',
-        value: 200,
+        value: 10,
         suffix: 'K+',
         label: 'Lượt khách được phục vụ',
         source: 'Báo cáo vận hành nội bộ',
@@ -67,9 +67,9 @@ export const homepageContentSeed: HomepageContent = {
       },
       {
         id: 'global-partners',
-        value: 60,
+        value: 150,
         suffix: '+',
-        label: 'Đối tác hàng không & lưu trú toàn cầu',
+        label: 'Đối tác lưu trú, vận chuyển',
         source: 'Danh mục đối tác Minh Việt',
         asOf: '2026-Q2',
       },
@@ -127,17 +127,17 @@ export const homepageContentSeed: HomepageContent = {
     ],
     proofStat: {
       id: 'mice-programs-delivered',
-      value: 300,
+      value: 30,
       suffix: '+',
       label: 'Chương trình MICE đã triển khai',
       source: 'Báo cáo vận hành nội bộ Minh Việt',
       asOf: '2026-Q2',
     },
     image: {
-      src: '/editorial-mice.webp',
-      alt: 'Sự kiện gala dinner doanh nghiệp do Minh Việt tổ chức',
+      src: '/mice-audience-vietnam.jpg',
+      alt: 'Khán phòng sự kiện doanh nghiệp do Minh Việt tổ chức, khách mời vỗ tay hưởng ứng',
       width: 1600,
-      height: 1200,
+      height: 1067,
     },
     cta: { label: 'Yêu cầu thiết kế chương trình', href: '/mice' },
   },
@@ -440,7 +440,7 @@ export const homepageContentSeed: HomepageContent = {
     eyebrow: 'Năng lực',
     title: 'Năng lực & uy tín được khẳng định',
     description:
-      'Trung tâm thương hiệu ghi nhận năng lực tổ chức, đội ngũ lãnh đạo và mạng lưới đối tác của Minh Việt — không phải một trang blog.',
+      'Trung tâm thương hiệu ghi nhận hành trình 14+ năm phát triển thương hiệu Minh Việt Travel, năng lực tổ chức, đội ngũ lãnh đạo và mạng lưới đối tác — không phải một trang blog.',
     stories: [
       {
         id: 'fdi-alliance',
@@ -448,7 +448,7 @@ export const homepageContentSeed: HomepageContent = {
         title: 'Minh Việt ký kết chiến lược cùng liên minh khu công nghiệp phía Bắc',
         description: 'Đồng hành tổ chức chương trình du lịch và MICE cho hàng chục nghìn lao động và chuyên gia FDI.',
         date: '18.06.2026',
-        image: { src: '/brand-signing.webp', alt: 'Lễ ký kết chiến lược', width: 1200, height: 900 },
+        image: { src: '/partnership-handshake-asia.jpg', alt: 'Bắt tay hợp tác chiến lược giữa Minh Việt và đối tác', width: 1200, height: 1800 },
         href: '/brand/news/fdi-alliance',
         size: 'large',
       },

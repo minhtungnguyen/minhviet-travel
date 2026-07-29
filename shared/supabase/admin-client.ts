@@ -7,8 +7,8 @@ import { getServiceRoleEnv } from '@/shared/env'
  * Service-role client — bypasses RLS entirely. `import 'server-only'`
  * fails the build if any client component ever imports this file.
  *
- * Restricted to the two documented exceptions where RLS structurally
- * cannot express the required check (docs/database/rls-policy-matrix.md):
+ * Restricted to the documented exceptions where RLS structurally cannot
+ * express the required check (docs/database/rls-policy-matrix.md):
  *   1. `modules/audit` — audit_logs/audit_log_changes have no INSERT
  *      policy for any authenticated role, by design (append-only,
  *      server-side-logger-only).
@@ -16,6 +16,15 @@ import { getServiceRoleEnv } from '@/shared/env'
  *      INSERT policy (master-prompt §12: no unrestricted public inserts
  *      into complex application tables); Zod validation, honeypot and
  *      idempotency checks run first, then this client writes the row.
+ *   3. The public attraction-ticket booking route
+ *      (app/api/v1/attraction-tickets/bookings/route.ts) — same shape as
+ *      #2: attraction_orders has no anon INSERT policy
+ *      (database/policies/0004_attraction_ticket_policies.sql), guest
+ *      checkout is a required V1 feature (docs/mv-ticket/01-product-scope.md
+ *      §5 "guest checkout"), Zod validation + the idempotency-key lookup
+ *      run first (`AttractionBookingService#createGuestBooking`), then
+ *      this client writes the row. Never used for reading/cancelling an
+ *      existing order — those stay staff-only through the session client.
  *
  * Never use this client for an ordinary authenticated user's own action —
  * that goes through `getServerSupabaseClient()` so RLS remains the actual

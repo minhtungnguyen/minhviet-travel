@@ -58,6 +58,766 @@ export type Database = {
           },
         ]
       }
+      attraction_api_error_logs: {
+        Row: {
+          attraction_order_id: string | null
+          correlation_id: string
+          created_at: string
+          endpoint: string
+          error_code: string | null
+          error_message: string | null
+          http_status: number | null
+          id: string
+        }
+        Insert: {
+          attraction_order_id?: string | null
+          correlation_id: string
+          created_at?: string
+          endpoint: string
+          error_code?: string | null
+          error_message?: string | null
+          http_status?: number | null
+          id?: string
+        }
+        Update: {
+          attraction_order_id?: string | null
+          correlation_id?: string
+          created_at?: string
+          endpoint?: string
+          error_code?: string | null
+          error_message?: string | null
+          http_status?: number | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attraction_api_error_logs_attraction_order_id_fkey"
+            columns: ["attraction_order_id"]
+            isOneToOne: false
+            referencedRelation: "attraction_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attraction_categories: {
+        Row: {
+          created_at: string
+          icon_key: string
+          id: string
+          slug: string
+          sort_order: number
+          updated_at: string
+          website_id: string
+        }
+        Insert: {
+          created_at?: string
+          icon_key: string
+          id?: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+          website_id: string
+        }
+        Update: {
+          created_at?: string
+          icon_key?: string
+          id?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attraction_categories_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attraction_category_translations: {
+        Row: {
+          attraction_category_id: string
+          id: string
+          locale: string
+          name: string
+        }
+        Insert: {
+          attraction_category_id: string
+          id?: string
+          locale: string
+          name: string
+        }
+        Update: {
+          attraction_category_id?: string
+          id?: string
+          locale?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attraction_category_translations_attraction_category_id_fkey"
+            columns: ["attraction_category_id"]
+            isOneToOne: false
+            referencedRelation: "attraction_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attraction_category_translations_locale_fkey"
+            columns: ["locale"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      attraction_cross_sells: {
+        Row: {
+          attraction_product_id: string
+          created_at: string
+          id: string
+          label: string
+          related_url: string
+          sort_order: number
+        }
+        Insert: {
+          attraction_product_id: string
+          created_at?: string
+          id?: string
+          label: string
+          related_url: string
+          sort_order?: number
+        }
+        Update: {
+          attraction_product_id?: string
+          created_at?: string
+          id?: string
+          label?: string
+          related_url?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attraction_cross_sells_attraction_product_id_fkey"
+            columns: ["attraction_product_id"]
+            isOneToOne: false
+            referencedRelation: "attraction_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attraction_faqs: {
+        Row: {
+          answer: string
+          attraction_product_id: string
+          created_at: string
+          id: string
+          locale: string
+          question: string
+          sort_order: number
+        }
+        Insert: {
+          answer: string
+          attraction_product_id: string
+          created_at?: string
+          id?: string
+          locale: string
+          question: string
+          sort_order?: number
+        }
+        Update: {
+          answer?: string
+          attraction_product_id?: string
+          created_at?: string
+          id?: string
+          locale?: string
+          question?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attraction_faqs_attraction_product_id_fkey"
+            columns: ["attraction_product_id"]
+            isOneToOne: false
+            referencedRelation: "attraction_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attraction_faqs_locale_fkey"
+            columns: ["locale"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      attraction_order_items: {
+        Row: {
+          attraction_order_id: string
+          attraction_product_id: string
+          created_at: string
+          id: string
+          provider_variant_id: string
+          quantity: number
+          ticket_holder_name: string | null
+          unit_price: number
+          usage_date: string
+        }
+        Insert: {
+          attraction_order_id: string
+          attraction_product_id: string
+          created_at?: string
+          id?: string
+          provider_variant_id: string
+          quantity: number
+          ticket_holder_name?: string | null
+          unit_price: number
+          usage_date: string
+        }
+        Update: {
+          attraction_order_id?: string
+          attraction_product_id?: string
+          created_at?: string
+          id?: string
+          provider_variant_id?: string
+          quantity?: number
+          ticket_holder_name?: string | null
+          unit_price?: number
+          usage_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attraction_order_items_attraction_order_id_fkey"
+            columns: ["attraction_order_id"]
+            isOneToOne: false
+            referencedRelation: "attraction_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attraction_order_items_attraction_product_id_fkey"
+            columns: ["attraction_product_id"]
+            isOneToOne: false
+            referencedRelation: "attraction_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attraction_orders: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          currency: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          id: string
+          idempotency_key: string
+          note: string | null
+          order_code: string
+          payment_status: string | null
+          provider_code: string
+          provider_order_id: string | null
+          request_snapshot: Json | null
+          response_reference: Json | null
+          status: Database["public"]["Enums"]["attraction_order_status"]
+          total_amount: number
+          updated_at: string
+          website_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          id?: string
+          idempotency_key: string
+          note?: string | null
+          order_code: string
+          payment_status?: string | null
+          provider_code?: string
+          provider_order_id?: string | null
+          request_snapshot?: Json | null
+          response_reference?: Json | null
+          status?: Database["public"]["Enums"]["attraction_order_status"]
+          total_amount: number
+          updated_at?: string
+          website_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string
+          id?: string
+          idempotency_key?: string
+          note?: string | null
+          order_code?: string
+          payment_status?: string | null
+          provider_code?: string
+          provider_order_id?: string | null
+          request_snapshot?: Json | null
+          response_reference?: Json | null
+          status?: Database["public"]["Enums"]["attraction_order_status"]
+          total_amount?: number
+          updated_at?: string
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attraction_orders_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attraction_orders_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attraction_product_categories: {
+        Row: {
+          attraction_category_id: string
+          attraction_product_id: string
+        }
+        Insert: {
+          attraction_category_id: string
+          attraction_product_id: string
+        }
+        Update: {
+          attraction_category_id?: string
+          attraction_product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attraction_product_categories_attraction_category_id_fkey"
+            columns: ["attraction_category_id"]
+            isOneToOne: false
+            referencedRelation: "attraction_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attraction_product_categories_attraction_product_id_fkey"
+            columns: ["attraction_product_id"]
+            isOneToOne: false
+            referencedRelation: "attraction_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attraction_product_translations: {
+        Row: {
+          attraction_product_id: string
+          cancellation_policy: string | null
+          created_at: string
+          description: string | null
+          id: string
+          locale: string
+          meta_description: string | null
+          meta_title: string | null
+          summary: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          attraction_product_id: string
+          cancellation_policy?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          locale: string
+          meta_description?: string | null
+          meta_title?: string | null
+          summary?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          attraction_product_id?: string
+          cancellation_policy?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          locale?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          summary?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attraction_product_translations_attraction_product_id_fkey"
+            columns: ["attraction_product_id"]
+            isOneToOne: false
+            referencedRelation: "attraction_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attraction_product_translations_locale_fkey"
+            columns: ["locale"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      attraction_products: {
+        Row: {
+          attraction_venue_id: string
+          created_at: string
+          currency: string
+          deleted_at: string | null
+          gallery_images: Json
+          id: string
+          image_alt: string
+          image_url: string
+          is_featured: boolean
+          price_from: number | null
+          product_type_id: string
+          slug: string
+          sort_order: number
+          status: Database["public"]["Enums"]["entity_status"]
+          updated_at: string
+          website_id: string
+        }
+        Insert: {
+          attraction_venue_id: string
+          created_at?: string
+          currency?: string
+          deleted_at?: string | null
+          gallery_images?: Json
+          id?: string
+          image_alt: string
+          image_url: string
+          is_featured?: boolean
+          price_from?: number | null
+          product_type_id: string
+          slug: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["entity_status"]
+          updated_at?: string
+          website_id: string
+        }
+        Update: {
+          attraction_venue_id?: string
+          created_at?: string
+          currency?: string
+          deleted_at?: string | null
+          gallery_images?: Json
+          id?: string
+          image_alt?: string
+          image_url?: string
+          is_featured?: boolean
+          price_from?: number | null
+          product_type_id?: string
+          slug?: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["entity_status"]
+          updated_at?: string
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attraction_products_attraction_venue_id_fkey"
+            columns: ["attraction_venue_id"]
+            isOneToOne: false
+            referencedRelation: "attraction_venues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attraction_products_product_type_id_fkey"
+            columns: ["product_type_id"]
+            isOneToOne: false
+            referencedRelation: "product_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attraction_products_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attraction_provider_refs: {
+        Row: {
+          attraction_product_id: string | null
+          attraction_venue_id: string | null
+          created_at: string
+          id: string
+          last_synced_at: string | null
+          provider_code: string
+          provider_product_id: string | null
+          provider_variant_id: string | null
+          provider_venue_id: string | null
+          raw_snapshot: Json | null
+          updated_at: string
+        }
+        Insert: {
+          attraction_product_id?: string | null
+          attraction_venue_id?: string | null
+          created_at?: string
+          id?: string
+          last_synced_at?: string | null
+          provider_code?: string
+          provider_product_id?: string | null
+          provider_variant_id?: string | null
+          provider_venue_id?: string | null
+          raw_snapshot?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          attraction_product_id?: string | null
+          attraction_venue_id?: string | null
+          created_at?: string
+          id?: string
+          last_synced_at?: string | null
+          provider_code?: string
+          provider_product_id?: string | null
+          provider_variant_id?: string | null
+          provider_venue_id?: string | null
+          raw_snapshot?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attraction_provider_refs_attraction_product_id_fkey"
+            columns: ["attraction_product_id"]
+            isOneToOne: false
+            referencedRelation: "attraction_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attraction_provider_refs_attraction_venue_id_fkey"
+            columns: ["attraction_venue_id"]
+            isOneToOne: false
+            referencedRelation: "attraction_venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attraction_sync_logs: {
+        Row: {
+          attraction_product_id: string | null
+          attraction_venue_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          status: string
+          sync_type: string
+          triggered_by: string | null
+        }
+        Insert: {
+          attraction_product_id?: string | null
+          attraction_venue_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          status: string
+          sync_type: string
+          triggered_by?: string | null
+        }
+        Update: {
+          attraction_product_id?: string | null
+          attraction_venue_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          status?: string
+          sync_type?: string
+          triggered_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attraction_sync_logs_attraction_product_id_fkey"
+            columns: ["attraction_product_id"]
+            isOneToOne: false
+            referencedRelation: "attraction_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attraction_sync_logs_attraction_venue_id_fkey"
+            columns: ["attraction_venue_id"]
+            isOneToOne: false
+            referencedRelation: "attraction_venues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attraction_sync_logs_triggered_by_fkey"
+            columns: ["triggered_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attraction_venue_translations: {
+        Row: {
+          attraction_venue_id: string
+          created_at: string
+          description: string | null
+          highlights: Json
+          id: string
+          locale: string
+          name: string
+          policy: string | null
+          summary: string | null
+          updated_at: string
+          usage_guide: string | null
+        }
+        Insert: {
+          attraction_venue_id: string
+          created_at?: string
+          description?: string | null
+          highlights?: Json
+          id?: string
+          locale: string
+          name: string
+          policy?: string | null
+          summary?: string | null
+          updated_at?: string
+          usage_guide?: string | null
+        }
+        Update: {
+          attraction_venue_id?: string
+          created_at?: string
+          description?: string | null
+          highlights?: Json
+          id?: string
+          locale?: string
+          name?: string
+          policy?: string | null
+          summary?: string | null
+          updated_at?: string
+          usage_guide?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attraction_venue_translations_attraction_venue_id_fkey"
+            columns: ["attraction_venue_id"]
+            isOneToOne: false
+            referencedRelation: "attraction_venues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attraction_venue_translations_locale_fkey"
+            columns: ["locale"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      attraction_venues: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          destination_id: string
+          id: string
+          image_alt: string
+          image_url: string
+          is_featured: boolean
+          slug: string
+          sort_order: number
+          status: Database["public"]["Enums"]["entity_status"]
+          updated_at: string
+          website_id: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          destination_id: string
+          id?: string
+          image_alt: string
+          image_url: string
+          is_featured?: boolean
+          slug: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["entity_status"]
+          updated_at?: string
+          website_id: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          destination_id?: string
+          id?: string
+          image_alt?: string
+          image_url?: string
+          is_featured?: boolean
+          slug?: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["entity_status"]
+          updated_at?: string
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attraction_venues_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attraction_venues_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attraction_vouchers: {
+        Row: {
+          attraction_order_id: string
+          created_at: string
+          download_url: string | null
+          hash_code: string | null
+          id: string
+          issued_at: string | null
+          provider_voucher_id: string
+        }
+        Insert: {
+          attraction_order_id: string
+          created_at?: string
+          download_url?: string | null
+          hash_code?: string | null
+          id?: string
+          issued_at?: string | null
+          provider_voucher_id: string
+        }
+        Update: {
+          attraction_order_id?: string
+          created_at?: string
+          download_url?: string | null
+          hash_code?: string | null
+          id?: string
+          issued_at?: string | null
+          provider_voucher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attraction_vouchers_attraction_order_id_fkey"
+            columns: ["attraction_order_id"]
+            isOneToOne: false
+            referencedRelation: "attraction_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log_changes: {
         Row: {
           audit_log_id: string
@@ -2369,6 +3129,13 @@ export type Database = {
         | "SUSPENDED"
         | "DISABLED"
         | "TERMINATED"
+      attraction_order_status:
+        | "INITIATED"
+        | "PENDING_PAYMENT"
+        | "CONFIRMED"
+        | "FAILED"
+        | "CANCELLED"
+        | "VOUCHER_ISSUED"
       cms_lifecycle_status:
         | "DRAFT"
         | "IN_REVIEW"
@@ -2561,6 +3328,14 @@ export const Constants = {
         "SUSPENDED",
         "DISABLED",
         "TERMINATED",
+      ],
+      attraction_order_status: [
+        "INITIATED",
+        "PENDING_PAYMENT",
+        "CONFIRMED",
+        "FAILED",
+        "CANCELLED",
+        "VOUCHER_ISSUED",
       ],
       cms_lifecycle_status: [
         "DRAFT",

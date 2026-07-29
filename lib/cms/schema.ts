@@ -45,7 +45,7 @@ const partnerLogoSchema = z.object({
 const serviceTileSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
-  icon: z.enum(['group', 'briefcase', 'sparkles', 'building', 'ship', 'plane', 'ticket']),
+  icon: z.enum(['group', 'briefcase', 'sparkles', 'building', 'ship', 'plane', 'ticket', 'globe']),
   href: z.string().min(1),
 })
 

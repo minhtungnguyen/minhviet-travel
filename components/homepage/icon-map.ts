@@ -1,6 +1,7 @@
 import {
   Briefcase,
   Building2,
+  Globe,
   Landmark,
   Plane,
   Ship,
@@ -20,6 +21,7 @@ export const SERVICE_ICONS: Record<ServiceTile['icon'], LucideIcon> = {
   ship: Ship,
   plane: Plane,
   ticket: Ticket,
+  globe: Globe,
 }
 
 export const SEGMENT_ICONS: Record<AudienceSegment['icon'], LucideIcon> = {

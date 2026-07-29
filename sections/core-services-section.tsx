@@ -65,7 +65,7 @@ export async function CoreServicesSection() {
           {readyMade && (
             <div>
               <p className="eyebrow mb-3 text-[11px] font-semibold text-muted-foreground">{readyMade.label}</p>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+              <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
                 {readyMade.services.map((service) => {
                   const Icon = SERVICE_ICONS[service.icon]
                   return (

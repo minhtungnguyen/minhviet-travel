@@ -39,7 +39,7 @@ export interface TrustStripContent {
 export interface ServiceTile {
   id: string
   title: string
-  icon: 'group' | 'briefcase' | 'sparkles' | 'building' | 'ship' | 'plane' | 'ticket'
+  icon: 'group' | 'briefcase' | 'sparkles' | 'building' | 'ship' | 'plane' | 'ticket' | 'globe'
   href: string
 }
 

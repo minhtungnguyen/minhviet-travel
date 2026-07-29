@@ -14,6 +14,7 @@ import type { AvailabilityStatus } from '@/types/cms'
 import { buildTourCardViewModel } from '@/lib/tours/availability'
 import type { TourAvailabilityStatus } from '@/types/tour-availability'
 import type { FlightAirport, FlightDetail, FlightHomeContent } from '@/types/flight'
+import type { InsuranceArticle, InsuranceLandingContent } from '@/types/insurance'
 
 /**
  * schema.org's ItemAvailability doesn't have a direct match for CHECKING
@@ -287,6 +288,95 @@ export function FlightSearchResultsJsonLd({
       dangerouslySetInnerHTML={{ __html: JSON.stringify(graph) }}
     />
   )
+}
+
+/**
+ * Structured data for /insurance (Organization + BreadcrumbList + FAQPage,
+ * same graph shape as `FlightHomeJsonLd`).
+ */
+export function InsuranceLandingJsonLd({ content }: { content: InsuranceLandingContent }) {
+  const canonicalUrl = `${SITE_URL}${content.seo.canonicalPath}`
+
+  const organization = {
+    '@type': 'TravelAgency',
+    '@id': `${SITE_URL}/#organization`,
+    name: ORGANIZATION_NAME,
+    url: SITE_URL,
+    logo: `${SITE_URL}${ORGANIZATION_LOGO}`,
+    telephone: ORGANIZATION_PHONE,
+    email: ORGANIZATION_EMAIL,
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: ORGANIZATION_ADDRESS_LOCALITY,
+      addressCountry: ORGANIZATION_ADDRESS_COUNTRY,
+    },
+    sameAs: ORGANIZATION_SAME_AS,
+  }
+
+  const breadcrumbList = {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Trang chủ', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Bảo hiểm du lịch', item: canonicalUrl },
+    ],
+  }
+
+  const faqPage = {
+    '@type': 'FAQPage',
+    mainEntity: content.faqs
+      .filter((faq) => faq.isActive)
+      .map((faq) => ({
+        '@type': 'Question',
+        name: faq.question,
+        acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+      })),
+  }
+
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [organization, breadcrumbList, faqPage],
+  }
+
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(graph) }} />
+}
+
+/** Structured data for `/insurance/kien-thuc/[slug]` — Organization + BreadcrumbList + Article, mirrors `FlightDetailJsonLd`'s shape. */
+export function InsuranceArticleJsonLd({ article, pageUrl }: { article: InsuranceArticle; pageUrl: string }) {
+  const organization = {
+    '@type': 'TravelAgency',
+    '@id': `${SITE_URL}/#organization`,
+    name: ORGANIZATION_NAME,
+    url: SITE_URL,
+    logo: `${SITE_URL}${ORGANIZATION_LOGO}`,
+  }
+
+  const breadcrumbList = {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Trang chủ', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Bảo hiểm du lịch', item: `${SITE_URL}/insurance` },
+      { '@type': 'ListItem', position: 3, name: article.title, item: pageUrl },
+    ],
+  }
+
+  const articleSchema = {
+    '@type': 'Article',
+    '@id': `${pageUrl}#article`,
+    headline: article.title,
+    description: article.excerpt,
+    image: `${SITE_URL}${article.image.src}`,
+    datePublished: article.publishedAt,
+    author: organization,
+    publisher: organization,
+    mainEntityOfPage: pageUrl,
+  }
+
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [organization, breadcrumbList, articleSchema],
+  }
+
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(graph) }} />
 }
 
 /**

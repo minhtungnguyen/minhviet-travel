@@ -19,6 +19,8 @@ type FormPrefill = {
   audienceType?: string
   defaultServiceInterest?: string
   showEventDetails?: boolean
+  /** Forwarded straight to `LeadForm`'s own `aiContext` prop — e.g. the /insurance calculator's computed zone/plan/fee summary. */
+  aiContext?: string
 }
 
 function ConsultationFormPanel({

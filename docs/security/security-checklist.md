@@ -1,11 +1,13 @@
 # Security Checklist — Sprint 1
 
-Per master-prompt §17: "Do not claim a security feature is complete unless it is actually implemented and tested." Status reflects Sprint 1A (architecture-only) reality.
+Per master-prompt §17: "Do not claim a security feature is complete unless it is actually implemented and tested." Status originally reflected Sprint 1A (architecture-only) reality.
+
+> **Status update (Phase 0 audit, `docs/backend/auth/01-current-state-audit.md`):** the rows below claiming "no live project"/"not yet applied" are **stale** — written before Sprint 1B deployed to `mv-travel-os-dev`. Re-verified live via Supabase MCP: RLS is enabled on all 62 tables, `resolveActor()` is implemented and running in production `/api/v1/*` traffic, and one real `SUPER_ADMIN` user exists. The two rows immediately below are corrected; every other row in this table still reflects its original, still-accurate status (rate limiting, CSRF, security headers etc. remain genuinely not implemented — see the Backend Foundation sprint's own audit for what's in scope to close each gap).
 
 | Item | Status |
 |---|---|
-| Supabase Auth session validation | Contract defined (`shared/auth/session.ts#resolveActor`), not implemented — no live project |
-| Row Level Security | **Written** for every Sprint 1 table (`database/policies/`), not yet applied to any project |
+| Supabase Auth session validation | **Implemented and live** (`shared/auth/session.ts#resolveActor`) — running against the deployed `mv-travel-os-dev` project, exercised by every `/api/v1/*` route |
+| Row Level Security | **Written and applied** for all 62 tables (`database/policies/`), live-verified via Supabase MCP `list_tables` (`rls_enabled: true` on every row), not just present in migration files |
 | Server-only service-role usage | Enforced by `import 'server-only'` in `shared/supabase/server-client.ts`; no real client exists yet |
 | Input validation (Zod) | Implemented for the two reference modules' schemas; the pattern is documented for the rest |
 | Output filtering | Response envelope (`shared/http/response.ts`) never echoes raw DB errors; `AppError` messages are hand-written, not derived from Postgres error text |

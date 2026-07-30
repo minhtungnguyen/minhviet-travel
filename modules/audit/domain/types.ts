@@ -29,3 +29,47 @@ export type AuditLogInput = {
  * Route files pass the real `recordAuditLog`; tests pass a no-op/spy.
  */
 export type AuditLogger = (input: AuditLogInput) => Promise<void>
+
+/**
+ * Domain type for `database/migrations/0013_audit.sql#security_events` —
+ * events with no resolved actor/entity (a failed login, a denied
+ * permission check) rather than a structural change to a named entity,
+ * which is what `audit_logs` is for. See `recordSecurityEvent`
+ * (`modules/audit/application/audit.service.ts`).
+ */
+export type SecurityEventInput = {
+  actorUserId: string | null
+  eventType: 'LOGIN_FAILURE' | 'PERMISSION_DENIED' | 'SUSPICIOUS_ACTIVITY'
+  ipAddress?: string | null
+  userAgent?: string | null
+  metadata?: Record<string, unknown>
+}
+
+/** Read shape for `GET /api/v1/audit-logs` (Admin Shell's Audit Logs screen). */
+export type AuditLogRecord = {
+  id: string
+  actorUserId: string | null
+  organizationId: string | null
+  websiteId: string | null
+  action: string
+  entityType: string
+  entityId: string | null
+  requestId: string | null
+  source: string
+  success: boolean
+  reason: string | null
+  ipAddress: string | null
+  userAgent: string | null
+  createdAt: string
+}
+
+/** Read shape for `GET /api/v1/audit-logs/security-events`. */
+export type SecurityEventRecord = {
+  id: string
+  actorUserId: string | null
+  eventType: string
+  ipAddress: string | null
+  userAgent: string | null
+  metadata: Record<string, unknown>
+  createdAt: string
+}

@@ -31,6 +31,8 @@ export interface AccessControlRepository {
   listRoles(): Promise<Role[]>
   findRoleById(id: string): Promise<Role | null>
   listPermissions(): Promise<Permission[]>
+  /** Full role↔permission grant matrix — powers the Admin Shell's Roles & Permissions screen. */
+  listRolePermissionPairs(): Promise<{ roleId: string; permissionId: string }[]>
 
   listUserRoles(userProfileId: string): Promise<UserRole[]>
   assignRole(input: AssignRoleInput, actorId: string): Promise<UserRole>
@@ -229,6 +231,12 @@ export class SupabaseAccessControlRepository implements AccessControlRepository 
     const { data, error } = await this.client.from('permissions').select('*').order('module')
     if (error) throw mapDatabaseError(error, 'Permission')
     return (data ?? []).map(mapPermission)
+  }
+
+  async listRolePermissionPairs(): Promise<{ roleId: string; permissionId: string }[]> {
+    const { data, error } = await this.client.from('role_permissions').select('role_id, permission_id')
+    if (error) throw mapDatabaseError(error, 'RolePermission')
+    return (data ?? []).map((row) => ({ roleId: row.role_id, permissionId: row.permission_id }))
   }
 
   async listUserRoles(userProfileId: string): Promise<UserRole[]> {

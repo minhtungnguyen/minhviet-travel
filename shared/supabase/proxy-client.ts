@@ -9,6 +9,10 @@ import { getPublicEnv } from '@/shared/env'
  * `@supabase/ssr`'s documented pattern — without this,
  * `getServerSupabaseClient()` in a Server Component can read a stale/
  * expired session (Server Components can't write cookies themselves).
+ *
+ * Also returns the resolved user (or `null`) so `proxy.ts` can gate
+ * `/admin/**` without creating a second Supabase client — `getUser()` is
+ * already called here to refresh the token, no need to call it twice.
  */
 export async function updateSupabaseSession(request: NextRequest) {
   let response = NextResponse.next({ request })
@@ -29,7 +33,7 @@ export async function updateSupabaseSession(request: NextRequest) {
 
   // Touches the session so an expired token is refreshed before any
   // downstream Server Component/Route Handler reads it.
-  await supabase.auth.getUser()
+  const { data } = await supabase.auth.getUser()
 
-  return response
+  return { response, user: data.user }
 }

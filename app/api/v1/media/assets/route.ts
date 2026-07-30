@@ -11,7 +11,7 @@ import { mediaAssetCreateSchema } from '@/modules/media/schemas/media.schema'
 import { MediaService } from '@/modules/media/application/media.service'
 import { SupabaseMediaRepository } from '@/modules/media/infrastructure/media.repository'
 
-const listQuerySchema = paginationQuerySchema.extend({ websiteId: uuidSchema.optional() })
+const listQuerySchema = paginationQuerySchema.extend({ websiteId: uuidSchema.optional(), folderId: uuidSchema.optional() })
 
 async function getService() {
   const client = await getServerSupabaseClient()
@@ -23,7 +23,7 @@ export const GET = withRoute(async (req: NextRequest, requestId) => {
   if (!parsed.success) throw AppError.validation('Invalid query parameters', { issues: parsed.error.issues })
   const actor = await resolveActor()
   const service = await getService()
-  const result = await service.listAssets(actor, parsed.data.websiteId, parsed.data)
+  const result = await service.listAssets(actor, parsed.data.websiteId, parsed.data, parsed.data.folderId)
   return ok(result, requestId)
 })
 

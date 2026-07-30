@@ -8,7 +8,7 @@ export interface MediaRepository {
   listFolders(websiteId?: string): Promise<MediaFolder[]>
   createFolder(input: MediaFolderCreateInput, actorId: string): Promise<MediaFolder>
 
-  listAssets(websiteId: string | undefined, query: PaginationQuery): Promise<PaginatedResult<MediaAsset>>
+  listAssets(websiteId: string | undefined, query: PaginationQuery, folderId?: string | null): Promise<PaginatedResult<MediaAsset>>
   findAssetById(id: string): Promise<MediaAsset | null>
   createAsset(input: MediaAssetCreateInput, actorId: string): Promise<MediaAsset>
   updateAsset(id: string, input: MediaAssetUpdateInput): Promise<MediaAsset>
@@ -85,10 +85,11 @@ export class SupabaseMediaRepository implements MediaRepository {
     return mapFolder(data)
   }
 
-  async listAssets(websiteId: string | undefined, query: PaginationQuery): Promise<PaginatedResult<MediaAsset>> {
+  async listAssets(websiteId: string | undefined, query: PaginationQuery, folderId?: string | null): Promise<PaginatedResult<MediaAsset>> {
     const from = (query.page - 1) * query.pageSize
     let builder = this.client.from('media_assets').select('*', { count: 'exact' }).is('deleted_at', null)
     builder = websiteId ? builder.eq('website_id', websiteId) : builder.is('website_id', null)
+    if (folderId !== undefined) builder = folderId === null ? builder.is('folder_id', null) : builder.eq('folder_id', folderId)
     if (query.search) builder = builder.ilike('original_filename', `%${query.search}%`)
     builder = builder.order(query.sort ?? 'created_at', { ascending: query.order === 'asc' })
     const { data, error, count } = await builder.range(from, from + query.pageSize - 1)

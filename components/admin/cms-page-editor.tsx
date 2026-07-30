@@ -1,0 +1,152 @@
+'use client'
+
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import { AlertCircle, ArrowDown, ArrowUp } from 'lucide-react'
+import { MVButton } from '@/components/mv/mv-button'
+import {
+  submitForReviewAction,
+  approvePageAction,
+  publishPageAction,
+  archivePageAction,
+  moveSectionAction,
+  type ActionResult,
+} from '@/app/admin/cms/actions'
+import type { CmsBlock, CmsBlockDefinition, CmsPage, CmsPageVersion, CmsSection } from '@/modules/cms/domain/types'
+
+const STATUS_LABEL: Record<string, string> = {
+  DRAFT: 'Bản nháp',
+  IN_REVIEW: 'Đang duyệt',
+  APPROVED: 'Đã duyệt',
+  SCHEDULED: 'Đã lên lịch',
+  PUBLISHED: 'Đã xuất bản',
+  ARCHIVED: 'Đã lưu trữ',
+}
+
+export function CmsPageEditor({
+  page,
+  currentVersion,
+  sectionsWithBlocks,
+  blockDefinitions,
+  canUpdate,
+  canPublish,
+}: {
+  page: CmsPage
+  currentVersion: CmsPageVersion | null
+  sectionsWithBlocks: { section: CmsSection; blocks: CmsBlock[] }[]
+  blockDefinitions: CmsBlockDefinition[]
+  canUpdate: boolean
+  canPublish: boolean
+}) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+  const defByI = new Map(blockDefinitions.map((d) => [d.id, d]))
+  const status = currentVersion?.status
+
+  function run(action: () => Promise<ActionResult>) {
+    setError(null)
+    startTransition(async () => {
+      const result = await action()
+      if (!result.ok) {
+        setError(result.message)
+        return
+      }
+      router.refresh()
+    })
+  }
+
+  return (
+    <div className="max-w-4xl space-y-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-foreground">/{page.slug}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {page.pageType} · {page.locale}
+          </p>
+        </div>
+        <span className="rounded-full bg-secondary px-3 py-1.5 text-xs font-semibold text-secondary-foreground">
+          {status ? (STATUS_LABEL[status] ?? status) : 'Chưa có phiên bản'}
+        </span>
+      </div>
+
+      {error && (
+        <p className="flex items-start gap-2 rounded-lg bg-destructive/10 px-3.5 py-3 text-sm leading-relaxed text-destructive">
+          <AlertCircle className="mt-0.5 size-4 shrink-0" />
+          {error}
+        </p>
+      )}
+
+      <div className="flex flex-wrap gap-2">
+        {canUpdate && status === 'DRAFT' && (
+          <MVButton size="sm" variant="secondary" loading={isPending} onClick={() => run(() => submitForReviewAction(page.id))}>
+            Gửi duyệt
+          </MVButton>
+        )}
+        {canUpdate && status === 'IN_REVIEW' && (
+          <MVButton size="sm" variant="secondary" loading={isPending} onClick={() => run(() => approvePageAction(page.id))}>
+            Duyệt
+          </MVButton>
+        )}
+        {canPublish && (status === 'APPROVED' || status === 'SCHEDULED') && (
+          <MVButton size="sm" loading={isPending} onClick={() => run(() => publishPageAction(page.id))}>
+            Xuất bản
+          </MVButton>
+        )}
+        {canUpdate && status && status !== 'ARCHIVED' && (
+          <MVButton size="sm" variant="outline" loading={isPending} onClick={() => run(() => archivePageAction(page.id))}>
+            Lưu trữ
+          </MVButton>
+        )}
+      </div>
+
+      <div className="space-y-4">
+        {sectionsWithBlocks.map(({ section, blocks }, i) => (
+          <section key={section.id} className="rounded-xl border border-border bg-card p-5">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="font-display text-base font-semibold text-foreground">{section.sectionKey}</h2>
+              {canUpdate && (
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    disabled={i === 0 || isPending}
+                    onClick={() => run(() => moveSectionAction(page.id, section.id, sectionsWithBlocks[i - 1].section.position))}
+                    className="rounded-lg border border-border p-1.5 text-muted-foreground hover:bg-secondary/60 disabled:opacity-30"
+                    aria-label="Đưa lên"
+                  >
+                    <ArrowUp className="size-4" />
+                  </button>
+                  <button
+                    type="button"
+                    disabled={i === sectionsWithBlocks.length - 1 || isPending}
+                    onClick={() => run(() => moveSectionAction(page.id, section.id, sectionsWithBlocks[i + 1].section.position))}
+                    className="rounded-lg border border-border p-1.5 text-muted-foreground hover:bg-secondary/60 disabled:opacity-30"
+                    aria-label="Đưa xuống"
+                  >
+                    <ArrowDown className="size-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="space-y-2">
+              {blocks.map((block) => (
+                <div key={block.id} className="rounded-lg bg-secondary/30 p-3">
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {defByI.get(block.blockDefinitionId)?.name ?? block.blockDefinitionId}
+                  </p>
+                  <pre className="overflow-x-auto text-xs text-foreground/80">{JSON.stringify(block.config, null, 2)}</pre>
+                </div>
+              ))}
+              {blocks.length === 0 && <p className="text-sm text-muted-foreground">Chưa có block nào trong section này.</p>}
+            </div>
+          </section>
+        ))}
+        {sectionsWithBlocks.length === 0 && (
+          <p className="rounded-xl border border-dashed border-border py-10 text-center text-sm text-muted-foreground">
+            Trang này chưa có section nào.
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}

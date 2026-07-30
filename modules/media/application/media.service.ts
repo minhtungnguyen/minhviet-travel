@@ -41,9 +41,9 @@ export class MediaService {
     return folder
   }
 
-  async listAssets(actor: ActorContext, websiteId: string | undefined, query: PaginationQuery) {
+  async listAssets(actor: ActorContext, websiteId: string | undefined, query: PaginationQuery, folderId?: string | null) {
     requirePermission(actor, 'media.asset.read')
-    return this.repository.listAssets(websiteId, query)
+    return this.repository.listAssets(websiteId, query, folderId)
   }
 
   async createAsset(actor: ActorContext, input: MediaAssetCreateInput, requestId: string) {

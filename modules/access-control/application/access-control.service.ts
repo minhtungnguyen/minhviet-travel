@@ -144,6 +144,14 @@ export class AccessControlService {
     return this.repository.listPermissions()
   }
 
+  async listRolePermissionPairs() {
+    // Same rationale as listRoles()/listPermissions() — the grant matrix
+    // itself isn't secret (RLS already allows any authenticated read on
+    // role_permissions); the Admin Shell gates the *screen* behind
+    // `role.manage` for UX, not because the data needs a stricter check.
+    return this.repository.listRolePermissionPairs()
+  }
+
   async listUserRoles(actor: ActorContext, userProfileId: string) {
     if (userProfileId !== actor.userId) {
       requirePermission(actor, 'user.manage')

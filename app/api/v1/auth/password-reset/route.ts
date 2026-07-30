@@ -19,7 +19,7 @@ export const POST = withRoute(async (req: NextRequest, requestId) => {
   }
 
   const supabase = await getServerSupabaseClient()
-  const redirectTo = `${process.env.APP_URL ?? 'http://localhost:3000'}/auth/password-update`
+  const redirectTo = `${process.env.APP_URL ?? 'http://localhost:3000'}/auth/callback?next=/reset-password`
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, { redirectTo })
   // Logged server-side only, never reflected in the response — a
   // different response for a bad/unregistered email would leak account

@@ -5,6 +5,7 @@ import { AppError } from '@/shared/errors/app-error'
 import { requireAuthenticatedUser } from '@/shared/auth/session'
 import { getServerSupabaseClient } from '@/shared/supabase/server-client'
 import { passwordUpdateSchema } from '@/shared/auth/auth.schema'
+import { recordAuditLog } from '@/modules/audit/application/audit.service'
 
 /**
  * Requires an authenticated session — either an ordinary logged-in user
@@ -14,7 +15,7 @@ import { passwordUpdateSchema } from '@/shared/auth/auth.schema'
  * is a pure auth operation, not an application-authorization one.
  */
 export const POST = withRoute(async (req: NextRequest, requestId) => {
-  await requireAuthenticatedUser()
+  const user = await requireAuthenticatedUser()
 
   const body = await req.json()
   const parsed = passwordUpdateSchema.safeParse(body)
@@ -27,6 +28,15 @@ export const POST = withRoute(async (req: NextRequest, requestId) => {
   if (error) {
     throw AppError.validation(error.message)
   }
+
+  await recordAuditLog({
+    actorUserId: user.id,
+    action: 'auth.password.updated',
+    entityType: 'auth',
+    entityId: user.id,
+    requestId,
+    source: 'admin-ui',
+  })
 
   return ok({ updated: true }, requestId)
 })

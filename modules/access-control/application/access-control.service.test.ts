@@ -36,6 +36,7 @@ function makeFakeRepository(overrides: Partial<AccessControlRepository> = {}): A
     listRoles: async () => [SUPER_ADMIN, VIEWER],
     findRoleById: async (id) => [SUPER_ADMIN, VIEWER].find((r) => r.id === id) ?? null,
     listPermissions: async () => [],
+    listRolePermissionPairs: async () => [],
     listUserRoles: async () => [],
     assignRole: async (input) => ({ id: 'ur-1', userProfileId: input.userProfileId, roleId: input.roleId, scopes: [] }),
     revokeRole: async () => {},

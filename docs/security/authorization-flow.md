@@ -25,6 +25,10 @@ Route Handler
 
 Verified live in Sprint 1B.1 (5-identity RLS test matrix) and re-confirmed structurally in Sprint 1B.2: `grep`ing the entire `modules/`/`app/api/` tree for `admin-client`/`SUPABASE_SERVICE_ROLE_KEY` usage returns exactly three call sites — `modules/audit/application/audit.service.ts` (writing `audit_logs`, which has no INSERT policy for any authenticated role by design) and the one public form-submission route (`form_submissions` has no anon INSERT policy by design) — plus `shared/env.ts`/`shared/supabase/admin-client.ts` themselves, where the function is defined. No other module, route, or "internal" path touches it.
 
+**Backend Foundation sprint (auth/RBAC UI) update:** two more narrowly-scoped exceptions were added, both structurally the same shape as the three above (RLS cannot express the check, so the service-role client is the documented bypass):
+4. `modules/access-control/infrastructure/auth-email-lookup.ts` — reads `auth.users.email` by id via the Supabase Admin API, used only by the Admin Shell's Users list/detail pages to display an email next to a `user_profiles` row. No RLS policy can grant this because Postgres's `auth` schema isn't exposed to ordinary authenticated roles at all; the caller only ever looks up ids it already resolved through a permission-gated `user_profiles` query, never used to enumerate or search identities on its own.
+5. `modules/audit/application/audit.service.ts#recordSecurityEvent` — same append-only, service-role-only write pattern as `recordAuditLog`, for `security_events` (failed logins etc.) instead of `audit_logs`.
+
 ## Website-level isolation
 
 `requireWebsiteAccess(actor, website)` (used by every CMS/navigation/FAQ/SEO/forms/media mutation) passes when either:

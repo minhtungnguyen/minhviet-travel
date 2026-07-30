@@ -1,7 +1,8 @@
 import 'server-only'
 import { getAdminSupabaseClient } from '@/shared/supabase/admin-client'
 import { logger } from '@/shared/logging/logger'
-import type { AuditLogInput } from '@/modules/audit/domain/types'
+import type { AuditLogInput, SecurityEventInput } from '@/modules/audit/domain/types'
+import type { Json } from '@/shared/supabase/database.types'
 
 /**
  * Writes one row to `audit_logs` via the service-role client — the table
@@ -40,6 +41,38 @@ export async function recordAuditLog(input: AuditLogInput): Promise<void> {
     logger.error(input.requestId, 'Unexpected error writing audit log', {
       action: input.action,
       entityType: input.entityType,
+      error: error instanceof Error ? error.message : String(error),
+    })
+  }
+}
+
+/**
+ * Writes one row to `security_events` — same append-only/service-role
+ * pattern as `recordAuditLog`, for events with no resolved actor/entity
+ * (e.g. a failed login) rather than a structural change to a named
+ * entity. `event_type` examples ('LOGIN_FAILURE', 'PERMISSION_DENIED',
+ * 'SUSPICIOUS_ACTIVITY') are the same ones documented directly in
+ * database/migrations/0013_audit.sql.
+ */
+export async function recordSecurityEvent(input: SecurityEventInput): Promise<void> {
+  try {
+    const admin = getAdminSupabaseClient()
+    const { error } = await admin.from('security_events').insert({
+      actor_user_id: input.actorUserId,
+      event_type: input.eventType,
+      ip_address: input.ipAddress ?? null,
+      user_agent: input.userAgent ?? null,
+      metadata: (input.metadata ?? {}) as Json,
+    })
+    if (error) {
+      logger.error('security-event', 'Failed to write security event', {
+        eventType: input.eventType,
+        error: error.message,
+      })
+    }
+  } catch (error) {
+    logger.error('security-event', 'Unexpected error writing security event', {
+      eventType: input.eventType,
       error: error instanceof Error ? error.message : String(error),
     })
   }

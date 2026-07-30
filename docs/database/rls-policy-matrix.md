@@ -1,6 +1,10 @@
 # RLS Policy Matrix — Sprint 1 (post Sprint 1A.2 reduction)
 
-Source of truth is the SQL in `database/policies/`; this document explains the *reasoning* per table family. Not yet applied to any project. 47 tables total — every one has RLS **enabled**, with zero documented exceptions (master-prompt §12).
+Source of truth is the SQL in `database/policies/`; this document explains the *reasoning* per table family.
+
+> **Status update (Phase 0 audit, `docs/backend/auth/01-current-state-audit.md`):** the line below originally read "Not yet applied to any project" — that was true at Sprint 1A authoring time but is **stale**. Re-verified live against `mv-travel-os-dev` (`otusjahkdjpxqayeeqqn`) via Supabase MCP: all policies described here **are applied**, and the table count has grown to 62 (47 Sprint 1 tables + 15 added by the Attraction Ticket module in Sprint "mv-ticket") — every one of the 62 has RLS **enabled**, confirmed via `list_tables`, not assumed from migration files. The per-table reasoning below is otherwise still accurate and is the correct reference to build against.
+
+47 tables total from the original Sprint 1 scope — every one has RLS **enabled**, with zero documented exceptions (master-prompt §12).
 
 Legend: **anon** = unauthenticated public visitor. **auth (self)** = any authenticated user, own rows only. **staff (perm)** = authenticated user holding the named permission key.
 

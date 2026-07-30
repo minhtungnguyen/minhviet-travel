@@ -57,7 +57,7 @@ begin
       (v_vn_id, 'en', 'Vietnam', 'vietnam');
   end if;
 
-  select id into v_hanoi_id from destination_translations where locale = 'vi' and slug = 'ha-noi';
+  select destination_id into v_hanoi_id from destination_translations where locale = 'vi' and slug = 'ha-noi';
   if v_hanoi_id is null then
     insert into destinations (parent_destination_id, destination_type, country_code, status)
     values (v_vn_id, 'PROVINCE_CITY', 'VN', 'ACTIVE') returning id into v_hanoi_id;
@@ -66,7 +66,7 @@ begin
       (v_hanoi_id, 'en', 'Hanoi', 'hanoi');
   end if;
 
-  select id into v_haiphong_id from destination_translations where locale = 'vi' and slug = 'hai-phong';
+  select destination_id into v_haiphong_id from destination_translations where locale = 'vi' and slug = 'hai-phong';
   if v_haiphong_id is null then
     insert into destinations (parent_destination_id, destination_type, country_code, status)
     values (v_vn_id, 'PROVINCE_CITY', 'VN', 'ACTIVE') returning id into v_haiphong_id;
@@ -75,7 +75,7 @@ begin
       (v_haiphong_id, 'en', 'Hai Phong', 'hai-phong-en');
   end if;
 
-  select id into v_quangninh_id from destination_translations where locale = 'vi' and slug = 'quang-ninh';
+  select destination_id into v_quangninh_id from destination_translations where locale = 'vi' and slug = 'quang-ninh';
   if v_quangninh_id is null then
     insert into destinations (parent_destination_id, destination_type, country_code, status)
     values (v_vn_id, 'PROVINCE_CITY', 'VN', 'ACTIVE') returning id into v_quangninh_id;
@@ -84,7 +84,7 @@ begin
       (v_quangninh_id, 'en', 'Quang Ninh', 'quang-ninh-en');
   end if;
 
-  select id into v_halong_id from destination_translations where locale = 'vi' and slug = 'ha-long';
+  select destination_id into v_halong_id from destination_translations where locale = 'vi' and slug = 'ha-long';
   if v_halong_id is null then
     insert into destinations (parent_destination_id, destination_type, country_code, is_featured, status)
     values (v_quangninh_id, 'DESTINATION', 'VN', true, 'ACTIVE') returning id into v_halong_id;
@@ -93,7 +93,7 @@ begin
       (v_halong_id, 'en', 'Ha Long Bay', 'ha-long-bay');
   end if;
 
-  select id into v_catba_id from destination_translations where locale = 'vi' and slug = 'cat-ba';
+  select destination_id into v_catba_id from destination_translations where locale = 'vi' and slug = 'cat-ba';
   if v_catba_id is null then
     insert into destinations (parent_destination_id, destination_type, country_code, is_featured, status)
     values (v_haiphong_id, 'DESTINATION', 'VN', true, 'ACTIVE') returning id into v_catba_id;

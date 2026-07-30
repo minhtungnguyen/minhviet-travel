@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getCurrentApplicationUser } from '@/shared/auth/session'
 import { visibleNavItems } from '@/lib/admin/nav-config'
+import { ADMIN_NAV_ICONS } from '@/components/admin/admin-icon-map'
 
 export const metadata: Metadata = { title: 'Dashboard | Minh Việt Travel Admin' }
 
@@ -26,7 +27,7 @@ export default async function AdminDashboardPage() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {quickLinks.map((item) => {
-              const Icon = item.icon
+              const Icon = ADMIN_NAV_ICONS[item.icon]
               return (
                 <Link
                   key={item.href}

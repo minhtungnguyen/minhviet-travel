@@ -8,17 +8,18 @@ import { Menu, X, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/mv/logo'
 import { LogoutButton } from '@/components/admin/logout-button'
+import { ADMIN_NAV_ICONS } from '@/components/admin/admin-icon-map'
 import type { AdminNavItem } from '@/lib/admin/nav-config'
 
 function NavLink({ item, active, onClick }: { item: AdminNavItem; active: boolean; onClick?: () => void }) {
-  const Icon = item.icon
+  const Icon = ADMIN_NAV_ICONS[item.icon]
   if (item.comingSoon) {
     return (
       <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground/50">
         <Icon className="size-4.5 shrink-0" />
         {item.label}
         <span className="ml-auto rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-secondary-foreground">
-          Sắp ra mắt
+          Sắp triển khai
         </span>
       </span>
     )
@@ -126,9 +127,22 @@ export function AdminShell({
           </nav>
 
           <div className="ml-auto flex items-center gap-4">
-            <div className="hidden text-right sm:block">
+            <div className="hidden text-right sm:flex sm:flex-col sm:items-end sm:gap-1">
               <p className="text-sm font-semibold text-foreground">{displayName}</p>
-              <p className="text-xs text-muted-foreground">{roles.join(', ') || 'Chưa gán vai trò'}</p>
+              <div className="flex flex-wrap justify-end gap-1">
+                {roles.length > 0 ? (
+                  roles.map((role) => (
+                    <span
+                      key={role}
+                      className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary"
+                    >
+                      {role}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-[11px] text-muted-foreground">Chưa gán vai trò</span>
+                )}
+              </div>
             </div>
             <LogoutButton />
           </div>

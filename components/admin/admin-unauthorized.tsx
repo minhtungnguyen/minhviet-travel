@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { ShieldAlert } from 'lucide-react'
 
 /**
@@ -10,10 +11,14 @@ export function AdminUnauthorized() {
   return (
     <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-card py-20 text-center">
       <ShieldAlert className="size-10 text-destructive" />
+      <p className="text-xs font-semibold uppercase tracking-wide text-destructive">Lỗi 403 — Không đủ quyền</p>
       <h2 className="font-display text-lg font-semibold text-foreground">Bạn không có quyền truy cập mục này</h2>
       <p className="max-w-sm text-sm text-muted-foreground">
         Liên hệ quản trị viên nếu bạn cho rằng đây là nhầm lẫn.
       </p>
+      <Link href="/admin" className="mt-2 text-sm font-medium text-primary hover:underline">
+        Về Dashboard
+      </Link>
     </div>
   )
 }

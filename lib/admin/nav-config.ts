@@ -1,22 +1,10 @@
-import type { LucideIcon } from 'lucide-react'
-import {
-  LayoutDashboard,
-  FileText,
-  Image as ImageIcon,
-  Package,
-  Users,
-  CalendarClock,
-  UserCog,
-  ShieldCheck,
-  Settings as SettingsIcon,
-  ScrollText,
-  Megaphone,
-} from 'lucide-react'
+import type { AdminIconKey } from '@/components/admin/admin-icon-map'
 
 export type AdminNavItem = {
   label: string
   href: string
-  icon: LucideIcon
+  /** Resolved to a component via `ADMIN_NAV_ICONS` wherever it's rendered — see admin-icon-map.ts for why this can't be a component reference. */
+  icon: AdminIconKey
   /**
    * Permission key(s) required to see this item — `null` means visible to
    * any authenticated staff member (no permission implies a gate).
@@ -38,17 +26,19 @@ export type AdminNavItem = {
  * mapping this mirrors.
  */
 export const ADMIN_NAV: AdminNavItem[] = [
-  { label: 'Dashboard', href: '/admin', icon: LayoutDashboard, permission: null },
-  { label: 'Website CMS', href: '/admin/cms', icon: FileText, permission: 'cms.page.read' },
-  { label: 'Media', href: '/admin/media', icon: ImageIcon, permission: 'media.asset.read' },
-  { label: 'Popup / Thông báo', href: '/admin/cms/announcements', icon: Megaphone, permission: 'cms.announcement.update' },
-  { label: 'Products', href: '/admin/products', icon: Package, permission: null, comingSoon: true },
-  { label: 'Leads', href: '/admin/leads', icon: Users, permission: null, comingSoon: true },
-  { label: 'Bookings', href: '/admin/bookings', icon: CalendarClock, permission: null, comingSoon: true },
-  { label: 'Users', href: '/admin/users', icon: UserCog, permission: 'user.manage' },
-  { label: 'Roles & Permissions', href: '/admin/roles', icon: ShieldCheck, permission: 'role.manage' },
-  { label: 'Settings', href: '/admin/settings', icon: SettingsIcon, permission: 'settings.website.read' },
-  { label: 'Audit Logs', href: '/admin/audit-logs', icon: ScrollText, permission: 'audit.read' },
+  { label: 'Dashboard', href: '/admin', icon: 'dashboard', permission: null },
+  { label: 'Website CMS', href: '/admin/cms', icon: 'cms', permission: 'cms.page.read' },
+  { label: 'Media', href: '/admin/media', icon: 'media', permission: 'media.asset.read' },
+  { label: 'Popup / Thông báo', href: '/admin/cms/announcements', icon: 'announcement', permission: 'cms.announcement.update' },
+  { label: 'Tin tức', href: '/admin/news', icon: 'news', permission: 'cms.page.create', comingSoon: true },
+  { label: 'SEO', href: '/admin/seo', icon: 'seo', permission: 'seo.metadata.update' },
+  { label: 'Products', href: '/admin/products', icon: 'products', permission: null, comingSoon: true },
+  { label: 'Leads', href: '/admin/leads', icon: 'leads', permission: null, comingSoon: true },
+  { label: 'Bookings', href: '/admin/bookings', icon: 'bookings', permission: null, comingSoon: true },
+  { label: 'Users', href: '/admin/users', icon: 'users', permission: 'user.manage' },
+  { label: 'Roles & Permissions', href: '/admin/roles', icon: 'roles', permission: 'role.manage' },
+  { label: 'Settings', href: '/admin/settings', icon: 'settings', permission: 'settings.website.read' },
+  { label: 'Audit Logs', href: '/admin/audit-logs', icon: 'auditLogs', permission: 'audit.read' },
 ]
 
 export function visibleNavItems(permissions: Set<string>): AdminNavItem[] {

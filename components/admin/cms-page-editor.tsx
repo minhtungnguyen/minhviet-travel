@@ -10,9 +10,40 @@ import {
   publishPageAction,
   archivePageAction,
   moveSectionAction,
+  deletePageAction,
   type ActionResult,
 } from '@/app/admin/cms/actions'
+import { HeroBlockForm } from '@/components/admin/blocks/hero-block-form'
+import { TrustStripBlockForm } from '@/components/admin/blocks/trust-strip-block-form'
+import { NewsMetaBlockForm, type NewsMetaConfig } from '@/components/admin/blocks/news-meta-block-form'
+import { SeoMetadataForm } from '@/components/admin/seo-metadata-form'
 import type { CmsBlock, CmsBlockDefinition, CmsPage, CmsPageVersion, CmsSection } from '@/modules/cms/domain/types'
+import type { SeoMetadata } from '@/modules/seo/domain/types'
+import type { HeroContent, TrustStripContent } from '@/types/homepage'
+
+/**
+ * Real per-section-type edit forms for the sections named in Sprint 2
+ * ("Hero Banner", "Statistics"/"Partner logos" — both live in the
+ * `trustStrip` section) plus Phase 4's `meta` (News). `ceoSection` is
+ * deliberately NOT wired here on this branch — its form needs
+ * `CeoSectionContent`, which only exists alongside the separate,
+ * not-yet-committed Sprint 2 homepage-CMS-loader work
+ * (lib/cms/client.ts) that Phase 4 stays independent of; CEO section
+ * keeps the raw JSON editor here, same as every other block without a
+ * dedicated form, until that work lands (Sprint 5 — Homepage Builder).
+ */
+function BlockEditor({ pageId, sectionKey, block }: { pageId: string; sectionKey: string; block: CmsBlock }) {
+  switch (sectionKey) {
+    case 'hero':
+      return <HeroBlockForm pageId={pageId} blockId={block.id} initial={block.config as unknown as HeroContent} />
+    case 'trustStrip':
+      return <TrustStripBlockForm pageId={pageId} blockId={block.id} initial={block.config as unknown as TrustStripContent} />
+    case 'meta':
+      return <NewsMetaBlockForm pageId={pageId} blockId={block.id} initial={block.config as unknown as NewsMetaConfig} />
+    default:
+      return <pre className="overflow-x-auto text-xs text-foreground/80">{JSON.stringify(block.config, null, 2)}</pre>
+  }
+}
 
 const STATUS_LABEL: Record<string, string> = {
   DRAFT: 'Bản nháp',
@@ -30,6 +61,9 @@ export function CmsPageEditor({
   blockDefinitions,
   canUpdate,
   canPublish,
+  canDelete,
+  canWriteSeo,
+  seoMetadata,
 }: {
   page: CmsPage
   currentVersion: CmsPageVersion | null
@@ -37,6 +71,9 @@ export function CmsPageEditor({
   blockDefinitions: CmsBlockDefinition[]
   canUpdate: boolean
   canPublish: boolean
+  canDelete: boolean
+  canWriteSeo: boolean
+  seoMetadata: SeoMetadata | null
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -53,6 +90,19 @@ export function CmsPageEditor({
         return
       }
       router.refresh()
+    })
+  }
+
+  function handleDelete() {
+    if (!window.confirm(`Xoá hẳn trang /${page.slug}? Hành động này ẩn trang khỏi mọi danh sách (soft-delete).`)) return
+    setError(null)
+    startTransition(async () => {
+      const result = await deletePageAction(page.id)
+      if (!result.ok) {
+        setError(result.message)
+        return
+      }
+      router.push('/admin/cms')
     })
   }
 
@@ -78,6 +128,9 @@ export function CmsPageEditor({
       )}
 
       <div className="flex flex-wrap gap-2">
+        <MVButton size="sm" variant="outline" href={`/admin/cms/${page.id}/preview`}>
+          Xem trước
+        </MVButton>
         {canUpdate && status === 'DRAFT' && (
           <MVButton size="sm" variant="secondary" loading={isPending} onClick={() => run(() => submitForReviewAction(page.id))}>
             Gửi duyệt
@@ -98,7 +151,29 @@ export function CmsPageEditor({
             Lưu trữ
           </MVButton>
         )}
+        {canDelete && (
+          <MVButton size="sm" variant="danger" loading={isPending} onClick={handleDelete}>
+            Xoá trang
+          </MVButton>
+        )}
       </div>
+
+      {canWriteSeo && (
+        <div>
+          <h2 className="mb-2 font-display text-base font-semibold text-foreground">SEO</h2>
+          <SeoMetadataForm
+            metadata={seoMetadata}
+            identity={{
+              websiteId: page.websiteId,
+              entityType: 'cms_page',
+              entityId: page.id,
+              locale: page.locale,
+              defaultSlug: page.slug,
+              defaultTitle: currentVersion?.title ?? page.slug,
+            }}
+          />
+        </div>
+      )}
 
       <div className="space-y-4">
         {sectionsWithBlocks.map(({ section, blocks }, i) => (
@@ -131,10 +206,14 @@ export function CmsPageEditor({
             <div className="space-y-2">
               {blocks.map((block) => (
                 <div key={block.id} className="rounded-lg bg-secondary/30 p-3">
-                  <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     {defByI.get(block.blockDefinitionId)?.name ?? block.blockDefinitionId}
                   </p>
-                  <pre className="overflow-x-auto text-xs text-foreground/80">{JSON.stringify(block.config, null, 2)}</pre>
+                  {canUpdate ? (
+                    <BlockEditor pageId={page.id} sectionKey={section.sectionKey} block={block} />
+                  ) : (
+                    <pre className="overflow-x-auto text-xs text-foreground/80">{JSON.stringify(block.config, null, 2)}</pre>
+                  )}
                 </div>
               ))}
               {blocks.length === 0 && <p className="text-sm text-muted-foreground">Chưa có block nào trong section này.</p>}

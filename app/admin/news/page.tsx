@@ -7,14 +7,11 @@ import { CmsService } from '@/modules/cms/application/cms.service'
 import { SupabaseCmsRepository } from '@/modules/cms/infrastructure/cms.repository'
 import { AdminUnauthorized } from '@/components/admin/admin-unauthorized'
 import { paginationQuerySchema } from '@/shared/validation/pagination'
+import { NEWS_SLUG_PREFIX } from '@/lib/cms/news-constants'
 
-export const metadata: Metadata = { title: 'Website CMS | Minh Việt Travel Admin' }
+export const metadata: Metadata = { title: 'Tin tức | Minh Việt Travel Admin' }
 
-export default async function AdminCmsPagesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ websiteId?: string; page?: string }>
-}) {
+export default async function AdminNewsPage({ searchParams }: { searchParams: Promise<{ websiteId?: string; page?: string }> }) {
   const params = await searchParams
   const actor = await resolveActor()
   if (!hasPermission(actor, 'cms.page.read')) {
@@ -30,7 +27,7 @@ export default async function AdminCmsPagesPage({
 
   const websiteId = params.websiteId ?? websites?.[0]?.id
   const service = new CmsService(new SupabaseCmsRepository(supabase), supabase, recordAuditLog)
-  const query = paginationQuerySchema.parse({ page: params.page, pageSize: 20 })
+  const query = paginationQuerySchema.parse({ page: params.page, pageSize: 20, search: NEWS_SLUG_PREFIX })
   const result = websiteId
     ? await service.listPages(actor, websiteId, query)
     : { items: [], page: 1, pageSize: 20, total: 0 }
@@ -39,35 +36,14 @@ export default async function AdminCmsPagesPage({
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-bold text-foreground">Website CMS</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{result.total} trang. Quản lý trang, nội dung và workflow xuất bản.</p>
+          <h1 className="font-display text-2xl font-bold text-foreground">Tin tức</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{result.total} bài viết.</p>
         </div>
-        <div className="flex items-center gap-2">
-          {websites && websites.length > 1 && (
-            <form className="flex items-center gap-2">
-              <select name="websiteId" defaultValue={websiteId} className="h-10 rounded-lg border border-border bg-background px-3 text-sm">
-                {websites.map((w) => (
-                  <option key={w.id} value={w.id}>
-                    {w.name} ({w.domain})
-                  </option>
-                ))}
-              </select>
-              <button type="submit" className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-secondary/60">
-                Đổi website
-              </button>
-            </form>
-          )}
-          {hasPermission(actor, 'cms.page.publish') && (
-            <Link href="/admin/cms/scheduler" className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-secondary/60">
-              Lịch xuất bản
-            </Link>
-          )}
-          {hasPermission(actor, 'cms.page.create') && (
-            <Link href="/admin/cms/new" className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-deep">
-              Tạo trang mới
-            </Link>
-          )}
-        </div>
+        {hasPermission(actor, 'cms.page.create') && (
+          <Link href="/admin/news/new" className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-deep">
+            Viết bài mới
+          </Link>
+        )}
       </div>
 
       <div className="overflow-hidden rounded-xl border border-border bg-card">
@@ -75,7 +51,6 @@ export default async function AdminCmsPagesPage({
           <thead className="border-b border-border bg-secondary/40 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             <tr>
               <th className="px-4 py-3">Slug</th>
-              <th className="px-4 py-3">Loại trang</th>
               <th className="px-4 py-3">Locale</th>
               <th className="px-4 py-3">Cập nhật</th>
               <th className="px-4 py-3" />
@@ -84,8 +59,7 @@ export default async function AdminCmsPagesPage({
           <tbody className="divide-y divide-border">
             {result.items.map((p) => (
               <tr key={p.id}>
-                <td className="px-4 py-3 font-medium text-foreground">/{p.slug}</td>
-                <td className="px-4 py-3 text-muted-foreground">{p.pageType}</td>
+                <td className="px-4 py-3 font-medium text-foreground">/{p.slug.slice(NEWS_SLUG_PREFIX.length)}</td>
                 <td className="px-4 py-3 text-muted-foreground">{p.locale}</td>
                 <td className="px-4 py-3 text-muted-foreground">{new Date(p.updatedAt).toLocaleDateString('vi-VN')}</td>
                 <td className="px-4 py-3 text-right">
@@ -97,8 +71,8 @@ export default async function AdminCmsPagesPage({
             ))}
             {result.items.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
-                  Chưa có trang nào cho website này.
+                <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
+                  Chưa có bài viết nào.
                 </td>
               </tr>
             )}

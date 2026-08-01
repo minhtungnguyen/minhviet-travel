@@ -39,3 +39,15 @@ export async function updateAnnouncementAction(id: string, input: AnnouncementUp
     return { ok: false, message: error instanceof Error ? error.message : 'Có lỗi xảy ra.' }
   }
 }
+
+export async function deleteAnnouncementAction(id: string): Promise<ActionResult> {
+  try {
+    const actor = await resolveActor()
+    const service = await getService()
+    await service.deleteAnnouncement(actor, id, newRequestId())
+    revalidatePath('/admin/cms/announcements')
+    return { ok: true }
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : 'Có lỗi xảy ra.' }
+  }
+}

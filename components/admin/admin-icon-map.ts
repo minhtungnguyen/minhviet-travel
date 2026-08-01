@@ -12,6 +12,7 @@ import {
   Megaphone,
   Search,
   Newspaper,
+  Menu,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -32,6 +33,7 @@ export const ADMIN_NAV_ICONS = {
   announcement: Megaphone,
   news: Newspaper,
   seo: Search,
+  navigation: Menu,
   products: Package,
   leads: Users,
   bookings: CalendarClock,

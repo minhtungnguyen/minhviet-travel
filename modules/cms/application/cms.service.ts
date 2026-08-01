@@ -82,6 +82,13 @@ export class CmsService {
     return page
   }
 
+  /** Create + its first DRAFT version in one call — the admin "Tạo trang mới" form has no reason to expose 2 separate steps. */
+  async createPageWithDraftVersion(actor: ActorContext, input: CmsPageCreateInput, title: string, requestId: string) {
+    const page = await this.createPage(actor, input, requestId)
+    const version = await this.createVersion(actor, page.id, { title, sections: [] }, requestId)
+    return { page, version }
+  }
+
   async updatePage(actor: ActorContext, id: string, input: CmsPageUpdateInput, requestId: string) {
     requirePermission(actor, 'cms.page.update')
     const existing = await this.repository.findPageById(id)
@@ -169,7 +176,17 @@ export class CmsService {
       await this.repository.unsetCurrentVersion(page.id)
     }
 
-    const updated = await this.repository.setVersionStatus(versionId, to, extra)
+    // Record metadata (docs/backend/admin-os/07-phase4-metadata-migration-preview.md)
+    // is distinct from audit_logs below: this is the record's own
+    // current-state pointer (who last touched / reviewed / published this
+    // version), not the append-only operation history.
+    const metadataExtra = {
+      updatedBy: actor.userId,
+      ...(to === 'APPROVED' && { reviewedBy: actor.userId, reviewedAt: new Date().toISOString() }),
+      ...(to === 'PUBLISHED' && { publishedBy: actor.userId }),
+    }
+
+    const updated = await this.repository.setVersionStatus(versionId, to, { ...extra, ...metadataExtra })
     await this.auditLogger({
       actorUserId: actor.userId,
       organizationId: actor.organizationId,
@@ -241,6 +258,27 @@ export class CmsService {
 
   async listBlockDefinitions() {
     return this.repository.listBlockDefinitions()
+  }
+
+  /**
+   * Admin-only preview of the page's latest version regardless of status
+   * (DRAFT/IN_REVIEW/.../ARCHIVED) — the public site only ever renders
+   * `is_current && PUBLISHED` (`getPublicPage`), so this is the only way
+   * to see unpublished content rendered before it goes live.
+   */
+  async getPreviewContent(actor: ActorContext, pageId: string) {
+    requirePermission(actor, 'cms.page.read')
+    const page = await this.repository.findPageById(pageId)
+    if (!page) throw AppError.notFound('CmsPage', pageId)
+    await this.checkWebsiteAccess(actor, page.websiteId)
+    const versionId = await this.latestVersionId(pageId)
+    const version = await this.repository.findVersionById(versionId)
+    if (!version) throw AppError.notFound('CmsPageVersion', versionId)
+    const sectionRows = await this.repository.listSections(versionId)
+    const sections = await Promise.all(
+      sectionRows.map(async (section) => ({ ...section, blocks: await this.repository.listBlocks(section.id) })),
+    )
+    return { page, version, sections }
   }
 
   async listSections(actor: ActorContext, pageId: string) {
@@ -388,6 +426,69 @@ export class CmsService {
       requestId,
     })
     return announcement
+  }
+
+  /**
+   * Scheduler V1 (docs/backend/admin-os/08-phase4-completion-report.md):
+   * manual due-item processing only — no cron, no background job. An
+   * admin with `cms.page.publish` sees the due count, confirms, then
+   * `runScheduledPublish` does the actual work. Idempotent by
+   * construction: `listDueScheduledVersions` only ever returns rows still
+   * in SCHEDULED status, so a version already published by an earlier run
+   * (or by an explicit manual publish in the meantime) is never selected
+   * again.
+   */
+  async previewScheduledPublish(actor: ActorContext, websiteId: string) {
+    requirePermission(actor, 'cms.page.publish')
+    await this.checkWebsiteAccess(actor, websiteId)
+    const now = new Date().toISOString()
+    const due = await this.repository.listDueScheduledVersions(now)
+    const pageWebsiteIds = await Promise.all(due.map((v) => this.repository.findPageById(v.pageId)))
+    const dueForWebsite = due.filter((_, i) => pageWebsiteIds[i]?.websiteId === websiteId).length
+    const notDueYet = await this.repository.countPendingScheduledVersions(now)
+    return { due: dueForWebsite, notDueYet }
+  }
+
+  async runScheduledPublish(actor: ActorContext, websiteId: string, requestId: string) {
+    requirePermission(actor, 'cms.page.publish')
+    await this.checkWebsiteAccess(actor, websiteId)
+    const now = new Date().toISOString()
+    const due = await this.repository.listDueScheduledVersions(now)
+
+    let published = 0
+    const errors: { versionId: string; message: string }[] = []
+    for (const version of due) {
+      try {
+        const page = await this.repository.findPageById(version.pageId)
+        if (!page || page.websiteId !== websiteId) {
+          continue // belongs to a different website than this run scoped to — left for that website's own run
+        }
+        await this.publish(actor, version.id, {}, requestId)
+        published++
+      } catch (error) {
+        errors.push({ versionId: version.id, message: error instanceof Error ? error.message : 'Unknown error' })
+      }
+    }
+
+    const notDueYet = await this.repository.countPendingScheduledVersions(now)
+    return { published, notDueYet, errors }
+  }
+
+  async deleteAnnouncement(actor: ActorContext, id: string, requestId: string) {
+    requirePermission(actor, 'cms.announcement.update')
+    const existing = await this.repository.findAnnouncementById(id)
+    if (!existing) throw AppError.notFound('Announcement', id)
+    await this.checkWebsiteAccess(actor, existing.websiteId)
+    await this.repository.deleteAnnouncement(id)
+    await this.auditLogger({
+      actorUserId: actor.userId,
+      organizationId: actor.organizationId,
+      websiteId: existing.websiteId,
+      action: 'cms.announcement.deleted',
+      entityType: 'announcement',
+      entityId: id,
+      requestId,
+    })
   }
 
   /** Public — used by /api/v1/public/sites/{websiteKey}/pages/{slug}. Returns only published, current content. */

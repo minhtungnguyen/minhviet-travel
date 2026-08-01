@@ -4,6 +4,8 @@ import { getServerSupabaseClient } from '@/shared/supabase/server-client'
 import { recordAuditLog } from '@/modules/audit/application/audit.service'
 import { CmsService } from '@/modules/cms/application/cms.service'
 import { SupabaseCmsRepository } from '@/modules/cms/infrastructure/cms.repository'
+import { SeoService } from '@/modules/seo/application/seo.service'
+import { SupabaseSeoRepository } from '@/modules/seo/infrastructure/seo.repository'
 import { AdminUnauthorized } from '@/components/admin/admin-unauthorized'
 import { CmsPageEditor } from '@/components/admin/cms-page-editor'
 
@@ -36,6 +38,12 @@ export default async function AdminCmsPageDetail({ params }: { params: Promise<{
       })),
   )
 
+  const canWriteSeo = hasPermission(actor, 'seo.metadata.update')
+  const seoService = new SeoService(new SupabaseSeoRepository(supabase), supabase, recordAuditLog)
+  const seoMetadata = canWriteSeo
+    ? await seoService.getMetadata(page.websiteId, 'cms_page', page.id, page.locale).catch(() => null)
+    : null
+
   return (
     <CmsPageEditor
       page={page}
@@ -44,6 +52,9 @@ export default async function AdminCmsPageDetail({ params }: { params: Promise<{
       blockDefinitions={blockDefinitions}
       canUpdate={hasPermission(actor, 'cms.page.update')}
       canPublish={hasPermission(actor, 'cms.page.publish')}
+      canDelete={hasPermission(actor, 'cms.page.delete')}
+      canWriteSeo={canWriteSeo}
+      seoMetadata={seoMetadata}
     />
   )
 }

@@ -39,10 +39,22 @@ export interface CmsRepository {
   findVersionById(id: string): Promise<CmsPageVersion | null>
   findCurrentVersion(pageId: string): Promise<CmsPageVersion | null>
   createVersion(pageId: string, input: CmsPageVersionCreateInput, actorId: string): Promise<CmsPageVersion>
+  /** SCHEDULED versions whose `scheduled_publish_at` has passed — the Scheduler V1 due-item query. */
+  listDueScheduledVersions(asOfIso: string): Promise<CmsPageVersion[]>
+  /** SCHEDULED versions still in the future — reported alongside the due count so an admin can see what's left waiting. */
+  countPendingScheduledVersions(asOfIso: string): Promise<number>
   setVersionStatus(
     id: string,
     status: CmsLifecycleStatus,
-    extra: { isCurrent?: boolean; publishedAt?: string | null; scheduledPublishAt?: string | null },
+    extra: {
+      isCurrent?: boolean
+      publishedAt?: string | null
+      scheduledPublishAt?: string | null
+      updatedBy?: string
+      reviewedBy?: string
+      reviewedAt?: string
+      publishedBy?: string
+    },
   ): Promise<CmsPageVersion>
   unsetCurrentVersion(pageId: string): Promise<void>
 
@@ -64,6 +76,7 @@ export interface CmsRepository {
   listAnnouncements(websiteId: string): Promise<Announcement[]>
   createAnnouncement(input: AnnouncementCreateInput): Promise<Announcement>
   updateAnnouncement(id: string, input: AnnouncementUpdateInput): Promise<Announcement>
+  deleteAnnouncement(id: string): Promise<void>
   findAnnouncementById(id: string): Promise<Announcement | null>
 
   findPublishedPage(websiteId: string, locale: string, slug: string): Promise<PublishedPageContent | null>
@@ -101,6 +114,12 @@ type VersionRow = {
   scheduled_publish_at: string | null
   published_at: string | null
   created_at: string
+  created_by: string | null
+  updated_at: string
+  updated_by: string | null
+  reviewed_by: string | null
+  reviewed_at: string | null
+  published_by: string | null
 }
 const mapVersion = (r: VersionRow): CmsPageVersion => ({
   id: r.id,
@@ -113,6 +132,12 @@ const mapVersion = (r: VersionRow): CmsPageVersion => ({
   scheduledPublishAt: r.scheduled_publish_at,
   publishedAt: r.published_at,
   createdAt: r.created_at,
+  createdBy: r.created_by,
+  updatedAt: r.updated_at,
+  updatedBy: r.updated_by,
+  reviewedBy: r.reviewed_by,
+  reviewedAt: r.reviewed_at,
+  publishedBy: r.published_by,
 })
 
 type SectionRow = { id: string; page_version_id: string; section_key: string; position: number }
@@ -272,7 +297,14 @@ export class SupabaseCmsRepository implements CmsRepository {
 
     const { data: versionRow, error: versionError } = await this.client
       .from('cms_page_versions')
-      .insert({ page_id: pageId, version_number: nextVersionNumber, title: input.title, status: 'DRAFT', created_by: actorId })
+      .insert({
+        page_id: pageId,
+        version_number: nextVersionNumber,
+        title: input.title,
+        status: 'DRAFT',
+        created_by: actorId,
+        updated_by: actorId,
+      })
       .select('*')
       .single()
     if (versionError) throw mapDatabaseError(versionError, 'CmsPageVersion')
@@ -304,7 +336,15 @@ export class SupabaseCmsRepository implements CmsRepository {
   async setVersionStatus(
     id: string,
     status: CmsLifecycleStatus,
-    extra: { isCurrent?: boolean; publishedAt?: string | null; scheduledPublishAt?: string | null },
+    extra: {
+      isCurrent?: boolean
+      publishedAt?: string | null
+      scheduledPublishAt?: string | null
+      updatedBy?: string
+      reviewedBy?: string
+      reviewedAt?: string
+      publishedBy?: string
+    },
   ): Promise<CmsPageVersion> {
     const { data, error } = await this.client
       .from('cms_page_versions')
@@ -313,12 +353,36 @@ export class SupabaseCmsRepository implements CmsRepository {
         ...(extra.isCurrent !== undefined && { is_current: extra.isCurrent }),
         ...(extra.publishedAt !== undefined && { published_at: extra.publishedAt }),
         ...(extra.scheduledPublishAt !== undefined && { scheduled_publish_at: extra.scheduledPublishAt }),
+        ...(extra.updatedBy !== undefined && { updated_by: extra.updatedBy }),
+        ...(extra.reviewedBy !== undefined && { reviewed_by: extra.reviewedBy }),
+        ...(extra.reviewedAt !== undefined && { reviewed_at: extra.reviewedAt }),
+        ...(extra.publishedBy !== undefined && { published_by: extra.publishedBy }),
       })
       .eq('id', id)
       .select('*')
       .single()
     if (error) throw mapDatabaseError(error, 'CmsPageVersion')
     return mapVersion(data)
+  }
+
+  async listDueScheduledVersions(asOfIso: string): Promise<CmsPageVersion[]> {
+    const { data, error } = await this.client
+      .from('cms_page_versions')
+      .select('*')
+      .eq('status', 'SCHEDULED')
+      .lte('scheduled_publish_at', asOfIso)
+    if (error) throw mapDatabaseError(error, 'CmsPageVersion')
+    return (data ?? []).map(mapVersion)
+  }
+
+  async countPendingScheduledVersions(asOfIso: string): Promise<number> {
+    const { count, error } = await this.client
+      .from('cms_page_versions')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'SCHEDULED')
+      .gt('scheduled_publish_at', asOfIso)
+    if (error) throw mapDatabaseError(error, 'CmsPageVersion')
+    return count ?? 0
   }
 
   async unsetCurrentVersion(pageId: string): Promise<void> {
@@ -459,6 +523,11 @@ export class SupabaseCmsRepository implements CmsRepository {
       .single()
     if (error) throw mapDatabaseError(error, 'Announcement')
     return mapAnnouncement(data)
+  }
+
+  async deleteAnnouncement(id: string): Promise<void> {
+    const { error } = await this.client.from('announcements').delete().eq('id', id)
+    if (error) throw mapDatabaseError(error, 'Announcement')
   }
 
   async findAnnouncementById(id: string): Promise<Announcement | null> {

@@ -1138,10 +1138,15 @@ export type Database = {
           is_current: boolean
           page_id: string
           published_at: string | null
+          published_by: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           scheduled_publish_at: string | null
           seo_metadata_id: string | null
           status: Database["public"]["Enums"]["cms_lifecycle_status"]
           title: string
+          updated_at: string
+          updated_by: string | null
           version_number: number
         }
         Insert: {
@@ -1151,10 +1156,15 @@ export type Database = {
           is_current?: boolean
           page_id: string
           published_at?: string | null
+          published_by?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           scheduled_publish_at?: string | null
           seo_metadata_id?: string | null
           status?: Database["public"]["Enums"]["cms_lifecycle_status"]
           title: string
+          updated_at?: string
+          updated_by?: string | null
           version_number: number
         }
         Update: {
@@ -1164,10 +1174,15 @@ export type Database = {
           is_current?: boolean
           page_id?: string
           published_at?: string | null
+          published_by?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           scheduled_publish_at?: string | null
           seo_metadata_id?: string | null
           status?: Database["public"]["Enums"]["cms_lifecycle_status"]
           title?: string
+          updated_at?: string
+          updated_by?: string | null
           version_number?: number
         }
         Relationships: [

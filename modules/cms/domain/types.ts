@@ -45,6 +45,12 @@ export type CmsPageVersion = {
   scheduledPublishAt: string | null
   publishedAt: string | null
   createdAt: string
+  createdBy: string | null
+  updatedAt: string
+  updatedBy: string | null
+  reviewedBy: string | null
+  reviewedAt: string | null
+  publishedBy: string | null
 }
 
 export type CmsSection = {

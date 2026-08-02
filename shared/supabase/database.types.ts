@@ -1934,6 +1934,7 @@ export type Database = {
         Row: {
           alt_text: string | null
           caption: string | null
+          checksum: string | null
           copyright_info: string | null
           created_at: string
           credit: string | null
@@ -1957,6 +1958,7 @@ export type Database = {
         Insert: {
           alt_text?: string | null
           caption?: string | null
+          checksum?: string | null
           copyright_info?: string | null
           created_at?: string
           credit?: string | null
@@ -1980,6 +1982,7 @@ export type Database = {
         Update: {
           alt_text?: string | null
           caption?: string | null
+          checksum?: string | null
           copyright_info?: string | null
           created_at?: string
           credit?: string | null

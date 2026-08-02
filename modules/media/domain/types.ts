@@ -33,5 +33,13 @@ export type MediaAsset = {
   copyrightInfo: string | null
   source: string | null
   licenseStatus: string | null
+  checksum: string | null
   deletedAt: string | null
+}
+
+/** Sprint 5B "Media Usage panel" — where an asset is referenced. `cms_block` matches are best-effort (JSONB substring search on cms_blocks.config), not a guaranteed-exhaustive index. */
+export type MediaAssetUsage = {
+  type: 'seo_og_image' | 'seo_featured_image' | 'cms_block'
+  label: string
+  href?: string
 }

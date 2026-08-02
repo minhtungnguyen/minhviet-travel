@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, AlertCircle } from 'lucide-react'
 import { getBrowserSupabaseClient } from '@/shared/supabase/browser-client'
+import { computeFileChecksum } from '@/lib/media/checksum'
 import { MVButton } from '@/components/mv/mv-button'
 
 function bucketFor(visibility: 'PUBLIC' | 'PRIVATE') {
@@ -55,7 +56,7 @@ export function MediaUploadForm({ folderId, maxUploadSizeMb }: { folderId?: stri
         return
       }
 
-      const dimensions = await readImageDimensions(file)
+      const [dimensions, checksum] = await Promise.all([readImageDimensions(file), computeFileChecksum(file)])
 
       const res = await fetch('/api/v1/media/assets', {
         method: 'POST',
@@ -67,6 +68,7 @@ export function MediaUploadForm({ folderId, maxUploadSizeMb }: { folderId?: stri
           visibility,
           mimeType: file.type || 'application/octet-stream',
           fileSizeBytes: file.size,
+          checksum,
           ...(dimensions ?? {}),
         }),
       })

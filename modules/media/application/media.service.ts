@@ -87,6 +87,14 @@ export class MediaService {
     return asset
   }
 
+  /** Sprint 5B "Media Usage panel" — read-only, same permission as viewing the library. */
+  async getAssetUsage(actor: ActorContext, id: string) {
+    requirePermission(actor, 'media.asset.read')
+    const asset = await this.repository.findAssetById(id)
+    if (!asset) throw AppError.notFound('MediaAsset', id)
+    return this.repository.findAssetUsage(id, asset.storagePath)
+  }
+
   async deleteAsset(actor: ActorContext, id: string, requestId: string) {
     requirePermission(actor, 'media.asset.upload')
     const existing = await this.repository.findAssetById(id)

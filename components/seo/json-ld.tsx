@@ -449,16 +449,19 @@ export function GenericPageJsonLd({
   description,
   path,
   breadcrumb,
+  baseUrl = SITE_URL,
 }: {
   title: string
   description?: string
   path: string
   breadcrumb: { name: string; path: string }[]
+  /** Sprint 5B: overridable from `seo.canonical_base_url` — defaults to the SITE_URL constant when that setting is empty. */
+  baseUrl?: string
 }) {
   const webPage = {
     '@type': 'WebPage',
-    '@id': `${SITE_URL}${path}#webpage`,
-    url: `${SITE_URL}${path}`,
+    '@id': `${baseUrl}${path}#webpage`,
+    url: `${baseUrl}${path}`,
     name: title,
     ...(description && { description }),
   }
@@ -468,7 +471,7 @@ export function GenericPageJsonLd({
       '@type': 'ListItem',
       position: index + 1,
       name: crumb.name,
-      item: `${SITE_URL}${crumb.path}`,
+      item: `${baseUrl}${crumb.path}`,
     })),
   }
   const graph = { '@context': 'https://schema.org', '@graph': [webPage, breadcrumbList] }
@@ -483,6 +486,9 @@ export function NewsArticleJsonLd({
   imageSrc,
   publishedAt,
   category,
+  baseUrl = SITE_URL,
+  organizationName = ORGANIZATION_NAME,
+  organizationLogo = ORGANIZATION_LOGO,
 }: {
   title: string
   description?: string
@@ -490,28 +496,32 @@ export function NewsArticleJsonLd({
   imageSrc?: string | null
   publishedAt?: string | null
   category?: string
+  /** Sprint 5B: all 3 overridable from Global SEO settings — default to the constants/seo.ts values when those settings are empty. */
+  baseUrl?: string
+  organizationName?: string
+  organizationLogo?: string
 }) {
   const article = {
     '@type': 'Article',
-    '@id': `${SITE_URL}${path}#article`,
+    '@id': `${baseUrl}${path}#article`,
     headline: title,
     ...(description && { description }),
-    url: `${SITE_URL}${path}`,
+    url: `${baseUrl}${path}`,
     ...(imageSrc && { image: [imageSrc] }),
     ...(publishedAt && { datePublished: publishedAt }),
     ...(category && { articleSection: category }),
     publisher: {
       '@type': 'Organization',
-      name: ORGANIZATION_NAME,
-      logo: { '@type': 'ImageObject', url: `${SITE_URL}${ORGANIZATION_LOGO}` },
+      name: organizationName,
+      logo: { '@type': 'ImageObject', url: organizationLogo.startsWith('http') ? organizationLogo : `${baseUrl}${organizationLogo}` },
     },
   }
   const breadcrumbList = {
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Trang chủ', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'Tin tức', item: `${SITE_URL}/tin-tuc` },
-      { '@type': 'ListItem', position: 3, name: title, item: `${SITE_URL}${path}` },
+      { '@type': 'ListItem', position: 1, name: 'Trang chủ', item: baseUrl },
+      { '@type': 'ListItem', position: 2, name: 'Tin tức', item: `${baseUrl}/tin-tuc` },
+      { '@type': 'ListItem', position: 3, name: title, item: `${baseUrl}${path}` },
     ],
   }
   const graph = { '@context': 'https://schema.org', '@graph': [article, breadcrumbList] }

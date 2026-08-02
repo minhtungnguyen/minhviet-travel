@@ -29,6 +29,7 @@ export const mediaAssetCreateSchema = z.object({
   copyrightInfo: z.string().max(500).optional(),
   source: z.string().max(300).optional(),
   licenseStatus: z.string().max(100).optional(),
+  checksum: z.string().max(128).optional(),
 }).strict()
 
 export const mediaAssetUpdateSchema = z.object({
@@ -48,6 +49,7 @@ export const mediaAssetUpdateSchema = z.object({
   fileSizeBytes: z.number().int().positive().optional(),
   width: z.number().int().positive().nullable().optional(),
   height: z.number().int().positive().nullable().optional(),
+  checksum: z.string().max(128).nullable().optional(),
 }).strict()
 
 export type MediaFolderCreateInput = z.infer<typeof mediaFolderCreateSchema>

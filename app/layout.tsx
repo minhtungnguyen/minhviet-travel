@@ -8,6 +8,7 @@ import { SITE_URL } from '@/constants/seo'
 import { getPublicSupabaseClient } from '@/shared/supabase/public-client'
 import { SettingsService } from '@/modules/settings/application/settings.service'
 import { SupabaseSettingsRepository } from '@/modules/settings/infrastructure/settings.repository'
+import { resolveSiteWideSeoSettings } from '@/lib/seo/default-metadata'
 import './globals.css'
 
 const inter = Inter({
@@ -80,7 +81,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const { ga4Id, gtmId, pixelId } = await getTrackingIds()
+  const [{ ga4Id, gtmId, pixelId }, { googleSiteVerification, bingSiteVerification, facebookAppId }] = await Promise.all([
+    getTrackingIds(),
+    resolveSiteWideSeoSettings(getPublicSupabaseClient()),
+  ])
 
   return (
     <html
@@ -88,6 +92,9 @@ export default async function RootLayout({
       className={`${inter.variable} ${jakarta.variable} bg-background`}
     >
       <head>
+        {googleSiteVerification && <meta name="google-site-verification" content={googleSiteVerification} />}
+        {bingSiteVerification && <meta name="msvalidate.01" content={bingSiteVerification} />}
+        {facebookAppId && <meta property="fb:app_id" content={facebookAppId} />}
         {gtmId && (
           <Script id="gtm" strategy="afterInteractive">
             {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`}

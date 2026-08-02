@@ -8,8 +8,10 @@ import { MediaService } from '@/modules/media/application/media.service'
 import { SupabaseMediaRepository } from '@/modules/media/infrastructure/media.repository'
 import { newRequestId } from '@/shared/http/request-id'
 import type { MediaAssetUpdateInput } from '@/modules/media/schemas/media.schema'
+import type { MediaAssetUsage } from '@/modules/media/domain/types'
 
 export type ActionResult = { ok: true } | { ok: false; message: string }
+export type UsageResult = { ok: true; usage: MediaAssetUsage[] } | { ok: false; message: string }
 
 async function getService() {
   const client = await getServerSupabaseClient()
@@ -23,6 +25,17 @@ export async function createFolderAction(name: string, parentFolderId?: string):
     await service.createFolder(actor, { name, parentFolderId }, newRequestId())
     revalidatePath('/admin/media')
     return { ok: true }
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : 'Có lỗi xảy ra.' }
+  }
+}
+
+export async function getAssetUsageAction(id: string): Promise<UsageResult> {
+  try {
+    const actor = await resolveActor()
+    const service = await getService()
+    const usage = await service.getAssetUsage(actor, id)
+    return { ok: true, usage }
   } catch (error) {
     return { ok: false, message: error instanceof Error ? error.message : 'Có lỗi xảy ra.' }
   }

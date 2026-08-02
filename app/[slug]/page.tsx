@@ -8,7 +8,6 @@ import { getPublicSupabaseClient } from '@/shared/supabase/public-client'
 import { recordAuditLog } from '@/modules/audit/application/audit.service'
 import { CmsService } from '@/modules/cms/application/cms.service'
 import { SupabaseCmsRepository } from '@/modules/cms/infrastructure/cms.repository'
-import { SITE_URL } from '@/constants/seo'
 import { resolveDefaultSeoMetadata } from '@/lib/seo/default-metadata'
 
 /**
@@ -38,40 +37,56 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const loaded = await loadPage(slug)
   if (!loaded) return {}
   const { version, client } = loaded
+  const fallback = await resolveDefaultSeoMetadata(client, version.title)
   const canonicalPath = `/${slug}`
+  const canonicalUrl = `${fallback.canonicalBaseUrl}${canonicalPath}`
+
   if (!version.seoMetadataId) {
-    const fallback = await resolveDefaultSeoMetadata(client, version.title)
     return {
       title: fallback.title,
       description: fallback.description,
+      robots: fallback.robots,
       alternates: { canonical: canonicalPath },
       openGraph: {
         title: fallback.title,
         description: fallback.description,
-        url: `${SITE_URL}${canonicalPath}`,
+        url: canonicalUrl,
+        siteName: fallback.siteName,
         type: 'website',
         images: fallback.ogImage ? [{ url: fallback.ogImage }] : undefined,
       },
+      twitter: { card: fallback.twitterCard as 'summary_large_image' },
     }
   }
   const { data: seoRow } = await client
     .from('seo_metadata')
-    .select('title, meta_description, og_title, og_description')
+    .select('title, meta_description, og_title, og_description, is_indexed, is_followed')
     .eq('id', version.seoMetadataId)
     .maybeSingle()
-  const row = seoRow as { title?: string; meta_description?: string; og_title?: string; og_description?: string } | null
+  const row = seoRow as {
+    title?: string
+    meta_description?: string
+    og_title?: string
+    og_description?: string
+    is_indexed?: boolean
+    is_followed?: boolean
+  } | null
   const title = row?.title ?? version.title
   const description = row?.meta_description ?? undefined
+  const robots = row ? `${row.is_indexed === false ? 'noindex' : 'index'}, ${row.is_followed === false ? 'nofollow' : 'follow'}` : fallback.robots
   return {
     title,
     description,
+    robots,
     alternates: { canonical: canonicalPath },
     openGraph: {
       title: row?.og_title ?? title,
       description: row?.og_description ?? description,
-      url: `${SITE_URL}${canonicalPath}`,
+      url: canonicalUrl,
+      siteName: fallback.siteName,
       type: 'website',
     },
+    twitter: { card: fallback.twitterCard as 'summary_large_image' },
   }
 }
 
@@ -80,14 +95,16 @@ export default async function GenericCmsPage({ params }: { params: Promise<{ slu
   const loaded = await loadPage(slug)
   if (!loaded) notFound()
 
-  const { version, sections, keyById } = loaded
+  const { version, sections, keyById, client } = loaded
   const path = `/${slug}`
+  const fallback = await resolveDefaultSeoMetadata(client, version.title)
 
   return (
     <SiteChrome>
       <GenericPageJsonLd
         title={version.title}
         path={path}
+        baseUrl={fallback.canonicalBaseUrl}
         breadcrumb={[
           { name: 'Trang chủ', path: '/' },
           { name: version.title, path },

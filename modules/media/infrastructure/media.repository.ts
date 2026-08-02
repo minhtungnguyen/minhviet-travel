@@ -1,7 +1,7 @@
 import type { SupabaseClientLike } from '@/shared/supabase/types'
 import { mapDatabaseError } from '@/shared/errors/db-error-mapper'
 import type { PaginatedResult, PaginationQuery } from '@/shared/validation/pagination'
-import type { MediaAsset, MediaFolder } from '@/modules/media/domain/types'
+import type { MediaAsset, MediaAssetUsage, MediaFolder } from '@/modules/media/domain/types'
 import type { MediaAssetCreateInput, MediaAssetUpdateInput, MediaFolderCreateInput } from '@/modules/media/schemas/media.schema'
 
 export interface MediaRepository {
@@ -13,6 +13,7 @@ export interface MediaRepository {
   createAsset(input: MediaAssetCreateInput, actorId: string): Promise<MediaAsset>
   updateAsset(id: string, input: MediaAssetUpdateInput): Promise<MediaAsset>
   softDeleteAsset(id: string): Promise<void>
+  findAssetUsage(assetId: string, storagePath: string): Promise<MediaAssetUsage[]>
 }
 
 type FolderRow = { id: string; website_id: string | null; parent_folder_id: string | null; name: string }
@@ -36,6 +37,7 @@ type AssetRow = {
   copyright_info: string | null
   source: string | null
   license_status: string | null
+  checksum: string | null
   deleted_at: string | null
 }
 const mapAsset = (r: AssetRow): MediaAsset => ({
@@ -56,6 +58,7 @@ const mapAsset = (r: AssetRow): MediaAsset => ({
   copyrightInfo: r.copyright_info,
   source: r.source,
   licenseStatus: r.license_status,
+  checksum: r.checksum,
   deletedAt: r.deleted_at,
 })
 
@@ -123,6 +126,7 @@ export class SupabaseMediaRepository implements MediaRepository {
         copyright_info: input.copyrightInfo ?? null,
         source: input.source ?? null,
         license_status: input.licenseStatus ?? null,
+        checksum: input.checksum ?? null,
         uploaded_by: actorId,
       })
       .select('*')
@@ -148,6 +152,7 @@ export class SupabaseMediaRepository implements MediaRepository {
         ...(input.fileSizeBytes !== undefined && { file_size_bytes: input.fileSizeBytes }),
         ...(input.width !== undefined && { width: input.width }),
         ...(input.height !== undefined && { height: input.height }),
+        ...(input.checksum !== undefined && { checksum: input.checksum }),
       })
       .eq('id', id)
       .select('*')
@@ -159,5 +164,64 @@ export class SupabaseMediaRepository implements MediaRepository {
   async softDeleteAsset(id: string): Promise<void> {
     const { error } = await this.client.from('media_assets').update({ deleted_at: new Date().toISOString() }).eq('id', id)
     if (error) throw mapDatabaseError(error, 'MediaAsset')
+  }
+
+  /**
+   * Sprint 5B "Media Usage panel". `seo_metadata.og_image_media_id` /
+   * `featured_image_media_id` are real FK-shaped columns — exact match.
+   * `cms_blocks.config` is opaque JSONB with no fixed shape (image src is
+   * a full public URL string embedded at a different key per block type
+   * — hero/image/news-meta all differ), so there is no clean relational
+   * query for "does this block reference this asset". Best effort:
+   * fetch every block and substring-match its serialized config against
+   * the asset's storage_path. Fine at this table's current size; would
+   * need revisiting (a real media_id column on blocks, or a search index)
+   * if the CMS block count grows large — not built here since no such
+   * scale exists yet.
+   */
+  async findAssetUsage(assetId: string, storagePath: string): Promise<MediaAssetUsage[]> {
+    const usage: MediaAssetUsage[] = []
+
+    const { data: seoRows } = await this.client
+      .from('seo_metadata')
+      .select('title, slug, og_image_media_id, featured_image_media_id')
+      .or(`og_image_media_id.eq.${assetId},featured_image_media_id.eq.${assetId}`)
+    for (const row of seoRows ?? []) {
+      const label = row.title || row.slug || 'không tên'
+      if (row.og_image_media_id === assetId) usage.push({ type: 'seo_og_image', label: `SEO — ảnh OG của "${label}"` })
+      if (row.featured_image_media_id === assetId) usage.push({ type: 'seo_featured_image', label: `SEO — ảnh đại diện của "${label}"` })
+    }
+
+    const { data: blocks } = await this.client.from('cms_blocks').select('id, section_id, config')
+    const matchingBlocks = (blocks ?? []).filter((b) => JSON.stringify(b.config ?? {}).includes(storagePath))
+    if (matchingBlocks.length > 0) {
+      const sectionIds = matchingBlocks.map((b) => b.section_id)
+      const { data: sections } = await this.client.from('cms_sections').select('id, page_version_id, section_key').in('id', sectionIds)
+      const versionIds = [...new Set((sections ?? []).map((s) => s.page_version_id))]
+      const { data: versions } = versionIds.length
+        ? await this.client.from('cms_page_versions').select('id, page_id').in('id', versionIds)
+        : { data: [] as { id: string; page_id: string }[] }
+      const pageIds = [...new Set((versions ?? []).map((v) => v.page_id))]
+      const { data: pages } = pageIds.length
+        ? await this.client.from('cms_pages').select('id, slug').in('id', pageIds)
+        : { data: [] as { id: string; slug: string }[] }
+
+      const pageById = new Map((pages ?? []).map((p) => [p.id, p]))
+      const versionById = new Map((versions ?? []).map((v) => [v.id, v]))
+      const sectionById = new Map((sections ?? []).map((s) => [s.id, s]))
+
+      for (const block of matchingBlocks) {
+        const section = sectionById.get(block.section_id)
+        const version = section ? versionById.get(section.page_version_id) : undefined
+        const page = version ? pageById.get(version.page_id) : undefined
+        usage.push({
+          type: 'cms_block',
+          label: `Trang /${page?.slug ?? '?'} — section "${section?.section_key ?? '?'}"`,
+          href: page ? `/admin/cms/${page.id}` : undefined,
+        })
+      }
+    }
+
+    return usage
   }
 }

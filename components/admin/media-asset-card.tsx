@@ -2,11 +2,13 @@
 
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import Image from 'next/image'
-import { FileIcon, Pencil, Loader2, RefreshCw } from 'lucide-react'
+import { FileIcon, Pencil, Loader2, RefreshCw, Link2 } from 'lucide-react'
 import { getBrowserSupabaseClient } from '@/shared/supabase/browser-client'
-import { updateAssetAction } from '@/app/admin/media/actions'
-import type { MediaAsset } from '@/modules/media/domain/types'
+import { computeFileChecksum } from '@/lib/media/checksum'
+import { updateAssetAction, getAssetUsageAction } from '@/app/admin/media/actions'
+import type { MediaAsset, MediaAssetUsage } from '@/modules/media/domain/types'
 
 function bucketFor(visibility: 'PUBLIC' | 'PRIVATE') {
   return visibility === 'PUBLIC' ? 'media-public' : 'media-private'
@@ -42,6 +44,9 @@ export function MediaAssetCard({ asset, url, canEdit }: { asset: MediaAsset; url
   const [copyrightInfo, setCopyrightInfo] = useState(asset.copyrightInfo ?? '')
   const [source, setSource] = useState(asset.source ?? '')
   const [licenseStatus, setLicenseStatus] = useState(asset.licenseStatus ?? '')
+  const [showUsage, setShowUsage] = useState(false)
+  const [loadingUsage, setLoadingUsage] = useState(false)
+  const [usage, setUsage] = useState<MediaAssetUsage[] | null>(null)
 
   const isImage = asset.mimeType.startsWith('image/')
   const sizeLabel = asset.fileSizeBytes >= 1024 * 1024
@@ -92,13 +97,14 @@ export function MediaAssetCard({ asset, url, canEdit }: { asset: MediaAsset; url
         setError(`Tải lên thất bại: ${uploadError.message}`)
         return
       }
-      const dimensions = await readImageDimensions(file)
+      const [dimensions, checksum] = await Promise.all([readImageDimensions(file), computeFileChecksum(file)])
       const result = await updateAssetAction(asset.id, {
         originalFilename: file.name,
         mimeType: file.type || 'application/octet-stream',
         fileSizeBytes: file.size,
         width: dimensions?.width ?? null,
         height: dimensions?.height ?? null,
+        checksum,
       })
       if (!result.ok) {
         setError(result.message)
@@ -109,6 +115,20 @@ export function MediaAssetCard({ asset, url, canEdit }: { asset: MediaAsset; url
       setReplacing(false)
       if (replaceInputRef.current) replaceInputRef.current.value = ''
     }
+  }
+
+  async function handleToggleUsage() {
+    if (showUsage) {
+      setShowUsage(false)
+      return
+    }
+    setShowUsage(true)
+    if (usage !== null) return // already fetched once — no need to refetch on every toggle
+    setLoadingUsage(true)
+    const result = await getAssetUsageAction(asset.id)
+    setLoadingUsage(false)
+    if (result.ok) setUsage(result.usage)
+    else setError(result.message)
   }
 
   return (
@@ -128,6 +148,11 @@ export function MediaAssetCard({ asset, url, canEdit }: { asset: MediaAsset; url
           {asset.visibility === 'PUBLIC' ? 'Công khai' : 'Riêng tư'} · {sizeLabel}
           {asset.width && asset.height ? ` · ${asset.width}×${asset.height}` : ''}
         </p>
+        {asset.checksum && (
+          <p className="truncate text-[10px] text-muted-foreground/70" title={asset.checksum}>
+            SHA-256: {asset.checksum.slice(0, 12)}…
+          </p>
+        )}
         {canEdit && (
           <div className="mt-1 flex items-center gap-3">
             <button
@@ -150,7 +175,46 @@ export function MediaAssetCard({ asset, url, canEdit }: { asset: MediaAsset; url
             <input ref={replaceInputRef} type="file" onChange={handleReplaceFile} disabled={replacing} className="hidden" />
           </div>
         )}
+        <button
+          type="button"
+          onClick={handleToggleUsage}
+          className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
+        >
+          {loadingUsage ? <Loader2 className="size-3 animate-spin" /> : <Link2 className="size-3" />}
+          {showUsage ? 'Ẩn nơi sử dụng' : 'Xem nơi sử dụng'}
+        </button>
       </div>
+
+      {showUsage && (
+        <div className="space-y-1.5 border-t border-border bg-secondary/20 p-3 text-xs">
+          {loadingUsage ? (
+            <p className="text-muted-foreground">Đang tìm...</p>
+          ) : usage && usage.length > 0 ? (
+            <>
+              <ul className="space-y-1">
+                {usage.map((u, i) => (
+                  <li key={i} className="text-foreground">
+                    {u.href ? (
+                      <Link href={u.href} className="text-primary hover:underline">
+                        {u.label}
+                      </Link>
+                    ) : (
+                      u.label
+                    )}
+                  </li>
+                ))}
+              </ul>
+              {usage.some((u) => u.type === 'cms_block') && (
+                <p className="text-[10px] text-muted-foreground/70">
+                  Kết quả từ nội dung block chỉ mang tính tương đối (tìm kiếm theo đường dẫn tệp), có thể không đầy đủ 100%.
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-muted-foreground">Chưa thấy asset này được dùng ở đâu.</p>
+          )}
+        </div>
+      )}
 
       {editing && (
         <div className="space-y-2 border-t border-border p-3">

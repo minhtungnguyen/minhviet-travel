@@ -9,7 +9,6 @@ import { recordAuditLog } from '@/modules/audit/application/audit.service'
 import { CmsService } from '@/modules/cms/application/cms.service'
 import { SupabaseCmsRepository } from '@/modules/cms/infrastructure/cms.repository'
 import { NEWS_SLUG_PREFIX } from '@/lib/cms/news-constants'
-import { SITE_URL } from '@/constants/seo'
 import { resolveDefaultSeoMetadata } from '@/lib/seo/default-metadata'
 
 const WEBSITE_ID = '00000000-0000-4000-8000-000000000003'
@@ -44,44 +43,60 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const loaded = await loadArticle(slug)
   if (!loaded) return {}
   const { version, client, meta } = loaded
+  const fallback = await resolveDefaultSeoMetadata(client, version.title)
   const canonicalPath = `/tin-tuc/${slug}`
+  const canonicalUrl = `${fallback.canonicalBaseUrl}${canonicalPath}`
   const featuredImageSrc = (meta.image as { src?: string } | null)?.src
+
   if (!version.seoMetadataId) {
-    const fallback = await resolveDefaultSeoMetadata(client, version.title)
     const description = String(meta.excerpt ?? '') || fallback.description
     const image = featuredImageSrc ?? fallback.ogImage
     return {
       title: fallback.title,
       description,
+      robots: fallback.robots,
       alternates: { canonical: canonicalPath },
       openGraph: {
         title: fallback.title,
         description,
-        url: `${SITE_URL}${canonicalPath}`,
+        url: canonicalUrl,
+        siteName: fallback.siteName,
         type: 'article',
         images: image ? [{ url: image }] : undefined,
       },
+      twitter: { card: fallback.twitterCard as 'summary_large_image' },
     }
   }
   const { data: seoRow } = await client
     .from('seo_metadata')
-    .select('title, meta_description, og_title, og_description')
+    .select('title, meta_description, og_title, og_description, is_indexed, is_followed')
     .eq('id', version.seoMetadataId)
     .maybeSingle()
-  const row = seoRow as { title?: string; meta_description?: string; og_title?: string; og_description?: string } | null
+  const row = seoRow as {
+    title?: string
+    meta_description?: string
+    og_title?: string
+    og_description?: string
+    is_indexed?: boolean
+    is_followed?: boolean
+  } | null
   const title = row?.title ?? version.title
   const description = row?.meta_description ?? String(meta.excerpt ?? '') ?? undefined
+  const robots = row ? `${row.is_indexed === false ? 'noindex' : 'index'}, ${row.is_followed === false ? 'nofollow' : 'follow'}` : fallback.robots
   return {
     title,
     description,
+    robots,
     alternates: { canonical: canonicalPath },
     openGraph: {
       title: row?.og_title ?? title,
       description: row?.og_description ?? description,
-      url: `${SITE_URL}${canonicalPath}`,
+      url: canonicalUrl,
+      siteName: fallback.siteName,
       type: 'article',
       images: featuredImageSrc ? [{ url: featuredImageSrc }] : undefined,
     },
+    twitter: { card: fallback.twitterCard as 'summary_large_image' },
   }
 }
 
@@ -90,9 +105,10 @@ export default async function TinTucArticlePage({ params }: { params: Promise<{ 
   const loaded = await loadArticle(slug)
   if (!loaded) notFound()
 
-  const { version, meta, bodySections, categoryName, keyById } = loaded
+  const { version, client, meta, bodySections, categoryName, keyById } = loaded
   const excerpt = String(meta.excerpt ?? '')
   const featuredImageSrc = (meta.image as { src?: string } | null)?.src ?? null
+  const fallback = await resolveDefaultSeoMetadata(client, version.title)
 
   return (
     <SiteChrome>
@@ -103,6 +119,9 @@ export default async function TinTucArticlePage({ params }: { params: Promise<{ 
         imageSrc={featuredImageSrc}
         publishedAt={version.publishedAt}
         category={categoryName || undefined}
+        baseUrl={fallback.canonicalBaseUrl}
+        organizationName={fallback.organizationName}
+        organizationLogo={fallback.organizationLogo}
       />
       <PageHero eyebrow={categoryName || 'Tin tức'} title={version.title} description={excerpt || undefined} breadcrumb={version.title} />
       <CmsGenericPageRenderer sections={bodySections} blockDefinitionKeyById={keyById} />

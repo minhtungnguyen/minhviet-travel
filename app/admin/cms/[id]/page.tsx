@@ -6,6 +6,9 @@ import { CmsService } from '@/modules/cms/application/cms.service'
 import { SupabaseCmsRepository } from '@/modules/cms/infrastructure/cms.repository'
 import { SeoService } from '@/modules/seo/application/seo.service'
 import { SupabaseSeoRepository } from '@/modules/seo/infrastructure/seo.repository'
+import { NewsCategoryService } from '@/modules/news-categories/application/news-category.service'
+import { SupabaseNewsCategoryRepository } from '@/modules/news-categories/infrastructure/news-category.repository'
+import { NEWS_SLUG_PREFIX } from '@/lib/cms/news-constants'
 import { AdminUnauthorized } from '@/components/admin/admin-unauthorized'
 import { CmsPageEditor } from '@/components/admin/cms-page-editor'
 
@@ -44,6 +47,12 @@ export default async function AdminCmsPageDetail({ params }: { params: Promise<{
     ? await seoService.getMetadata(page.websiteId, 'cms_page', page.id, page.locale).catch(() => null)
     : null
 
+  const isNewsArticle = page.slug.startsWith(NEWS_SLUG_PREFIX)
+  const categoryService = new NewsCategoryService(new SupabaseNewsCategoryRepository(supabase), supabase, recordAuditLog)
+  const [categories, currentCategoryId] = isNewsArticle
+    ? await Promise.all([categoryService.listCategories(page.websiteId), categoryService.getArticleCategoryId(page.id)])
+    : [[], null]
+
   return (
     <CmsPageEditor
       page={page}
@@ -55,6 +64,8 @@ export default async function AdminCmsPageDetail({ params }: { params: Promise<{
       canDelete={hasPermission(actor, 'cms.page.delete')}
       canWriteSeo={canWriteSeo}
       seoMetadata={seoMetadata}
+      newsCategories={isNewsArticle ? categories : null}
+      currentCategoryId={currentCategoryId}
     />
   )
 }

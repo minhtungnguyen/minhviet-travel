@@ -17,8 +17,10 @@ import { HeroBlockForm } from '@/components/admin/blocks/hero-block-form'
 import { TrustStripBlockForm } from '@/components/admin/blocks/trust-strip-block-form'
 import { NewsMetaBlockForm, type NewsMetaConfig } from '@/components/admin/blocks/news-meta-block-form'
 import { SeoMetadataForm } from '@/components/admin/seo-metadata-form'
+import { NewsCategoryPicker } from '@/components/admin/news-category-picker'
 import type { CmsBlock, CmsBlockDefinition, CmsPage, CmsPageVersion, CmsSection } from '@/modules/cms/domain/types'
 import type { SeoMetadata } from '@/modules/seo/domain/types'
+import type { NewsCategory } from '@/modules/news-categories/domain/types'
 import type { HeroContent, TrustStripContent } from '@/types/homepage'
 
 /**
@@ -64,6 +66,8 @@ export function CmsPageEditor({
   canDelete,
   canWriteSeo,
   seoMetadata,
+  newsCategories,
+  currentCategoryId,
 }: {
   page: CmsPage
   currentVersion: CmsPageVersion | null
@@ -73,6 +77,8 @@ export function CmsPageEditor({
   canPublish: boolean
   canDelete: boolean
   canWriteSeo: boolean
+  newsCategories: NewsCategory[] | null
+  currentCategoryId: string | null
   seoMetadata: SeoMetadata | null
 }) {
   const router = useRouter()
@@ -157,6 +163,15 @@ export function CmsPageEditor({
           </MVButton>
         )}
       </div>
+
+      {newsCategories && canUpdate && (
+        <NewsCategoryPicker
+          pageId={page.id}
+          websiteId={page.websiteId}
+          categories={newsCategories.filter((c) => c.isActive || c.id === currentCategoryId)}
+          currentCategoryId={currentCategoryId}
+        />
+      )}
 
       {canWriteSeo && (
         <div>

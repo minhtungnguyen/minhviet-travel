@@ -437,3 +437,83 @@ export function FlightDetailJsonLd({ detail, pageUrl }: { detail: FlightDetail; 
     />
   )
 }
+
+/**
+ * Sprint 5A: generic JSON-LD for any non-homepage `cms_pages` route
+ * (app/[slug]/page.tsx) — every other export above is a bespoke,
+ * hand-built function per page type; this one covers the generic CMS
+ * page renderer instead of leaving it with none at all.
+ */
+export function GenericPageJsonLd({
+  title,
+  description,
+  path,
+  breadcrumb,
+}: {
+  title: string
+  description?: string
+  path: string
+  breadcrumb: { name: string; path: string }[]
+}) {
+  const webPage = {
+    '@type': 'WebPage',
+    '@id': `${SITE_URL}${path}#webpage`,
+    url: `${SITE_URL}${path}`,
+    name: title,
+    ...(description && { description }),
+  }
+  const breadcrumbList = {
+    '@type': 'BreadcrumbList',
+    itemListElement: breadcrumb.map((crumb, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: crumb.name,
+      item: `${SITE_URL}${crumb.path}`,
+    })),
+  }
+  const graph = { '@context': 'https://schema.org', '@graph': [webPage, breadcrumbList] }
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(graph) }} />
+}
+
+/** Sprint 5A: Article + BreadcrumbList for /tin-tuc/[slug] — the public News detail route added this sprint. */
+export function NewsArticleJsonLd({
+  title,
+  description,
+  path,
+  imageSrc,
+  publishedAt,
+  category,
+}: {
+  title: string
+  description?: string
+  path: string
+  imageSrc?: string | null
+  publishedAt?: string | null
+  category?: string
+}) {
+  const article = {
+    '@type': 'Article',
+    '@id': `${SITE_URL}${path}#article`,
+    headline: title,
+    ...(description && { description }),
+    url: `${SITE_URL}${path}`,
+    ...(imageSrc && { image: [imageSrc] }),
+    ...(publishedAt && { datePublished: publishedAt }),
+    ...(category && { articleSection: category }),
+    publisher: {
+      '@type': 'Organization',
+      name: ORGANIZATION_NAME,
+      logo: { '@type': 'ImageObject', url: `${SITE_URL}${ORGANIZATION_LOGO}` },
+    },
+  }
+  const breadcrumbList = {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Trang chủ', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Tin tức', item: `${SITE_URL}/tin-tuc` },
+      { '@type': 'ListItem', position: 3, name: title, item: `${SITE_URL}${path}` },
+    ],
+  }
+  const graph = { '@context': 'https://schema.org', '@graph': [article, breadcrumbList] }
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(graph) }} />
+}

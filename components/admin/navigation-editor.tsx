@@ -2,13 +2,13 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { AlertCircle, ArrowDown, ArrowUp, Trash2 } from 'lucide-react'
+import { AlertCircle, GripVertical, Trash2 } from 'lucide-react'
 import { MVButton } from '@/components/mv/mv-button'
 import {
   createItemAction,
   createMenuAction,
   deleteItemAction,
-  moveItemAction,
+  reorderItemsAction,
   updateItemAction,
   updateMenuStatusAction,
   type ActionResult,
@@ -21,15 +21,13 @@ const labelClass = 'text-xs font-semibold text-muted-foreground'
 function ItemRow({
   item,
   pages,
-  index,
-  total,
-  onMove,
+  dragHandleProps,
+  isDragOver,
 }: {
   item: NavigationItem
   pages: { id: string; slug: string }[]
-  index: number
-  total: number
-  onMove: (direction: -1 | 1) => void
+  dragHandleProps: React.HTMLAttributes<HTMLDivElement>
+  isDragOver: boolean
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -80,7 +78,12 @@ function ItemRow({
   const targetLabel = item.cmsPageId ? `/${pages.find((p) => p.id === item.cmsPageId)?.slug ?? '?'}` : (item.url ?? '—')
 
   return (
-    <div className={`rounded-xl border border-border bg-card p-4 ${item.parentItemId ? 'ml-6' : ''}`}>
+    <div
+      {...dragHandleProps}
+      className={`rounded-xl border bg-card p-4 transition-colors ${item.parentItemId ? 'ml-6' : ''} ${
+        isDragOver ? 'border-primary bg-primary/5' : 'border-border'
+      }`}
+    >
       {error && (
         <p className="mb-2 flex items-center gap-2 text-xs text-destructive">
           <AlertCircle className="size-3.5" /> {error}
@@ -126,29 +129,14 @@ function ItemRow({
         </div>
       ) : (
         <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-foreground">{item.label}</p>
-            <p className="truncate text-xs text-muted-foreground">{targetLabel}</p>
+          <div className="flex min-w-0 items-center gap-2">
+            <GripVertical className="size-4 shrink-0 cursor-grab text-muted-foreground/60 active:cursor-grabbing" aria-hidden />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-foreground">{item.label}</p>
+              <p className="truncate text-xs text-muted-foreground">{targetLabel}</p>
+            </div>
           </div>
           <div className="flex shrink-0 items-center gap-1">
-            <button
-              type="button"
-              disabled={index === 0 || isPending}
-              onClick={() => onMove(-1)}
-              className="rounded-lg border border-border p-1.5 text-muted-foreground hover:bg-secondary/60 disabled:opacity-30"
-              aria-label="Đưa lên"
-            >
-              <ArrowUp className="size-4" />
-            </button>
-            <button
-              type="button"
-              disabled={index === total - 1 || isPending}
-              onClick={() => onMove(1)}
-              className="rounded-lg border border-border p-1.5 text-muted-foreground hover:bg-secondary/60 disabled:opacity-30"
-              aria-label="Đưa xuống"
-            >
-              <ArrowDown className="size-4" />
-            </button>
             <button
               type="button"
               disabled={isPending}
@@ -262,13 +250,25 @@ export function NavigationEditor({
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const sorted = [...items].sort((a, b) => a.position - b.position)
+  const [dragId, setDragId] = useState<string | null>(null)
+  const [dragOverId, setDragOverId] = useState<string | null>(null)
 
-  function moveItem(index: number, direction: -1 | 1) {
-    const other = sorted[index + direction]
-    if (!other) return
+  /** Native HTML5 drag-and-drop — no external library. Drop reassigns 0..N-1 positions for the whole (same-parent) sibling group in one batch request. */
+  function handleDrop(targetId: string) {
+    setDragOverId(null)
+    if (!dragId || dragId === targetId) return
+    const dragged = sorted.find((i) => i.id === dragId)
+    const target = sorted.find((i) => i.id === targetId)
+    if (!dragged || !target || dragged.parentItemId !== target.parentItemId) return
+
+    const siblingIds = sorted.filter((i) => i.parentItemId === dragged.parentItemId).map((i) => i.id)
+    const withoutDragged = siblingIds.filter((id) => id !== dragId)
+    const targetIndex = withoutDragged.indexOf(targetId)
+    const reordered = [...withoutDragged.slice(0, targetIndex), dragId, ...withoutDragged.slice(targetIndex)]
+
     setError(null)
     startTransition(async () => {
-      const result = await moveItemAction(sorted[index].id, other.position)
+      const result = await reorderItemsAction(reordered.map((id, position) => ({ id, position })))
       if (!result.ok) setError(result.message)
       else router.refresh()
     })
@@ -353,8 +353,29 @@ export function NavigationEditor({
 
       {selectedMenu ? (
         <div className="space-y-3">
-          {sorted.map((item, i) => (
-            <ItemRow key={item.id} item={item} pages={pages} index={i} total={sorted.length} onMove={(dir) => moveItem(i, dir)} />
+          {sorted.map((item) => (
+            <ItemRow
+              key={item.id}
+              item={item}
+              pages={pages}
+              isDragOver={dragOverId === item.id && dragId !== item.id}
+              dragHandleProps={{
+                draggable: true,
+                onDragStart: () => setDragId(item.id),
+                onDragEnd: () => {
+                  setDragId(null)
+                  setDragOverId(null)
+                },
+                onDragOver: (e) => {
+                  e.preventDefault()
+                  setDragOverId(item.id)
+                },
+                onDrop: (e) => {
+                  e.preventDefault()
+                  handleDrop(item.id)
+                },
+              }}
+            />
           ))}
           {sorted.length === 0 && <p className="text-sm text-muted-foreground">Menu này chưa có mục nào.</p>}
           <CreateItemForm menuId={selectedMenu.id} pages={pages} nextPosition={sorted.length} />

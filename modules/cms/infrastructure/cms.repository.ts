@@ -8,6 +8,7 @@ import type {
   CmsBlockDefinition,
   CmsLifecycleStatus,
   CmsPage,
+  CmsPageType,
   CmsPageVersion,
   CmsSection,
 } from '@/modules/cms/domain/types'
@@ -30,7 +31,11 @@ export type PublishedPageContent = {
 export interface CmsRepository {
   findPageById(id: string): Promise<CmsPage | null>
   findPageBySlug(websiteId: string, locale: string, slug: string): Promise<CmsPage | null>
-  listPages(websiteId: string, query: PaginationQuery): Promise<PaginatedResult<CmsPage>>
+  listPages(
+    websiteId: string,
+    query: PaginationQuery,
+    filters?: { pageType?: CmsPageType; status?: CmsLifecycleStatus },
+  ): Promise<PaginatedResult<CmsPage>>
   createPage(input: CmsPageCreateInput, actorId: string): Promise<CmsPage>
   updatePage(id: string, input: CmsPageUpdateInput, actorId: string): Promise<CmsPage>
   softDeletePage(id: string, actorId: string): Promise<void>
@@ -207,7 +212,11 @@ export class SupabaseCmsRepository implements CmsRepository {
     return data ? mapPage(data) : null
   }
 
-  async listPages(websiteId: string, query: PaginationQuery): Promise<PaginatedResult<CmsPage>> {
+  async listPages(
+    websiteId: string,
+    query: PaginationQuery,
+    filters?: { pageType?: CmsPageType; status?: CmsLifecycleStatus },
+  ): Promise<PaginatedResult<CmsPage>> {
     const from = (query.page - 1) * query.pageSize
     let builder = this.client
       .from('cms_pages')
@@ -215,6 +224,21 @@ export class SupabaseCmsRepository implements CmsRepository {
       .eq('website_id', websiteId)
       .is('deleted_at', null)
     if (query.search) builder = builder.ilike('slug', `%${query.search}%`)
+    if (filters?.pageType) builder = builder.eq('page_type', filters.pageType)
+    if (filters?.status) {
+      // Status lives on cms_page_versions (the current version), not cms_pages — resolve matching page ids first.
+      const { data: matchingVersions, error: versionsError } = await this.client
+        .from('cms_page_versions')
+        .select('page_id')
+        .eq('is_current', true)
+        .eq('status', filters.status)
+      if (versionsError) throw mapDatabaseError(versionsError, 'CmsPageVersion')
+      const matchingPageIds = (matchingVersions ?? []).map((v) => v.page_id)
+      if (matchingPageIds.length === 0) {
+        return { items: [], page: query.page, pageSize: query.pageSize, total: 0 }
+      }
+      builder = builder.in('id', matchingPageIds)
+    }
     builder = builder.order(query.sort ?? 'created_at', { ascending: query.order === 'asc' })
     const { data, error, count } = await builder.range(from, from + query.pageSize - 1)
     if (error) throw mapDatabaseError(error, 'CmsPage')

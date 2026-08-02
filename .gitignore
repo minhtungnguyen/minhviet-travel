@@ -19,3 +19,4 @@ node_modules
 
 # Playwright MCP trace/log output (tool-generated, not project source)
 .playwright-mcp/
+.vercel

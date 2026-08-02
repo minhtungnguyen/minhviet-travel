@@ -6,6 +6,8 @@ import { getServerSupabaseClient } from '@/shared/supabase/server-client'
 import { recordAuditLog } from '@/modules/audit/application/audit.service'
 import { CmsService } from '@/modules/cms/application/cms.service'
 import { SupabaseCmsRepository } from '@/modules/cms/infrastructure/cms.repository'
+import { NewsCategoryService } from '@/modules/news-categories/application/news-category.service'
+import { SupabaseNewsCategoryRepository } from '@/modules/news-categories/infrastructure/news-category.repository'
 import { newRequestId } from '@/shared/http/request-id'
 import { NEWS_SLUG_PREFIX } from '@/lib/cms/news-constants'
 
@@ -14,6 +16,11 @@ export type CreateNewsResult = { ok: true; pageId: string } | { ok: false; messa
 async function getService() {
   const client = await getServerSupabaseClient()
   return new CmsService(new SupabaseCmsRepository(client), client, recordAuditLog)
+}
+
+async function getCategoryService() {
+  const client = await getServerSupabaseClient()
+  return new NewsCategoryService(new SupabaseNewsCategoryRepository(client), client, recordAuditLog)
 }
 
 /**
@@ -29,6 +36,7 @@ export async function createNewsArticleAction(input: {
   locale: 'vi' | 'en' | 'zh' | 'ko' | 'ja'
   title: string
   slugSuffix: string
+  categoryId: string
 }): Promise<CreateNewsResult> {
   try {
     const actor = await resolveActor()
@@ -41,8 +49,18 @@ export async function createNewsArticleAction(input: {
       requestId,
     )
     const section = await service.createSection(actor, page.id, 'meta', 0, requestId)
-    await service.createBlock(actor, section.id, 'CUSTOM', 0, { category: '', excerpt: '', image: null, size: 'small' }, requestId)
+    await service.createBlock(
+      actor,
+      section.id,
+      'CUSTOM',
+      0,
+      { excerpt: '', image: null, size: 'small', featured: false, hot: false, pinned: false },
+      requestId,
+    )
+    const categoryService = await getCategoryService()
+    await categoryService.assignArticleCategory(actor, page.id, input.categoryId, input.websiteId, requestId)
     revalidatePath('/admin/news')
+    revalidatePath('/tin-tuc')
     return { ok: true, pageId: page.id }
   } catch (error) {
     return { ok: false, message: error instanceof Error ? error.message : 'Có lỗi xảy ra.' }

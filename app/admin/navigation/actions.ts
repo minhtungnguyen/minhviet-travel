@@ -76,3 +76,14 @@ export async function deleteItemAction(itemId: string): Promise<ActionResult> {
   const service = await getService()
   return wrap(() => service.deleteItem(actor, itemId, newRequestId()))
 }
+
+/** Drag-and-drop reorder: applies every item's new position in one request instead of N separate moveItemAction round trips. */
+export async function reorderItemsAction(updates: { id: string; position: number }[]): Promise<ActionResult> {
+  const actor = await resolveActor()
+  const service = await getService()
+  return wrap(async () => {
+    for (const update of updates) {
+      await service.updateItem(actor, update.id, { position: update.position }, newRequestId())
+    }
+  })
+}

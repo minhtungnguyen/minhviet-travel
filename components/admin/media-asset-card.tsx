@@ -16,6 +16,8 @@ export function MediaAssetCard({ asset, url, canEdit }: { asset: MediaAsset; url
   const [caption, setCaption] = useState(asset.caption ?? '')
   const [credit, setCredit] = useState(asset.credit ?? '')
   const [copyrightInfo, setCopyrightInfo] = useState(asset.copyrightInfo ?? '')
+  const [source, setSource] = useState(asset.source ?? '')
+  const [licenseStatus, setLicenseStatus] = useState(asset.licenseStatus ?? '')
 
   const isImage = asset.mimeType.startsWith('image/')
   const sizeLabel = asset.fileSizeBytes >= 1024 * 1024
@@ -30,6 +32,8 @@ export function MediaAssetCard({ asset, url, canEdit }: { asset: MediaAsset; url
       caption: caption || null,
       credit: credit || null,
       copyrightInfo: copyrightInfo || null,
+      source: source || null,
+      licenseStatus: licenseStatus || null,
     })
     setSaving(false)
     if (!result.ok) {
@@ -98,6 +102,20 @@ export function MediaAssetCard({ asset, url, canEdit }: { asset: MediaAsset; url
             value={copyrightInfo}
             onChange={(e) => setCopyrightInfo(e.target.value)}
             placeholder="Copyright"
+            className="h-9 w-full rounded-md border border-border bg-background px-2 text-xs"
+          />
+          <input
+            type="text"
+            value={source}
+            onChange={(e) => setSource(e.target.value)}
+            placeholder="Nguồn (source)"
+            className="h-9 w-full rounded-md border border-border bg-background px-2 text-xs"
+          />
+          <input
+            type="text"
+            value={licenseStatus}
+            onChange={(e) => setLicenseStatus(e.target.value)}
+            placeholder="Tình trạng bản quyền (license status)"
             className="h-9 w-full rounded-md border border-border bg-background px-2 text-xs"
           />
           <button

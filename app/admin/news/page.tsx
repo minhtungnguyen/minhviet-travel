@@ -39,11 +39,16 @@ export default async function AdminNewsPage({ searchParams }: { searchParams: Pr
           <h1 className="font-display text-2xl font-bold text-foreground">Tin tức</h1>
           <p className="mt-1 text-sm text-muted-foreground">{result.total} bài viết.</p>
         </div>
-        {hasPermission(actor, 'cms.page.create') && (
-          <Link href="/admin/news/new" className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-deep">
-            Viết bài mới
+        <div className="flex items-center gap-2">
+          <Link href="/admin/news/categories" className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-secondary/60">
+            Danh mục
           </Link>
-        )}
+          {hasPermission(actor, 'cms.page.create') && (
+            <Link href="/admin/news/new" className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-deep">
+              Viết bài mới
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-border bg-card">

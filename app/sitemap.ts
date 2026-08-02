@@ -2,8 +2,12 @@ import type { MetadataRoute } from 'next'
 import { SITE_URL } from '@/constants/seo'
 import { tours } from '@/lib/site-data'
 import { getCatalogService, getMasterDataService } from '@/lib/attraction-ticket/get-attraction-ticket-services'
+import { getPublicSupabaseClient } from '@/shared/supabase/public-client'
+import { NEWS_SLUG_PREFIX } from '@/lib/cms/news-constants'
 
 const ATTRACTION_TICKET_WEBSITE_ID = '00000000-0000-4000-8000-000000000003'
+const CMS_WEBSITE_ID = '00000000-0000-4000-8000-000000000003'
+const CMS_LOCALE = 'vi'
 
 /**
  * Only lists routes that are actually implemented and publicly indexable.
@@ -26,6 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/visa`, changeFrequency: 'weekly', priority: 0.6 },
     { url: `${SITE_URL}/about`, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${SITE_URL}/contact`, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${SITE_URL}/tin-tuc`, changeFrequency: 'daily', priority: 0.7 },
   ]
 
   const tourRoutes: MetadataRoute.Sitemap = tours.map((tour) => ({
@@ -68,5 +73,46 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   })()
 
-  return [...staticRoutes, ...tourRoutes, ...attractionTicketRoutes]
+  // Published cms_pages (generic Pages + News, Sprint 5A) — 'home' is
+  // excluded (it's `/`, listed in staticRoutes above; app/[slug]/page.tsx
+  // itself refuses to serve that slug).
+  const cmsPageRoutes: MetadataRoute.Sitemap = await (async () => {
+    try {
+      const client = getPublicSupabaseClient()
+      const { data: pages } = await client
+        .from('cms_pages')
+        .select('id, slug')
+        .eq('website_id', CMS_WEBSITE_ID)
+        .eq('locale', CMS_LOCALE)
+        .neq('slug', 'home')
+        .is('deleted_at', null)
+      if (!pages || pages.length === 0) return []
+
+      const { data: currentVersions } = await client
+        .from('cms_page_versions')
+        .select('page_id, updated_at')
+        .in('page_id', pages.map((p) => p.id))
+        .eq('is_current', true)
+        .eq('status', 'PUBLISHED')
+      const publishedPageIds = new Set((currentVersions ?? []).map((v) => v.page_id))
+      const updatedAtByPageId = new Map((currentVersions ?? []).map((v) => [v.page_id, v.updated_at]))
+
+      return pages
+        .filter((p) => publishedPageIds.has(p.id))
+        .map((p) => {
+          const isNews = p.slug.startsWith(NEWS_SLUG_PREFIX)
+          const path = isNews ? `/tin-tuc/${p.slug.slice(NEWS_SLUG_PREFIX.length)}` : `/${p.slug}`
+          return {
+            url: `${SITE_URL}${path}`,
+            lastModified: updatedAtByPageId.get(p.id) ?? undefined,
+            changeFrequency: isNews ? ('weekly' as const) : ('monthly' as const),
+            priority: isNews ? 0.6 : 0.5,
+          }
+        })
+    } catch {
+      return []
+    }
+  })()
+
+  return [...staticRoutes, ...tourRoutes, ...attractionTicketRoutes, ...cmsPageRoutes]
 }

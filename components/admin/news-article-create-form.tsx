@@ -6,13 +6,20 @@ import { AlertCircle } from 'lucide-react'
 import { MVButton } from '@/components/mv/mv-button'
 import { createNewsArticleAction } from '@/app/admin/news/actions'
 import { NEWS_SLUG_PREFIX } from '@/lib/cms/news-constants'
+import type { NewsCategory } from '@/modules/news-categories/domain/types'
 
 const LOCALES = ['vi', 'en', 'zh', 'ko', 'ja'] as const
 
 const inputClass = 'h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-primary'
 const labelClass = 'text-xs font-semibold text-muted-foreground'
 
-export function NewsArticleCreateForm({ websites }: { websites: { id: string; name: string; domain: string }[] }) {
+export function NewsArticleCreateForm({
+  websites,
+  categories,
+}: {
+  websites: { id: string; name: string; domain: string }[]
+  categories: NewsCategory[]
+}) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -20,12 +27,14 @@ export function NewsArticleCreateForm({ websites }: { websites: { id: string; na
   const [slugSuffix, setSlugSuffix] = useState('')
   const [websiteId, setWebsiteId] = useState(websites[0]?.id ?? '')
   const [locale, setLocale] = useState<(typeof LOCALES)[number]>('vi')
+  const activeCategories = categories.filter((c) => c.isActive)
+  const [categoryId, setCategoryId] = useState(activeCategories[0]?.id ?? '')
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
     startTransition(async () => {
-      const result = await createNewsArticleAction({ websiteId, locale, title, slugSuffix })
+      const result = await createNewsArticleAction({ websiteId, locale, title, slugSuffix, categoryId })
       if (!result.ok) {
         setError(result.message)
         return
@@ -60,6 +69,17 @@ export function NewsArticleCreateForm({ websites }: { websites: { id: string; na
           {LOCALES.map((l) => (
             <option key={l} value={l}>
               {l}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="block">
+        <span className={labelClass}>Danh mục</span>
+        <select className={inputClass} value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
+          {activeCategories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
             </option>
           ))}
         </select>

@@ -5,7 +5,7 @@ import type { SupabaseClientLike } from '@/shared/supabase/types'
 import { resolveWebsiteOrganizationId } from '@/shared/organization/resolve-website-organization'
 import type { PaginationQuery } from '@/shared/validation/pagination'
 import type { CmsRepository } from '@/modules/cms/infrastructure/cms.repository'
-import type { CmsLifecycleStatus } from '@/modules/cms/domain/types'
+import type { CmsLifecycleStatus, CmsPageType } from '@/modules/cms/domain/types'
 import type {
   AnnouncementCreateInput,
   AnnouncementUpdateInput,
@@ -59,9 +59,14 @@ export class CmsService {
     return page
   }
 
-  async listPages(actor: ActorContext, websiteId: string, query: PaginationQuery) {
+  async listPages(
+    actor: ActorContext,
+    websiteId: string,
+    query: PaginationQuery,
+    filters?: { pageType?: CmsPageType; status?: CmsLifecycleStatus },
+  ) {
     requirePermission(actor, 'cms.page.read')
-    return this.repository.listPages(websiteId, query)
+    return this.repository.listPages(websiteId, query, filters)
   }
 
   async createPage(actor: ActorContext, input: CmsPageCreateInput, requestId: string) {

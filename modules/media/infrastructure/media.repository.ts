@@ -143,6 +143,11 @@ export class SupabaseMediaRepository implements MediaRepository {
         ...(input.copyrightInfo !== undefined && { copyright_info: input.copyrightInfo }),
         ...(input.source !== undefined && { source: input.source }),
         ...(input.licenseStatus !== undefined && { license_status: input.licenseStatus }),
+        ...(input.originalFilename !== undefined && { original_filename: input.originalFilename }),
+        ...(input.mimeType !== undefined && { mime_type: input.mimeType }),
+        ...(input.fileSizeBytes !== undefined && { file_size_bytes: input.fileSizeBytes }),
+        ...(input.width !== undefined && { width: input.width }),
+        ...(input.height !== undefined && { height: input.height }),
       })
       .eq('id', id)
       .select('*')

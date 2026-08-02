@@ -40,6 +40,14 @@ export const mediaAssetUpdateSchema = z.object({
   copyrightInfo: z.string().max(500).nullable().optional(),
   source: z.string().max(300).nullable().optional(),
   licenseStatus: z.string().max(100).nullable().optional(),
+  // Sprint 5B "Replace file" (Founder decision: overwrite in place, no
+  // version history) — the new binary keeps the same id/storage_path, but
+  // its own technical metadata (what changed) needs updating alongside it.
+  originalFilename: z.string().min(1).max(300).optional(),
+  mimeType: z.string().min(1).max(150).optional(),
+  fileSizeBytes: z.number().int().positive().optional(),
+  width: z.number().int().positive().nullable().optional(),
+  height: z.number().int().positive().nullable().optional(),
 }).strict()
 
 export type MediaFolderCreateInput = z.infer<typeof mediaFolderCreateSchema>

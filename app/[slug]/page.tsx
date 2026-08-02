@@ -9,6 +9,7 @@ import { recordAuditLog } from '@/modules/audit/application/audit.service'
 import { CmsService } from '@/modules/cms/application/cms.service'
 import { SupabaseCmsRepository } from '@/modules/cms/infrastructure/cms.repository'
 import { SITE_URL } from '@/constants/seo'
+import { resolveDefaultSeoMetadata } from '@/lib/seo/default-metadata'
 
 /**
  * Generic public renderer for any PUBLISHED, non-homepage `cms_pages` row
@@ -39,7 +40,19 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { version, client } = loaded
   const canonicalPath = `/${slug}`
   if (!version.seoMetadataId) {
-    return { title: version.title, alternates: { canonical: canonicalPath } }
+    const fallback = await resolveDefaultSeoMetadata(client, version.title)
+    return {
+      title: fallback.title,
+      description: fallback.description,
+      alternates: { canonical: canonicalPath },
+      openGraph: {
+        title: fallback.title,
+        description: fallback.description,
+        url: `${SITE_URL}${canonicalPath}`,
+        type: 'website',
+        images: fallback.ogImage ? [{ url: fallback.ogImage }] : undefined,
+      },
+    }
   }
   const { data: seoRow } = await client
     .from('seo_metadata')

@@ -10,6 +10,7 @@ import { CmsService } from '@/modules/cms/application/cms.service'
 import { SupabaseCmsRepository } from '@/modules/cms/infrastructure/cms.repository'
 import { NEWS_SLUG_PREFIX } from '@/lib/cms/news-constants'
 import { SITE_URL } from '@/constants/seo'
+import { resolveDefaultSeoMetadata } from '@/lib/seo/default-metadata'
 
 const WEBSITE_ID = '00000000-0000-4000-8000-000000000003'
 const LOCALE = 'vi'
@@ -46,10 +47,20 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const canonicalPath = `/tin-tuc/${slug}`
   const featuredImageSrc = (meta.image as { src?: string } | null)?.src
   if (!version.seoMetadataId) {
+    const fallback = await resolveDefaultSeoMetadata(client, version.title)
+    const description = String(meta.excerpt ?? '') || fallback.description
+    const image = featuredImageSrc ?? fallback.ogImage
     return {
-      title: version.title,
+      title: fallback.title,
+      description,
       alternates: { canonical: canonicalPath },
-      openGraph: featuredImageSrc ? { images: [{ url: featuredImageSrc }] } : undefined,
+      openGraph: {
+        title: fallback.title,
+        description,
+        url: `${SITE_URL}${canonicalPath}`,
+        type: 'article',
+        images: image ? [{ url: image }] : undefined,
+      },
     }
   }
   const { data: seoRow } = await client

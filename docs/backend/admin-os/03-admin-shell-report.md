@@ -4,6 +4,19 @@
 
 ---
 
+## Commit & Preview Deployment
+
+| Mục | Giá trị |
+|---|---|
+| Commit tooling (đã duyệt trước) | `dbcfc44` — `chore: exclude Claude worktrees from lint and tests` |
+| Commit Phase 2 | `e5d324f` — `feat(admin): complete RBAC-driven admin shell v1` (6 file, xem §"Danh sách file thay đổi") |
+| Branch preview | `preview/admin-os-v1`, đã push lên `origin` — **không đụng `main`/Production** (`origin/main` vẫn nguyên `0a223b2`, đã xác nhận lại sau khi push) |
+| Preview URL | `https://minh-viet-git-preview-admin-os-v1-minh-viet-travel-s-projects.vercel.app` |
+| Trạng thái deploy | ✅ "Deployment has completed" (xác nhận qua GitHub Commit Status API, không cần `vercel`/`gh` CLI) |
+| Bảo vệ truy cập | Preview URL yêu cầu đăng nhập Vercel SSO (mặc định bảo mật của Vercel cho mọi Preview Deployment) — xác nhận qua `curl` (mọi route đều redirect `vercel.com/sso-api`). **Founder cần đăng nhập tài khoản Vercel thuộc team `minh-viet-travel-s-projects` để xem được** — đây là hành vi đúng/an toàn, không phải lỗi. |
+
+---
+
 ## Phát hiện quan trọng nhất: bug runtime nghiêm trọng, đã sửa
 
 `lib/admin/nav-config.ts` (`ADMIN_NAV`) từng lưu **component icon thật** (`LayoutDashboard`, `FileText`, ... từ `lucide-react`) làm giá trị của trường `icon`. `app/admin/layout.tsx` (Server Component) đọc mảng này rồi truyền làm prop cho `AdminShell` (`'use client'`). React Server Components **không cho phép truyền function/component reference qua ranh giới server→client** như dữ liệu prop — chỉ được phép *render* nó bên server. Kết quả: **mọi request thật vào bất kỳ trang `/admin/**` nào (đã đăng nhập) sẽ crash 500** với lỗi `"Functions cannot be passed directly to Client Components..."`.

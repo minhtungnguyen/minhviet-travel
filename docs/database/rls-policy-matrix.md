@@ -35,7 +35,7 @@ Legend: **anon** = unauthenticated public visitor. **auth (self)** = any authent
 | `user_roles`, `role_scopes` | self, or `user.manage` | `user.manage` |
 | `organizations`, `brands`, `business_units`, `offices`, `departments`, `positions` | members of the organization (`auth_user_organization_ids()`) | `settings.organization.update` / `settings.brand.update` |
 | Master data lookups (`currencies`, `languages`, `countries`, `provinces`, `cities`, `product_types`, `customer_types`) | **anon + authenticated** (documented exception — harmless reference data) | `master_data.manage` |
-| `setting_definitions` | any authenticated | `settings.definition.manage` |
+| `setting_definitions` | any authenticated, **plus anon when `visibility='PUBLIC'`** (`public_read_public_setting_definitions`, added Sprint 2 — the matching `setting_values` anon policy below existed already but could never actually resolve true for anon without this, since its own `EXISTS` subquery against `setting_definitions` was itself blocked) | `settings.definition.manage` |
 | `setting_values` | anon only if the definition is `visibility='PUBLIC'`; staff need `settings.website.update` | `settings.website.update`, and the write policy's `WITH CHECK` blocks writing a value for any `is_secret` definition outright |
 | `media_folders` | `media.asset.read` | `media.asset.upload` |
 | `form_submissions` | **no anon policy at all** — see below | staff `forms.submission.read`; inserts only via service role from a server route |

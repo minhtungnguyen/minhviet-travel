@@ -3,7 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import Script from 'next/script'
 import { Inter, Plus_Jakarta_Sans } from 'next/font/google'
 import { SkipLink } from '@/components/layout/skip-link'
-import { AnnouncementModal } from '@/components/site/announcement-modal'
+import { AnnouncementModalLoader } from '@/components/site/announcement-modal-loader'
 import { SITE_URL } from '@/constants/seo'
 import { getPublicSupabaseClient } from '@/shared/supabase/public-client'
 import { SettingsService } from '@/modules/settings/application/settings.service'
@@ -128,7 +128,7 @@ export default async function RootLayout({
         )}
         <SkipLink />
         {children}
-        <AnnouncementModal />
+        <AnnouncementModalLoader />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

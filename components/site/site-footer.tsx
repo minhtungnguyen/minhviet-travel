@@ -3,41 +3,59 @@ import { Phone, Mail, MapPin, Globe } from 'lucide-react'
 import { Logo } from '@/components/mv/logo'
 import { FacebookIcon, YoutubeIcon, LinkedinIcon } from '@/components/mv/social-icons'
 import { NewsletterForm } from '@/components/homepage/newsletter-form'
+import { getPublicSupabaseClient } from '@/shared/supabase/public-client'
+import { recordAuditLog } from '@/modules/audit/application/audit.service'
+import { NavigationService } from '@/modules/navigation/application/navigation.service'
+import { SupabaseNavigationRepository } from '@/modules/navigation/infrastructure/navigation.repository'
+import { SettingsService } from '@/modules/settings/application/settings.service'
+import { SupabaseSettingsRepository } from '@/modules/settings/infrastructure/settings.repository'
 
-const footerCols = [
-  {
-    heading: 'Về chúng tôi',
-    links: [
-      { label: 'Giới thiệu', href: '/about' },
-      { label: 'Tầm nhìn - Sứ mệnh', href: '/about#vision' },
-      { label: 'Đội ngũ', href: '/brand/leadership' },
-      { label: 'Tin tức', href: '/brand/news' },
-      { label: 'Tuyển dụng', href: '/careers' },
-    ],
-  },
-  {
-    heading: 'Dịch vụ',
-    links: [
-      { label: 'Tour đoàn', href: '/tours?type=group' },
-      { label: 'MICE & Sự kiện', href: '/mice' },
-      { label: 'Dịch vụ lẻ', href: '/services' },
-      { label: 'Khách sạn', href: '/hotels' },
-      { label: 'Du thuyền', href: '/cruises' },
-    ],
-  },
-  {
-    heading: 'Hỗ trợ',
-    links: [
-      { label: 'FAQ', href: '/faq' },
-      { label: 'Điều khoản & điều kiện', href: '/policy/terms' },
-      { label: 'Chính sách bảo mật', href: '/policy/privacy' },
-      { label: 'Hướng dẫn thanh toán', href: '/policy/payment' },
-      { label: 'Liên hệ', href: '/contact' },
-    ],
-  },
-]
+const WEBSITE_ID = '00000000-0000-4000-8000-000000000003'
 
-export function SiteFooter() {
+/**
+ * Sprint 2 ("Footer management"): link columns come from the real
+ * `FOOTER` navigation_menu (a column heading is a parent item with
+ * `url=null`, its links are the children) and contact/social info from
+ * existing `company.*` settings — replacing what used to be entirely
+ * hardcoded arrays. Falls back to the previous static content only if
+ * the real data is unexpectedly empty, so a settings/navigation outage
+ * degrades to "looks the same as before," never a blank footer.
+ */
+export async function SiteFooter() {
+  const client = getPublicSupabaseClient()
+  const nav = new NavigationService(new SupabaseNavigationRepository(client), client, recordAuditLog)
+  const settings = new SettingsService(new SupabaseSettingsRepository(client), recordAuditLog)
+
+  const [menuResult, hotline, email, address, city, facebook, youtube, linkedin] = await Promise.all([
+    nav.getPublicMenu(WEBSITE_ID, 'FOOTER', 'vi').catch(() => null),
+    settings.getSetting('company.hotline', {}),
+    settings.getSetting('company.email', {}),
+    settings.getSetting('company.address', {}),
+    settings.getSetting('company.city', {}),
+    settings.getSetting('company.social_facebook', {}),
+    settings.getSetting('company.social_youtube', {}),
+    settings.getSetting('company.social_linkedin', {}),
+  ])
+
+  const columns = menuResult
+    ? menuResult.items
+        .filter((item) => item.parentItemId === null)
+        .sort((a, b) => a.position - b.position)
+        .map((heading) => ({
+          heading: heading.label,
+          links: menuResult.items
+            .filter((item) => item.parentItemId === heading.id)
+            .sort((a, b) => a.position - b.position)
+            .map((item) => ({ label: item.label, href: item.url ?? '#' })),
+        }))
+    : []
+
+  const socialLinks = [
+    { Icon: FacebookIcon, label: 'Facebook Minh Việt Travel', href: String(facebook.resolved.value || '') },
+    { Icon: YoutubeIcon, label: 'YouTube Minh Việt Travel', href: String(youtube.resolved.value || '') },
+    { Icon: LinkedinIcon, label: 'LinkedIn Minh Việt Travel', href: String(linkedin.resolved.value || '') },
+  ].filter((s) => s.href)
+
   return (
     <footer>
       {/* Newsletter band — Sprint UI-02: deliberately its own light Mist
@@ -71,26 +89,26 @@ export function SiteFooter() {
               Công ty Cổ phần Thương mại &amp; Dịch vụ Du lịch Minh Việt — Đối tác tin cậy
               của doanh nghiệp, tổ chức và khách hàng cao cấp.
             </p>
-            <div className="mt-6 flex gap-3">
-              {[
-                { Icon: FacebookIcon, label: 'Facebook Minh Việt Travel' },
-                { Icon: YoutubeIcon, label: 'YouTube Minh Việt Travel' },
-                { Icon: LinkedinIcon, label: 'LinkedIn Minh Việt Travel' },
-              ].map(({ Icon, label }) => (
-                <a
-                  key={label}
-                  href="#"
-                  aria-label={label}
-                  className="grid size-10 place-items-center rounded-xl bg-white/10 text-white transition-colors duration-mv-fast hover:bg-mv-sky-cyan hover:text-white"
-                >
-                  <Icon className="size-4.5" />
-                </a>
-              ))}
-            </div>
+            {socialLinks.length > 0 && (
+              <div className="mt-6 flex gap-3">
+                {socialLinks.map(({ Icon, label, href }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    className="grid size-10 place-items-center rounded-xl bg-white/10 text-white transition-colors duration-mv-fast hover:bg-mv-sky-cyan hover:text-white"
+                  >
+                    <Icon className="size-4.5" />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Link columns */}
-          {footerCols.map((col) => (
+          {columns.map((col) => (
             <div key={col.heading}>
               <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-mv-sky-cyan">
                 {col.heading}
@@ -118,16 +136,15 @@ export function SiteFooter() {
             <ul className="mt-4 space-y-3 text-sm text-white/65">
               <li className="flex items-start gap-3">
                 <MapPin className="mt-0.5 size-4 shrink-0 text-mv-sky-cyan" />
-                Tầng 3, Tòa nhà VCCI Duyên Hải Bắc Bộ, Số 464 Lạch Tray, Gia Viên, Hải Phòng
+                {String(address.resolved.value || '')}
+                {city.resolved.value ? `, ${String(city.resolved.value)}` : ''}
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="size-4 shrink-0 text-mv-sky-cyan" />
-                <span className="font-semibold text-white">0934 368 132</span>
-                <span className="text-white/45">·</span>
-                <span className="font-semibold text-white">(0225) 662 7777</span>
+                <span className="font-semibold text-white">{String(hotline.resolved.value || '')}</span>
               </li>
               <li className="flex items-center gap-3">
-                <Mail className="size-4 shrink-0 text-mv-sky-cyan" /> info@minhviettravel.com
+                <Mail className="size-4 shrink-0 text-mv-sky-cyan" /> {String(email.resolved.value || '')}
               </li>
               <li className="flex items-center gap-3">
                 <Globe className="size-4 shrink-0 text-mv-sky-cyan" /> www.minhviettravel.com

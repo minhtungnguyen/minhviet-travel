@@ -20,3 +20,8 @@ node_modules
 # Playwright MCP trace/log output (tool-generated, not project source)
 .playwright-mcp/
 .vercel
+
+# Ad-hoc manual-QA screenshots dropped at repo root during a session — never a deliverable
+/sprint*-desktop*.png
+/sprint*-mobile*.png
+/sprint*-tablet*.png

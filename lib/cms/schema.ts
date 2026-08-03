@@ -169,6 +169,13 @@ export const homepageContentSchema = z.object({
     questions: z.array(aiAdvisorQuestionSchema).min(1),
     humanHandoffCta: cmsLinkSchema,
   }),
+  ceoSection: z.object({
+    eyebrow: z.string(),
+    quote: z.string(),
+    name: z.string(),
+    title: z.string(),
+    portrait: cmsImageSchema.nullable(),
+  }),
   featuredJourneys: z.object({
     eyebrow: z.string().min(1),
     title: z.string().min(1),

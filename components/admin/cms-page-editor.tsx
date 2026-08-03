@@ -16,23 +16,20 @@ import {
 import { HeroBlockForm } from '@/components/admin/blocks/hero-block-form'
 import { TrustStripBlockForm } from '@/components/admin/blocks/trust-strip-block-form'
 import { NewsMetaBlockForm, type NewsMetaConfig } from '@/components/admin/blocks/news-meta-block-form'
+import { CeoBlockForm } from '@/components/admin/blocks/ceo-block-form'
 import { SeoMetadataForm } from '@/components/admin/seo-metadata-form'
 import { NewsCategoryPicker } from '@/components/admin/news-category-picker'
 import type { CmsBlock, CmsBlockDefinition, CmsPage, CmsPageVersion, CmsSection } from '@/modules/cms/domain/types'
 import type { SeoMetadata } from '@/modules/seo/domain/types'
 import type { NewsCategory } from '@/modules/news-categories/domain/types'
-import type { HeroContent, TrustStripContent } from '@/types/homepage'
+import type { HeroContent, TrustStripContent, CeoSectionContent } from '@/types/homepage'
 
 /**
  * Real per-section-type edit forms for the sections named in Sprint 2
  * ("Hero Banner", "Statistics"/"Partner logos" — both live in the
- * `trustStrip` section) plus Phase 4's `meta` (News). `ceoSection` is
- * deliberately NOT wired here on this branch — its form needs
- * `CeoSectionContent`, which only exists alongside the separate,
- * not-yet-committed Sprint 2 homepage-CMS-loader work
- * (lib/cms/client.ts) that Phase 4 stays independent of; CEO section
- * keeps the raw JSON editor here, same as every other block without a
- * dedicated form, until that work lands (Sprint 5 — Homepage Builder).
+ * `trustStrip` section — and "CEO/Lãnh đạo") plus Phase 4's `meta`
+ * (News). Every other block still falls through to the raw JSON
+ * editor below until it gets a dedicated form.
  */
 function BlockEditor({ pageId, sectionKey, block }: { pageId: string; sectionKey: string; block: CmsBlock }) {
   switch (sectionKey) {
@@ -42,6 +39,8 @@ function BlockEditor({ pageId, sectionKey, block }: { pageId: string; sectionKey
       return <TrustStripBlockForm pageId={pageId} blockId={block.id} initial={block.config as unknown as TrustStripContent} />
     case 'meta':
       return <NewsMetaBlockForm pageId={pageId} blockId={block.id} initial={block.config as unknown as NewsMetaConfig} />
+    case 'ceoSection':
+      return <CeoBlockForm pageId={pageId} blockId={block.id} initial={block.config as unknown as CeoSectionContent} />
     default:
       return <pre className="overflow-x-auto text-xs text-foreground/80">{JSON.stringify(block.config, null, 2)}</pre>
   }

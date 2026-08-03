@@ -7,10 +7,20 @@ import { HeroSection } from '@/sections/hero-section'
 import { TrustStripSection } from '@/sections/trust-strip-section'
 import { CoreServicesSection } from '@/sections/core-services-section'
 import { EnterpriseMiceSection } from '@/sections/enterprise-mice-section'
+import { CeoSection } from '@/sections/ceo-section'
 import { FeaturedJourneysSection } from '@/sections/featured-journeys-section'
 import { DestinationsSection } from '@/sections/destinations-section'
 import { BrandCenterSection } from '@/sections/brand-center-section'
 import { ConsultationInspirationSection } from '@/sections/consultation-inspiration-section'
+
+/**
+ * ISR fallback so a CMS edit still reaches the live homepage even if
+ * `revalidatePath('/')` (called from `publishPageAction` on an actual
+ * publish — the primary, near-instant path) is ever missed. The page
+ * has no per-request dynamic API usage, so without this it would only
+ * ever be static content by design.
+ */
+export const revalidate = 300
 
 export async function generateMetadata(): Promise<Metadata> {
   const { seo } = await getHomepageContent()
@@ -39,6 +49,7 @@ export default async function HomePage() {
       <TrustStripSection />
       <CoreServicesSection />
       <EnterpriseMiceSection />
+      <CeoSection />
       <FeaturedJourneysSection />
       <DestinationsSection />
       <BrandCenterSection />

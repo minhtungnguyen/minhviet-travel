@@ -144,6 +144,20 @@ export interface BrandStoryContent {
   size: 'large' | 'small'
 }
 
+/**
+ * `quote`/`name` may be empty strings — the section renders nothing
+ * until a real leadership message is entered through the Admin CMS
+ * editor (no name/quote is fabricated as seed content, see
+ * database/seeds/0012_homepage_cms_content.sql's header comment).
+ */
+export interface CeoSectionContent {
+  eyebrow: string
+  quote: string
+  name: string
+  title: string
+  portrait: CmsImage | null
+}
+
 export interface BrandCenterContent {
   eyebrow: string
   title: string
@@ -189,6 +203,7 @@ export interface HomepageContent {
   coreServices: CoreServicesContent
   enterpriseMice: EnterpriseMiceContent
   aiAdvisor: AIAdvisorContent
+  ceoSection: CeoSectionContent
   featuredJourneys: FeaturedJourneysContent
   destinations: DestinationsContent
   brandCenter: BrandCenterContent

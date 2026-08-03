@@ -297,7 +297,7 @@ export const destinations: Destination[] = [
 export type WhyStat = { value: number; suffix: string; label: string; icon: LucideIcon; source: string; asOf: string }
 
 export const whyStats: WhyStat[] = [
-  { value: 15, suffix: '+', label: 'Năm kinh nghiệm', icon: Clock, source: 'Hồ sơ năng lực Minh Việt Travel', asOf: '2026' },
+  { value: 13, suffix: '+', label: 'Năm kinh nghiệm', icon: Clock, source: 'Hồ sơ năng lực Minh Việt Travel (thành lập 18/11/2013)', asOf: '2026' },
   { value: 5000, suffix: '+', label: 'Doanh nghiệp tin tưởng', icon: Briefcase, source: 'CRM nội bộ Minh Việt, tổng lũy kế', asOf: '2026-Q2' },
   { value: 200, suffix: 'K+', label: 'Khách hàng hài lòng', icon: Users, source: 'Báo cáo vận hành nội bộ', asOf: '2026-Q2' },
   { value: 60, suffix: '+', label: 'Đối tác toàn cầu', icon: Globe, source: 'Danh mục đối tác Minh Việt', asOf: '2026-Q2' },

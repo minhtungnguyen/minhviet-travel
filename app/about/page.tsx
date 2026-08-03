@@ -12,7 +12,7 @@ import { FinalCTA } from '@/components/site/final-cta'
 export const metadata: Metadata = {
   title: 'Giới thiệu | Minh Việt Travel',
   description:
-    'Minh Việt Travel — đối tác du lịch, sự kiện và MICE tin cậy của doanh nghiệp, tổ chức và khách hàng cao cấp từ 2009.',
+    'Minh Việt Travel — đối tác du lịch, sự kiện và MICE tin cậy của doanh nghiệp, tổ chức và khách hàng cao cấp từ 2013.',
 }
 
 const pillars = [
@@ -26,7 +26,7 @@ export default function AboutPage() {
     <SiteChrome>
       <PageHero
         eyebrow="Về Minh Việt"
-        title="Đối tác du lịch doanh nghiệp tin cậy từ 2009"
+        title="Đối tác du lịch doanh nghiệp tin cậy từ 2013"
         description="Minh Việt Travel đồng hành cùng doanh nghiệp, tổ chức, khu công nghiệp FDI và cơ quan nhà nước trong các hành trình du lịch, công tác và sự kiện quy mô lớn."
         breadcrumb="Giới thiệu"
         image="/brand-group.webp"

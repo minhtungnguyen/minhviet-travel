@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { SiteChrome } from '@/components/site/site-chrome'
+import { ErrorPageChrome } from '@/components/site/error-page-chrome'
 import { FlightErrorState } from '@/components/flight/flight-error-state'
 
 export default function FlightPaymentFailedError({
@@ -16,10 +16,10 @@ export default function FlightPaymentFailedError({
   }, [error])
 
   return (
-    <SiteChrome>
+    <ErrorPageChrome>
       <div className="container-mv pt-32 pb-10 sm:pt-40 lg:pt-48">
         <FlightErrorState onRetry={reset} />
       </div>
-    </SiteChrome>
+    </ErrorPageChrome>
   )
 }

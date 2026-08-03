@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { Phone, RotateCcw } from 'lucide-react'
 import { MVButton } from '@/components/mv/mv-button'
-import { SiteChrome } from '@/components/site/site-chrome'
+import { ErrorPageChrome } from '@/components/site/error-page-chrome'
 
 export default function FlightHomeError({
   error,
@@ -17,7 +17,7 @@ export default function FlightHomeError({
   }, [error])
 
   return (
-    <SiteChrome>
+    <ErrorPageChrome>
       <div className="container-mv flex flex-col items-center gap-5 py-24 text-center">
         <h1 className="font-display text-2xl font-bold text-foreground">Không thể tải trang Vé máy bay</h1>
         <p className="max-w-md text-sm text-muted-foreground">
@@ -34,6 +34,6 @@ export default function FlightHomeError({
           </MVButton>
         </div>
       </div>
-    </SiteChrome>
+    </ErrorPageChrome>
   )
 }

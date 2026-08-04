@@ -59,7 +59,7 @@ export default async function AdminMediaPage({
         <p className="mt-1 text-sm text-muted-foreground">{result.total} tệp.</p>
       </div>
 
-      <MediaFolderNav folders={folders.filter((f) => !f.parentFolderId)} currentFolderId={params.folderId} canWrite={canUpload} />
+      <MediaFolderNav allFolders={folders} currentFolderId={params.folderId} canWrite={canUpload} />
 
       <form className="flex max-w-sm items-center gap-2">
         {params.folderId && <input type="hidden" name="folderId" value={params.folderId} />}

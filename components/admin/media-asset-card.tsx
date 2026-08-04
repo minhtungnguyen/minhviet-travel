@@ -4,10 +4,10 @@ import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { FileIcon, Pencil, Loader2, RefreshCw, Link2 } from 'lucide-react'
+import { FileIcon, Pencil, Loader2, RefreshCw, Link2, Copy, Check, Trash2 } from 'lucide-react'
 import { getBrowserSupabaseClient } from '@/shared/supabase/browser-client'
 import { computeFileChecksum } from '@/lib/media/checksum'
-import { updateAssetAction, getAssetUsageAction } from '@/app/admin/media/actions'
+import { updateAssetAction, getAssetUsageAction, deleteAssetAction } from '@/app/admin/media/actions'
 import type { MediaAsset, MediaAssetUsage } from '@/modules/media/domain/types'
 
 function bucketFor(visibility: 'PUBLIC' | 'PRIVATE') {
@@ -47,6 +47,9 @@ export function MediaAssetCard({ asset, url, canEdit }: { asset: MediaAsset; url
   const [showUsage, setShowUsage] = useState(false)
   const [loadingUsage, setLoadingUsage] = useState(false)
   const [usage, setUsage] = useState<MediaAssetUsage[] | null>(null)
+  const [copied, setCopied] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleted, setDeleted] = useState(false)
 
   const isImage = asset.mimeType.startsWith('image/')
   const sizeLabel = asset.fileSizeBytes >= 1024 * 1024
@@ -131,6 +134,36 @@ export function MediaAssetCard({ asset, url, canEdit }: { asset: MediaAsset; url
     else setError(result.message)
   }
 
+  async function handleCopyUrl() {
+    if (!url) return
+    await navigator.clipboard.writeText(url)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
+
+  /** Checks usage first (never a blind delete) so the confirm dialog is honest about what else might break. */
+  async function handleDelete() {
+    setError(null)
+    const usageResult = await getAssetUsageAction(asset.id)
+    const foundUsage = usageResult.ok ? usageResult.usage : []
+    const warning =
+      foundUsage.length > 0
+        ? `Tệp "${asset.originalFilename}" đang được dùng ở ${foundUsage.length} nơi:\n${foundUsage.map((u) => `- ${u.label}`).join('\n')}\n\nXoá vẫn tiếp tục — các nơi trên có thể mất ảnh. Vẫn xoá?`
+        : `Xoá tệp "${asset.originalFilename}"? Chưa thấy được dùng ở đâu. Hành động này ẩn tệp khỏi Media Library (soft-delete).`
+    if (!window.confirm(warning)) return
+    setDeleting(true)
+    const result = await deleteAssetAction(asset.id)
+    setDeleting(false)
+    if (!result.ok) {
+      setError(result.message)
+      return
+    }
+    setDeleted(true)
+    router.refresh()
+  }
+
+  if (deleted) return null
+
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card">
       <div className="relative flex aspect-square items-center justify-center bg-secondary/30">
@@ -175,14 +208,33 @@ export function MediaAssetCard({ asset, url, canEdit }: { asset: MediaAsset; url
             <input ref={replaceInputRef} type="file" onChange={handleReplaceFile} disabled={replacing} className="hidden" />
           </div>
         )}
-        <button
-          type="button"
-          onClick={handleToggleUsage}
-          className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
-        >
-          {loadingUsage ? <Loader2 className="size-3 animate-spin" /> : <Link2 className="size-3" />}
-          {showUsage ? 'Ẩn nơi sử dụng' : 'Xem nơi sử dụng'}
-        </button>
+        <div className="mt-1 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={handleToggleUsage}
+            className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
+          >
+            {loadingUsage ? <Loader2 className="size-3 animate-spin" /> : <Link2 className="size-3" />}
+            {showUsage ? 'Ẩn nơi sử dụng' : 'Xem nơi sử dụng'}
+          </button>
+          {url && (
+            <button type="button" onClick={handleCopyUrl} className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline">
+              {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
+              {copied ? 'Đã sao chép' : 'Copy URL'}
+            </button>
+          )}
+          {canEdit && (
+            <button
+              type="button"
+              disabled={deleting}
+              onClick={handleDelete}
+              className="flex items-center gap-1 text-[11px] font-semibold text-destructive hover:underline disabled:opacity-50"
+            >
+              {deleting ? <Loader2 className="size-3 animate-spin" /> : <Trash2 className="size-3" />}
+              Xoá
+            </button>
+          )}
+        </div>
       </div>
 
       {showUsage && (

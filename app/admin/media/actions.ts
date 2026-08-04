@@ -52,3 +52,15 @@ export async function updateAssetAction(id: string, input: MediaAssetUpdateInput
     return { ok: false, message: error instanceof Error ? error.message : 'Có lỗi xảy ra.' }
   }
 }
+
+export async function deleteAssetAction(id: string): Promise<ActionResult> {
+  try {
+    const actor = await resolveActor()
+    const service = await getService()
+    await service.deleteAsset(actor, id, newRequestId())
+    revalidatePath('/admin/media')
+    return { ok: true }
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : 'Có lỗi xảy ra.' }
+  }
+}

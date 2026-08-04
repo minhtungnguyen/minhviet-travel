@@ -486,6 +486,7 @@ export function NewsArticleJsonLd({
   imageSrc,
   publishedAt,
   category,
+  authorName,
   baseUrl = SITE_URL,
   organizationName = ORGANIZATION_NAME,
   organizationLogo = ORGANIZATION_LOGO,
@@ -496,6 +497,7 @@ export function NewsArticleJsonLd({
   imageSrc?: string | null
   publishedAt?: string | null
   category?: string
+  authorName?: string | null
   /** Sprint 5B: all 3 overridable from Global SEO settings — default to the constants/seo.ts values when those settings are empty. */
   baseUrl?: string
   organizationName?: string
@@ -510,6 +512,7 @@ export function NewsArticleJsonLd({
     ...(imageSrc && { image: [imageSrc] }),
     ...(publishedAt && { datePublished: publishedAt }),
     ...(category && { articleSection: category }),
+    ...(authorName && { author: { '@type': 'Person', name: authorName } }),
     publisher: {
       '@type': 'Organization',
       name: organizationName,

@@ -24,12 +24,14 @@ async function getCategoryService() {
 }
 
 /**
- * Creates the page + first DRAFT version + the one `meta` section/block
- * `lib/cms/news.ts` expects (category/excerpt/image/size — empty until
- * edited via NewsMetaBlockForm on the shared Pages editor at
- * /admin/cms/{id}). `pageType: 'CUSTOM'` — the enum has no dedicated
- * "single article" value; ARTICLE_INDEX means the article-listing page,
- * not one article.
+ * Creates the page + first DRAFT version + the `meta` section/block
+ * `lib/cms/news.ts` expects (category/excerpt/image/size/tags — empty
+ * until edited via NewsMetaBlockForm on the shared Pages editor at
+ * /admin/cms/{id}) + a `content` section/block (RICH_TEXT, empty body)
+ * for the article's actual text — required non-empty before publish,
+ * see `requireNewsBodyBeforePublish` in app/admin/cms/actions.ts.
+ * `pageType: 'CUSTOM'` — the enum has no dedicated "single article"
+ * value; ARTICLE_INDEX means the article-listing page, not one article.
  */
 export async function createNewsArticleAction(input: {
   websiteId: string
@@ -48,15 +50,17 @@ export async function createNewsArticleAction(input: {
       input.title,
       requestId,
     )
-    const section = await service.createSection(actor, page.id, 'meta', 0, requestId)
+    const metaSection = await service.createSection(actor, page.id, 'meta', 0, requestId)
     await service.createBlock(
       actor,
-      section.id,
+      metaSection.id,
       'CUSTOM',
       0,
-      { excerpt: '', image: null, size: 'small', featured: false, hot: false, pinned: false },
+      { excerpt: '', image: null, size: 'small', featured: false, hot: false, pinned: false, tags: [] },
       requestId,
     )
+    const contentSection = await service.createSection(actor, page.id, 'content', 1, requestId)
+    await service.createBlock(actor, contentSection.id, 'RICH_TEXT', 0, { body: '' }, requestId)
     const categoryService = await getCategoryService()
     await categoryService.assignArticleCategory(actor, page.id, input.categoryId, input.websiteId, requestId)
     revalidatePath('/admin/news')

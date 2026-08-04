@@ -22,6 +22,7 @@ export type NewsMetaConfig = {
   featured: boolean
   hot: boolean
   pinned: boolean
+  tags?: string[]
 }
 
 const inputClass = 'h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-primary'
@@ -39,11 +40,16 @@ export function NewsMetaBlockForm({ pageId, blockId, initial }: { pageId: string
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState(initial)
+  const [tagsInput, setTagsInput] = useState((initial.tags ?? []).join(', '))
 
   function handleSave() {
     setError(null)
+    const tags = tagsInput
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean)
     startTransition(async () => {
-      const result = await updateBlockConfigAction(pageId, blockId, form as unknown as Record<string, unknown>)
+      const result = await updateBlockConfigAction(pageId, blockId, { ...form, tags } as unknown as Record<string, unknown>)
       if (!result.ok) {
         setError(result.message)
         return
@@ -89,6 +95,10 @@ export function NewsMetaBlockForm({ pageId, blockId, initial }: { pageId: string
           Ghim (Pinned)
         </label>
       </div>
+      <label className="block">
+        <span className={labelClass}>Tags (cách nhau bằng dấu phẩy)</span>
+        <input className={inputClass} value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} placeholder="mice, du-thuyen, hai-phong" />
+      </label>
       <div>
         <span className={labelClass}>Ảnh đại diện</span>
         <div className="mt-1">

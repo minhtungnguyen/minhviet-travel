@@ -119,6 +119,83 @@ export async function listPublishedNews(
   const items = allItems.slice(from, from + pagination.pageSize)
   return { items, total }
 }
+/** Other published articles sharing `categoryId`, excluding `excludePageId` — for the "Related Posts" section on an article detail page. Empty when the article has no category yet. */
+export async function listRelatedNews(
+  client: SupabaseClient<Database>,
+  websiteId: string,
+  locale: string,
+  categoryId: string | null,
+  excludePageId: string,
+  limit: number,
+): Promise<NewsListItem[]> {
+  if (!categoryId) return []
+
+  const { data: assignments } = await client
+    .from('news_article_categories')
+    .select('page_id')
+    .eq('category_id', categoryId)
+    .neq('page_id', excludePageId)
+  const candidatePageIds = (assignments ?? []).map((a) => a.page_id)
+  if (candidatePageIds.length === 0) return []
+
+  const { data: pages, error: pagesError } = await client
+    .from('cms_pages')
+    .select('id, slug')
+    .eq('website_id', websiteId)
+    .eq('locale', locale)
+    .in('id', candidatePageIds)
+    .is('deleted_at', null)
+  if (pagesError || !pages || pages.length === 0) return []
+
+  const pageIds = pages.map((p) => p.id)
+  const { data: versions, error: versionsError } = await client
+    .from('cms_page_versions')
+    .select('id, page_id, title, published_at')
+    .in('page_id', pageIds)
+    .eq('is_current', true)
+    .eq('status', 'PUBLISHED')
+    .order('published_at', { ascending: false })
+    .limit(limit)
+  if (versionsError || !versions || versions.length === 0) return []
+
+  const versionIds = versions.map((v) => v.id)
+  const { data: sections } = await client
+    .from('cms_sections')
+    .select('id, page_version_id')
+    .in('page_version_id', versionIds)
+    .eq('section_key', 'meta')
+  const sectionByVersion = new Map((sections ?? []).map((s) => [s.page_version_id, s.id]))
+
+  const sectionIds = [...sectionByVersion.values()]
+  const { data: blocks } = sectionIds.length
+    ? await client.from('cms_blocks').select('section_id, config').in('section_id', sectionIds)
+    : { data: [] as { section_id: string; config: unknown }[] }
+  const configBySection = new Map((blocks ?? []).map((b) => [b.section_id, b.config as Record<string, unknown>]))
+
+  const pageById = new Map(pages.map((p) => [p.id, p]))
+
+  return versions
+    .map((version): NewsListItem | null => {
+      const page = pageById.get(version.page_id)
+      const sectionId = sectionByVersion.get(version.id)
+      const meta = sectionId ? configBySection.get(sectionId) : undefined
+      if (!page || !meta) return null
+      return {
+        id: page.id,
+        slug: page.slug.slice(NEWS_SLUG_PREFIX.length),
+        title: version.title,
+        category: '',
+        excerpt: String(meta.excerpt ?? ''),
+        image: (meta.image as CmsImage | null) ?? null,
+        publishedAt: version.published_at,
+        featured: Boolean(meta.featured),
+        hot: Boolean(meta.hot),
+        pinned: Boolean(meta.pinned),
+      }
+    })
+    .filter((s): s is NewsListItem => s !== null)
+}
+
 export async function listRecentPublishedNews(
   client: SupabaseClient<Database>,
   websiteId: string,

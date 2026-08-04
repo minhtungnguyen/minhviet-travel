@@ -8,6 +8,7 @@ import {
   submitForReviewAction,
   approvePageAction,
   publishPageAction,
+  unpublishPageAction,
   archivePageAction,
   moveSectionAction,
   deletePageAction,
@@ -17,7 +18,9 @@ import { HeroBlockForm } from '@/components/admin/blocks/hero-block-form'
 import { TrustStripBlockForm } from '@/components/admin/blocks/trust-strip-block-form'
 import { NewsMetaBlockForm, type NewsMetaConfig } from '@/components/admin/blocks/news-meta-block-form'
 import { CeoBlockForm } from '@/components/admin/blocks/ceo-block-form'
+import { RichTextBlockForm, type RichTextConfig } from '@/components/admin/blocks/rich-text-block-form'
 import { SeoMetadataForm } from '@/components/admin/seo-metadata-form'
+import type { OgImageValue } from '@/components/admin/seo-og-image-picker'
 import { NewsCategoryPicker } from '@/components/admin/news-category-picker'
 import type { CmsBlock, CmsBlockDefinition, CmsPage, CmsPageVersion, CmsSection } from '@/modules/cms/domain/types'
 import type { SeoMetadata } from '@/modules/seo/domain/types'
@@ -28,8 +31,9 @@ import type { HeroContent, TrustStripContent, CeoSectionContent } from '@/types/
  * Real per-section-type edit forms for the sections named in Sprint 2
  * ("Hero Banner", "Statistics"/"Partner logos" — both live in the
  * `trustStrip` section — and "CEO/Lãnh đạo") plus Phase 4's `meta`
- * (News). Every other block still falls through to the raw JSON
- * editor below until it gets a dedicated form.
+ * (News) and Sprint 6's `content` (News article body, reuses the
+ * existing RICH_TEXT block definition). Every other block still falls
+ * through to the raw JSON editor below until it gets a dedicated form.
  */
 function BlockEditor({ pageId, sectionKey, block }: { pageId: string; sectionKey: string; block: CmsBlock }) {
   switch (sectionKey) {
@@ -41,6 +45,8 @@ function BlockEditor({ pageId, sectionKey, block }: { pageId: string; sectionKey
       return <NewsMetaBlockForm pageId={pageId} blockId={block.id} initial={block.config as unknown as NewsMetaConfig} />
     case 'ceoSection':
       return <CeoBlockForm pageId={pageId} blockId={block.id} initial={block.config as unknown as CeoSectionContent} />
+    case 'content':
+      return <RichTextBlockForm pageId={pageId} blockId={block.id} initial={block.config as unknown as RichTextConfig} />
     default:
       return <pre className="overflow-x-auto text-xs text-foreground/80">{JSON.stringify(block.config, null, 2)}</pre>
   }
@@ -65,6 +71,7 @@ export function CmsPageEditor({
   canDelete,
   canWriteSeo,
   seoMetadata,
+  initialOgImage,
   newsCategories,
   currentCategoryId,
 }: {
@@ -79,10 +86,12 @@ export function CmsPageEditor({
   newsCategories: NewsCategory[] | null
   currentCategoryId: string | null
   seoMetadata: SeoMetadata | null
+  initialOgImage?: OgImageValue
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [scheduledAt, setScheduledAt] = useState('')
   const defByI = new Map(blockDefinitions.map((d) => [d.id, d]))
   const status = currentVersion?.status
 
@@ -146,9 +155,32 @@ export function CmsPageEditor({
             Duyệt
           </MVButton>
         )}
-        {canPublish && (status === 'APPROVED' || status === 'SCHEDULED') && (
+        {canPublish && status === 'APPROVED' && (
+          <>
+            <input
+              type="datetime-local"
+              value={scheduledAt}
+              onChange={(e) => setScheduledAt(e.target.value)}
+              className="h-9 rounded-lg border border-border bg-background px-2.5 text-sm text-foreground outline-none focus:border-primary"
+              aria-label="Lên lịch xuất bản (tuỳ chọn)"
+            />
+            <MVButton
+              size="sm"
+              loading={isPending}
+              onClick={() => run(() => publishPageAction(page.id, scheduledAt ? new Date(scheduledAt).toISOString() : undefined))}
+            >
+              {scheduledAt ? 'Lên lịch xuất bản' : 'Xuất bản ngay'}
+            </MVButton>
+          </>
+        )}
+        {canPublish && status === 'SCHEDULED' && (
           <MVButton size="sm" loading={isPending} onClick={() => run(() => publishPageAction(page.id))}>
-            Xuất bản
+            Xuất bản ngay
+          </MVButton>
+        )}
+        {canPublish && status === 'PUBLISHED' && (
+          <MVButton size="sm" variant="outline" loading={isPending} onClick={() => run(() => unpublishPageAction(page.id))}>
+            Gỡ xuất bản
           </MVButton>
         )}
         {canUpdate && status && status !== 'ARCHIVED' && (
@@ -185,6 +217,7 @@ export function CmsPageEditor({
               defaultSlug: page.slug,
               defaultTitle: currentVersion?.title ?? page.slug,
             }}
+            initialOgImage={initialOgImage}
           />
         </div>
       )}

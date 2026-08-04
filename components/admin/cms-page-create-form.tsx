@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
 import { MVButton } from '@/components/mv/mv-button'
-import { createPageAction } from '@/app/admin/cms/actions'
+import { createPageAction, checkSlugAvailableAction } from '@/app/admin/cms/actions'
 
 const PAGE_TYPES = [
   'STATIC_PAGE', 'LANDING_PAGE', 'SERVICE_HUB', 'PROGRAM_INSPIRATION',
@@ -25,6 +25,21 @@ export function CmsPageCreateForm({ websites }: { websites: { id: string; name: 
   const [websiteId, setWebsiteId] = useState(websites[0]?.id ?? '')
   const [locale, setLocale] = useState<(typeof LOCALES)[number]>('vi')
   const [pageType, setPageType] = useState<(typeof PAGE_TYPES)[number]>('STATIC_PAGE')
+  const [slugCheck, setSlugCheck] = useState<'checking' | 'available' | 'taken'>('checking')
+  // Derived, not effect-driven: whenever slug/websiteId is empty the field
+  // is simply idle, regardless of the last debounced check's result.
+  const slugStatus = !slug || !websiteId ? 'idle' : slugCheck
+
+  useEffect(() => {
+    if (!slug || !websiteId) return
+    const timeout = setTimeout(() => {
+      setSlugCheck('checking')
+      void checkSlugAvailableAction(websiteId, locale, slug).then((result) => {
+        if (result.available !== null) setSlugCheck(result.available ? 'available' : 'taken')
+      })
+    }, 400)
+    return () => clearTimeout(timeout)
+  }, [slug, websiteId, locale])
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -98,9 +113,24 @@ export function CmsPageCreateForm({ websites }: { websites: { id: string; name: 
           required
         />
         <span className="text-[11px] text-muted-foreground">Chữ thường, nối bằng dấu gạch ngang. Trang sẽ hiện tại /{slug || '...'}.</span>
+        {slugStatus === 'checking' && (
+          <span className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <Loader2 className="size-3 animate-spin" /> Đang kiểm tra slug...
+          </span>
+        )}
+        {slugStatus === 'available' && (
+          <span className="mt-1 flex items-center gap-1.5 text-[11px] text-green-600">
+            <CheckCircle2 className="size-3" /> Slug khả dụng
+          </span>
+        )}
+        {slugStatus === 'taken' && (
+          <span className="mt-1 flex items-center gap-1.5 text-[11px] text-destructive">
+            <AlertCircle className="size-3" /> Slug này đã được dùng trên website/locale này
+          </span>
+        )}
       </label>
 
-      <MVButton type="submit" size="sm" loading={isPending} disabled={!websiteId}>
+      <MVButton type="submit" size="sm" loading={isPending} disabled={!websiteId || slugStatus === 'taken' || slugStatus === 'checking'}>
         Tạo trang
       </MVButton>
     </form>

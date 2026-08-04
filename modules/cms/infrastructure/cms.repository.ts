@@ -34,7 +34,7 @@ export interface CmsRepository {
   listPages(
     websiteId: string,
     query: PaginationQuery,
-    filters?: { pageType?: CmsPageType; status?: CmsLifecycleStatus },
+    filters?: { pageType?: CmsPageType; status?: CmsLifecycleStatus; pageIds?: string[] },
   ): Promise<PaginatedResult<CmsPage>>
   createPage(input: CmsPageCreateInput, actorId: string): Promise<CmsPage>
   updatePage(id: string, input: CmsPageUpdateInput, actorId: string): Promise<CmsPage>
@@ -215,7 +215,7 @@ export class SupabaseCmsRepository implements CmsRepository {
   async listPages(
     websiteId: string,
     query: PaginationQuery,
-    filters?: { pageType?: CmsPageType; status?: CmsLifecycleStatus },
+    filters?: { pageType?: CmsPageType; status?: CmsLifecycleStatus; pageIds?: string[] },
   ): Promise<PaginatedResult<CmsPage>> {
     const from = (query.page - 1) * query.pageSize
     let builder = this.client
@@ -225,6 +225,10 @@ export class SupabaseCmsRepository implements CmsRepository {
       .is('deleted_at', null)
     if (query.search) builder = builder.ilike('slug', `%${query.search}%`)
     if (filters?.pageType) builder = builder.eq('page_type', filters.pageType)
+    if (filters?.pageIds) {
+      if (filters.pageIds.length === 0) return { items: [], page: query.page, pageSize: query.pageSize, total: 0 }
+      builder = builder.in('id', filters.pageIds)
+    }
     if (filters?.status) {
       // Status lives on cms_page_versions (the current version), not cms_pages — resolve matching page ids first.
       const { data: matchingVersions, error: versionsError } = await this.client

@@ -184,4 +184,71 @@ describe('CmsService — lifecycle transitions', () => {
     const actor = makeActor({ organizationId: 'org-1' })
     await expect(service.submitForReview(actor, 'version-1', 'req-1')).rejects.toMatchObject({ code: 'WEBSITE_ACCESS_DENIED' })
   })
+
+  it('Sprint 6: PUBLISHED -> DRAFT (unpublish) is now a valid transition', async () => {
+    let version = makeVersion({ status: 'PUBLISHED', isCurrent: true })
+    const repository = makeFakeRepository(version, {
+      findVersionById: async () => version,
+      setVersionStatus: async (_id, status, extra) => {
+        version = { ...version, status, ...(extra.isCurrent !== undefined && { isCurrent: extra.isCurrent }) }
+        return version
+      },
+    })
+    const service = new CmsService(repository, makeFakeClient('org-1'), noopAuditLogger)
+    await service.unpublishPage(makeActor(), 'page-1', 'req-1')
+    expect(version.status).toBe('DRAFT')
+    // isCurrent is deliberately untouched — findPublishedPage's status filter alone hides it from the public route.
+    expect(version.isCurrent).toBe(true)
+  })
+
+  it('ARCHIVED still rejects unpublish — it stays terminal', async () => {
+    const version = makeVersion({ status: 'ARCHIVED' })
+    const repository = makeFakeRepository(version)
+    const service = new CmsService(repository, makeFakeClient('org-1'), noopAuditLogger)
+    await expect(service.unpublishPage(makeActor(), 'page-1', 'req-1')).rejects.toMatchObject({ code: 'CONFLICT' })
+  })
+})
+
+describe('CmsService — Sprint 6 additions', () => {
+  it('isSlugAvailable is true when no page has that slug, false when one does', async () => {
+    const version = makeVersion()
+    const repository = makeFakeRepository(version, {
+      findPageBySlug: async (_websiteId, _locale, slug) => (slug === 'taken-slug' ? PAGE : null),
+    })
+    const service = new CmsService(repository, makeFakeClient('org-1'), noopAuditLogger)
+    const actor = makeActor()
+    await expect(service.isSlugAvailable(actor, 'site-1', 'vi', 'taken-slug')).resolves.toBe(false)
+    await expect(service.isSlugAvailable(actor, 'site-1', 'vi', 'free-slug')).resolves.toBe(true)
+  })
+
+  it('duplicatePage clones sections/blocks into a new page with a "-copy" slug, and skips slugs already taken', async () => {
+    const version = makeVersion({ title: 'About us' })
+    const definitions = [{ id: 'def-rich-text', key: 'RICH_TEXT', name: 'Rich Text', configSchema: {}, status: 'ACTIVE' as const }]
+    const sections = [{ id: 'section-1', pageVersionId: version.id, sectionKey: 'content', position: 0 }]
+    const blocks = [{ id: 'block-1', sectionId: 'section-1', blockDefinitionId: 'def-rich-text', position: 0, config: { body: 'hello' } }]
+    const existingSlugs = new Set(['ve-chung-toi', 've-chung-toi-copy'])
+    const createdVersions: { pageId: string; sections: unknown }[] = []
+
+    const repository = makeFakeRepository(version, {
+      findPageById: async (id) => (id === PAGE.id ? PAGE : null),
+      findPageBySlug: async (_w, _l, slug) => (existingSlugs.has(slug) ? { ...PAGE, slug } : null),
+      createPage: async (input) => ({ ...PAGE, id: 'page-2', slug: input.slug, pageType: input.pageType }),
+      listSections: async () => sections,
+      listBlocks: async () => blocks,
+      listBlockDefinitions: async () => definitions,
+      createVersion: async (pageId, input) => {
+        createdVersions.push({ pageId, sections: input.sections })
+        return makeVersion({ id: 'version-2', pageId, title: input.title })
+      },
+    })
+    const service = new CmsService(repository, makeFakeClient('org-1'), noopAuditLogger)
+    const newPage = await service.duplicatePage(makeActor(), 'page-1', 'req-1')
+
+    // "-copy" is already taken (existingSlugs) — must skip it and land on "-copy-2".
+    expect(newPage.slug).toBe('ve-chung-toi-copy-2')
+    expect(createdVersions).toHaveLength(1)
+    expect(createdVersions[0].sections).toEqual([
+      { sectionKey: 'content', position: 0, blocks: [{ blockDefinitionKey: 'RICH_TEXT', position: 0, config: { body: 'hello' } }] },
+    ])
+  })
 })

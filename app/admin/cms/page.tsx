@@ -6,6 +6,7 @@ import { recordAuditLog } from '@/modules/audit/application/audit.service'
 import { CmsService } from '@/modules/cms/application/cms.service'
 import { SupabaseCmsRepository } from '@/modules/cms/infrastructure/cms.repository'
 import { AdminUnauthorized } from '@/components/admin/admin-unauthorized'
+import { DuplicatePageButton } from '@/components/admin/duplicate-page-button'
 import { paginationQuerySchema } from '@/shared/validation/pagination'
 import type { CmsLifecycleStatus, CmsPageType } from '@/modules/cms/domain/types'
 
@@ -144,9 +145,12 @@ export default async function AdminCmsPagesPage({
                   <td className="px-4 py-3 text-muted-foreground">{p.locale}</td>
                   <td className="px-4 py-3 text-muted-foreground">{new Date(p.updatedAt).toLocaleDateString('vi-VN')}</td>
                   <td className="px-4 py-3 text-right">
-                    <Link href={`/admin/cms/${p.id}`} className="font-medium text-primary hover:underline">
-                      Chỉnh sửa
-                    </Link>
+                    <div className="flex items-center justify-end gap-3">
+                      <Link href={`/admin/cms/${p.id}`} className="font-medium text-primary hover:underline">
+                        Chỉnh sửa
+                      </Link>
+                      {hasPermission(actor, 'cms.page.create') && <DuplicatePageButton pageId={p.id} />}
+                    </div>
                   </td>
                 </tr>
               )

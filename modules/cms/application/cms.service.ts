@@ -22,7 +22,7 @@ const VALID_TRANSITIONS: Record<string, CmsLifecycleStatus[]> = {
   IN_REVIEW: ['APPROVED', 'DRAFT', 'ARCHIVED'],
   APPROVED: ['PUBLISHED', 'SCHEDULED', 'IN_REVIEW', 'ARCHIVED'],
   SCHEDULED: ['PUBLISHED', 'ARCHIVED'],
-  PUBLISHED: ['ARCHIVED'],
+  PUBLISHED: ['ARCHIVED', 'DRAFT'],
   ARCHIVED: [],
 }
 
@@ -63,10 +63,17 @@ export class CmsService {
     actor: ActorContext,
     websiteId: string,
     query: PaginationQuery,
-    filters?: { pageType?: CmsPageType; status?: CmsLifecycleStatus },
+    filters?: { pageType?: CmsPageType; status?: CmsLifecycleStatus; pageIds?: string[] },
   ) {
     requirePermission(actor, 'cms.page.read')
     return this.repository.listPages(websiteId, query, filters)
+  }
+
+  /** Live slug-availability check for the admin create form — same rule createPage enforces at submit time (case-insensitive, scoped to website+locale), surfaced earlier so a conflict never reaches submit. */
+  async isSlugAvailable(actor: ActorContext, websiteId: string, locale: string, slug: string): Promise<boolean> {
+    requirePermission(actor, 'cms.page.create')
+    const existing = await this.repository.findPageBySlug(websiteId, locale, slug)
+    return !existing
   }
 
   async createPage(actor: ActorContext, input: CmsPageCreateInput, requestId: string) {
@@ -131,6 +138,70 @@ export class CmsService {
       entityId: id,
       requestId,
     })
+  }
+
+  /** Slug uniqueness is (website_id, locale) — try "-copy", "-copy-2", ... until one is free. */
+  private async findAvailableDuplicateSlug(websiteId: string, locale: string, baseSlug: string): Promise<string> {
+    for (let n = 1; ; n++) {
+      const candidate = n === 1 ? `${baseSlug}-copy` : `${baseSlug}-copy-${n}`
+      const existing = await this.repository.findPageBySlug(websiteId, locale, candidate)
+      if (!existing) return candidate
+    }
+  }
+
+  /**
+   * Clones a page's latest version (sections + blocks, verbatim config)
+   * into a brand-new page in DRAFT status with a "-copy" slug — does not
+   * touch or reference the original in any way afterwards, so editing
+   * the duplicate never affects the source page. SEO metadata is
+   * intentionally NOT cloned (a duplicate must never carry the
+   * original's canonical URL / OG data as if it were the same page).
+   */
+  async duplicatePage(actor: ActorContext, pageId: string, requestId: string) {
+    requirePermission(actor, 'cms.page.create')
+    const original = await this.repository.findPageById(pageId)
+    if (!original) throw AppError.notFound('CmsPage', pageId)
+    await this.checkWebsiteAccess(actor, original.websiteId)
+
+    const versionId = await this.latestVersionId(pageId)
+    const version = await this.repository.findVersionById(versionId)
+    if (!version) throw AppError.notFound('CmsPageVersion', versionId)
+    const sectionRows = await this.repository.listSections(versionId)
+    const blockDefinitions = await this.repository.listBlockDefinitions()
+    const keyById = new Map(blockDefinitions.map((d) => [d.id, d.key]))
+    const sections = await Promise.all(
+      sectionRows.map(async (section) => {
+        const blocks = await this.repository.listBlocks(section.id)
+        return {
+          sectionKey: section.sectionKey,
+          position: section.position,
+          blocks: blocks.map((b) => ({
+            blockDefinitionKey: keyById.get(b.blockDefinitionId) ?? 'CUSTOM',
+            position: b.position,
+            config: b.config,
+          })),
+        }
+      }),
+    )
+
+    const slug = await this.findAvailableDuplicateSlug(original.websiteId, original.locale, original.slug)
+    const newPage = await this.createPage(
+      actor,
+      { websiteId: original.websiteId, locale: original.locale as CmsPageCreateInput['locale'], pageType: original.pageType, slug },
+      requestId,
+    )
+    await this.repository.createVersion(newPage.id, { title: `${version.title} (Copy)`, sections }, actor.userId)
+    await this.auditLogger({
+      actorUserId: actor.userId,
+      organizationId: actor.organizationId,
+      websiteId: original.websiteId,
+      action: 'cms.page.duplicated',
+      entityType: 'cms_page',
+      entityId: newPage.id,
+      requestId,
+      reason: `Duplicated from ${pageId}`,
+    })
+    return newPage
   }
 
   async listVersions(actor: ActorContext, pageId: string) {
@@ -259,6 +330,21 @@ export class CmsService {
 
   archive(actor: ActorContext, versionId: string, requestId: string) {
     return this.transition(actor, versionId, 'ARCHIVED', 'cms.page.update', requestId)
+  }
+
+  /**
+   * PUBLISHED -> DRAFT. Deliberately does not touch `is_current`:
+   * `findPublishedPage` filters on `status = 'PUBLISHED'` in addition to
+   * `is_current`, so flipping status alone already removes the page from
+   * the public route immediately. Re-publishing later goes through the
+   * normal DRAFT -> IN_REVIEW -> APPROVED -> PUBLISHED path again.
+   */
+  unpublish(actor: ActorContext, versionId: string, requestId: string) {
+    return this.transition(actor, versionId, 'DRAFT', 'cms.page.update', requestId)
+  }
+
+  async unpublishPage(actor: ActorContext, pageId: string, requestId: string) {
+    return this.unpublish(actor, await this.latestVersionId(pageId), requestId)
   }
 
   async listBlockDefinitions() {

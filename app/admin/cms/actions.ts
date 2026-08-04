@@ -7,7 +7,9 @@ import { recordAuditLog } from '@/modules/audit/application/audit.service'
 import { CmsService } from '@/modules/cms/application/cms.service'
 import { SupabaseCmsRepository } from '@/modules/cms/infrastructure/cms.repository'
 import { newRequestId } from '@/shared/http/request-id'
+import { NEWS_SLUG_PREFIX } from '@/lib/cms/news-constants'
 import type { CmsPageCreateInput } from '@/modules/cms/schemas/cms.schema'
+import type { ActorContext } from '@/shared/auth/guards'
 
 export type ActionResult = { ok: true } | { ok: false; message: string }
 export type CreatePageResult = { ok: true; pageId: string } | { ok: false; message: string }
@@ -50,6 +52,17 @@ async function wrap(fn: () => Promise<unknown>, pageId: string): Promise<ActionR
   }
 }
 
+export async function checkSlugAvailableAction(websiteId: string, locale: string, slug: string): Promise<{ available: boolean | null }> {
+  try {
+    const actor = await resolveActor()
+    const service = await getService()
+    const available = await service.isSlugAvailable(actor, websiteId, locale, slug)
+    return { available }
+  } catch {
+    return { available: null }
+  }
+}
+
 export async function createPageAction(input: CmsPageCreateInput, title: string): Promise<CreatePageResult> {
   try {
     const actor = await resolveActor()
@@ -89,10 +102,47 @@ export async function approvePageAction(pageId: string): Promise<ActionResult> {
   return wrap(() => service.approvePage(actor, pageId, newRequestId()), pageId)
 }
 
-export async function publishPageAction(pageId: string): Promise<ActionResult> {
+/**
+ * News articles have no dedicated "is this a news page" flag — the
+ * slug prefix convention (`lib/cms/news.ts`) is the only signal. Body
+ * lives in the `content` section's RICH_TEXT block (see
+ * createNewsArticleAction); a News page can't go live with it empty.
+ */
+async function requireNewsBodyBeforePublish(actor: ActorContext, service: CmsService, pageId: string): Promise<string | null> {
+  const page = await service.getPage(pageId)
+  if (!page.slug.startsWith(NEWS_SLUG_PREFIX)) return null
+  const sections = await service.listSections(actor, pageId)
+  const contentSection = sections.find((s) => s.sectionKey === 'content')
+  const blocks = contentSection ? await service.listBlocks(actor, contentSection.id) : []
+  const body = (blocks[0]?.config as { body?: string } | undefined)?.body ?? ''
+  return body.trim() ? null : 'Bài viết cần có nội dung (phần thân bài) trước khi xuất bản.'
+}
+
+export async function publishPageAction(pageId: string, scheduledPublishAt?: string): Promise<ActionResult> {
   const actor = await resolveActor()
   const service = await getService()
-  return wrap(() => service.publishPage(actor, pageId, {}, newRequestId()), pageId)
+  const bodyError = await requireNewsBodyBeforePublish(actor, service, pageId)
+  if (bodyError) return { ok: false, message: bodyError }
+  return wrap(() => service.publishPage(actor, pageId, scheduledPublishAt ? { scheduledPublishAt } : {}, newRequestId()), pageId)
+}
+
+export async function unpublishPageAction(pageId: string): Promise<ActionResult> {
+  const actor = await resolveActor()
+  const service = await getService()
+  return wrap(() => service.unpublishPage(actor, pageId, newRequestId()), pageId)
+}
+
+export async function duplicatePageAction(pageId: string): Promise<CreatePageResult> {
+  try {
+    const actor = await resolveActor()
+    const service = await getService()
+    const newPage = await service.duplicatePage(actor, pageId, newRequestId())
+    revalidatePath('/admin/cms')
+    revalidatePath('/admin/news')
+    return { ok: true, pageId: newPage.id }
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : 'Có lỗi xảy ra.' }
+  }
 }
 
 export async function archivePageAction(pageId: string): Promise<ActionResult> {

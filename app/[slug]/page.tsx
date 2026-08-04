@@ -9,6 +9,7 @@ import { recordAuditLog } from '@/modules/audit/application/audit.service'
 import { CmsService } from '@/modules/cms/application/cms.service'
 import { SupabaseCmsRepository } from '@/modules/cms/infrastructure/cms.repository'
 import { resolveDefaultSeoMetadata } from '@/lib/seo/default-metadata'
+import { resolveMediaImageUrl } from '@/lib/seo/resolve-media-image'
 
 /**
  * Generic public renderer for any PUBLISHED, non-homepage `cms_pages` row
@@ -60,7 +61,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
   const { data: seoRow } = await client
     .from('seo_metadata')
-    .select('title, meta_description, og_title, og_description, is_indexed, is_followed')
+    .select('title, meta_description, og_title, og_description, is_indexed, is_followed, og_image_media_id, featured_image_media_id')
     .eq('id', version.seoMetadataId)
     .maybeSingle()
   const row = seoRow as {
@@ -70,10 +71,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     og_description?: string
     is_indexed?: boolean
     is_followed?: boolean
+    og_image_media_id?: string | null
+    featured_image_media_id?: string | null
   } | null
   const title = row?.title ?? version.title
   const description = row?.meta_description ?? undefined
   const robots = row ? `${row.is_indexed === false ? 'noindex' : 'index'}, ${row.is_followed === false ? 'nofollow' : 'follow'}` : fallback.robots
+  // Fallback chain: per-page OG image -> featured image -> global default.
+  const ogImage =
+    (await resolveMediaImageUrl(client, row?.og_image_media_id)) ??
+    (await resolveMediaImageUrl(client, row?.featured_image_media_id)) ??
+    fallback.ogImage
   return {
     title,
     description,
@@ -85,6 +93,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       url: canonicalUrl,
       siteName: fallback.siteName,
       type: 'website',
+      images: ogImage ? [{ url: ogImage }] : undefined,
     },
     twitter: { card: fallback.twitterCard as 'summary_large_image' },
   }

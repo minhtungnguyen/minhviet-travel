@@ -9,8 +9,10 @@ import { SupabaseSeoRepository } from '@/modules/seo/infrastructure/seo.reposito
 import { NewsCategoryService } from '@/modules/news-categories/application/news-category.service'
 import { SupabaseNewsCategoryRepository } from '@/modules/news-categories/infrastructure/news-category.repository'
 import { NEWS_SLUG_PREFIX } from '@/lib/cms/news-constants'
+import { resolveMediaImageUrl } from '@/lib/seo/resolve-media-image'
 import { AdminUnauthorized } from '@/components/admin/admin-unauthorized'
 import { CmsPageEditor } from '@/components/admin/cms-page-editor'
+import type { OgImageValue } from '@/components/admin/seo-og-image-picker'
 
 export const metadata: Metadata = { title: 'Chỉnh sửa trang | Minh Việt Travel Admin' }
 
@@ -46,6 +48,9 @@ export default async function AdminCmsPageDetail({ params }: { params: Promise<{
   const seoMetadata = canWriteSeo
     ? await seoService.getMetadata(page.websiteId, 'cms_page', page.id, page.locale).catch(() => null)
     : null
+  const initialOgImageSrc = seoMetadata?.ogImageMediaId ? await resolveMediaImageUrl(supabase, seoMetadata.ogImageMediaId) : null
+  const initialOgImage: OgImageValue =
+    seoMetadata?.ogImageMediaId && initialOgImageSrc ? { mediaId: seoMetadata.ogImageMediaId, src: initialOgImageSrc } : null
 
   const isNewsArticle = page.slug.startsWith(NEWS_SLUG_PREFIX)
   const categoryService = new NewsCategoryService(new SupabaseNewsCategoryRepository(supabase), supabase, recordAuditLog)
@@ -64,6 +69,7 @@ export default async function AdminCmsPageDetail({ params }: { params: Promise<{
       canDelete={hasPermission(actor, 'cms.page.delete')}
       canWriteSeo={canWriteSeo}
       seoMetadata={seoMetadata}
+      initialOgImage={initialOgImage}
       newsCategories={isNewsArticle ? categories : null}
       currentCategoryId={currentCategoryId}
     />

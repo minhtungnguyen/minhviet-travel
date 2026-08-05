@@ -11,6 +11,10 @@ import { NEWS_SLUG_PREFIX } from '@/lib/cms/news-constants'
 import { NewsCategoryService } from '@/modules/news-categories/application/news-category.service'
 import { SupabaseNewsCategoryRepository } from '@/modules/news-categories/infrastructure/news-category.repository'
 import { TOUR_SLUG_PREFIX } from '@/lib/cms/tour-constants'
+import { TourCategoryService } from '@/modules/tour-categories/application/tour-category.service'
+import { SupabaseTourCategoryRepository } from '@/modules/tour-categories/infrastructure/tour-category.repository'
+import { TourDestinationService } from '@/modules/tour-destinations/application/tour-destination.service'
+import { SupabaseTourDestinationRepository } from '@/modules/tour-destinations/infrastructure/tour-destination.repository'
 import type { CmsPageCreateInput } from '@/modules/cms/schemas/cms.schema'
 import type { ActorContext } from '@/shared/auth/guards'
 
@@ -167,8 +171,26 @@ export async function duplicatePageAction(pageId: string): Promise<CreatePageRes
         await categoryService.assignArticleCategory(actor, newPage.id, categoryId, newPage.websiteId, newRequestId())
       }
     }
+    // Same reasoning as News above — Tour categories (many-to-many) and
+    // destinations live in their own join tables, not cms_blocks, so the
+    // generic clone never sees them either.
+    if (newPage.slug.startsWith(TOUR_SLUG_PREFIX)) {
+      const tourCategoryService = new TourCategoryService(new SupabaseTourCategoryRepository(client), client, recordAuditLog)
+      const tourDestinationService = new TourDestinationService(new SupabaseTourDestinationRepository(client), client, recordAuditLog)
+      const [categoryIds, destinationIds] = await Promise.all([
+        tourCategoryService.getTourCategoryIds(pageId),
+        tourDestinationService.getTourDestinationIds(pageId),
+      ])
+      if (categoryIds.length > 0) {
+        await tourCategoryService.assignTourCategories(actor, newPage.id, categoryIds, newPage.websiteId, newRequestId())
+      }
+      if (destinationIds.length > 0) {
+        await tourDestinationService.assignTourDestinations(actor, newPage.id, destinationIds, newPage.websiteId, newRequestId())
+      }
+    }
     revalidatePath('/admin/cms')
     revalidatePath('/admin/news')
+    revalidatePath('/admin/tours')
     return { ok: true, pageId: newPage.id }
   } catch (error) {
     return { ok: false, message: error instanceof Error ? error.message : 'Có lỗi xảy ra.' }

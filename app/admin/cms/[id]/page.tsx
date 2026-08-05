@@ -9,6 +9,13 @@ import { SupabaseSeoRepository } from '@/modules/seo/infrastructure/seo.reposito
 import { NewsCategoryService } from '@/modules/news-categories/application/news-category.service'
 import { SupabaseNewsCategoryRepository } from '@/modules/news-categories/infrastructure/news-category.repository'
 import { NEWS_SLUG_PREFIX } from '@/lib/cms/news-constants'
+import { TourCategoryService } from '@/modules/tour-categories/application/tour-category.service'
+import { SupabaseTourCategoryRepository } from '@/modules/tour-categories/infrastructure/tour-category.repository'
+import { TourDestinationService } from '@/modules/tour-destinations/application/tour-destination.service'
+import { SupabaseTourDestinationRepository } from '@/modules/tour-destinations/infrastructure/tour-destination.repository'
+import { MasterDataService } from '@/modules/master-data/application/master-data.service'
+import { SupabaseMasterDataRepository } from '@/modules/master-data/infrastructure/master-data.repository'
+import { TOUR_SLUG_PREFIX } from '@/lib/cms/tour-constants'
 import { resolveMediaImageUrl } from '@/lib/seo/resolve-media-image'
 import { AdminUnauthorized } from '@/components/admin/admin-unauthorized'
 import { CmsPageEditor } from '@/components/admin/cms-page-editor'
@@ -58,6 +65,20 @@ export default async function AdminCmsPageDetail({ params }: { params: Promise<{
     ? await Promise.all([categoryService.listCategories(page.websiteId), categoryService.getArticleCategoryId(page.id)])
     : [[], null]
 
+  const isTour = page.slug.startsWith(TOUR_SLUG_PREFIX)
+  const tourCategoryService = new TourCategoryService(new SupabaseTourCategoryRepository(supabase), supabase, recordAuditLog)
+  const tourDestinationService = new TourDestinationService(new SupabaseTourDestinationRepository(supabase), supabase, recordAuditLog)
+  const masterDataService = new MasterDataService(new SupabaseMasterDataRepository(supabase), recordAuditLog)
+  const [tourCategories, currentTourCategoryIds, allDestinations, currentTourDestinationIds] = isTour
+    ? await Promise.all([
+        tourCategoryService.listCategories(page.websiteId),
+        tourCategoryService.getTourCategoryIds(page.id),
+        masterDataService.listDestinations(page.locale),
+        tourDestinationService.getTourDestinationIds(page.id),
+      ])
+    : [[], [], [], []]
+  const pickableDestinations = allDestinations.map((d) => ({ id: d.id, name: d.translation?.name ?? d.id }))
+
   return (
     <CmsPageEditor
       page={page}
@@ -72,6 +93,10 @@ export default async function AdminCmsPageDetail({ params }: { params: Promise<{
       initialOgImage={initialOgImage}
       newsCategories={isNewsArticle ? categories : null}
       currentCategoryId={currentCategoryId}
+      tourCategories={isTour ? tourCategories : null}
+      currentTourCategoryIds={currentTourCategoryIds}
+      tourDestinations={isTour ? pickableDestinations : null}
+      currentTourDestinationIds={currentTourDestinationIds}
     />
   )
 }

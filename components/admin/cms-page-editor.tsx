@@ -19,12 +19,17 @@ import { TrustStripBlockForm } from '@/components/admin/blocks/trust-strip-block
 import { NewsMetaBlockForm, type NewsMetaConfig } from '@/components/admin/blocks/news-meta-block-form'
 import { CeoBlockForm } from '@/components/admin/blocks/ceo-block-form'
 import { RichTextBlockForm, type RichTextConfig } from '@/components/admin/blocks/rich-text-block-form'
+import { TourItineraryBlockForm, type TourItineraryConfig } from '@/components/admin/blocks/tour-itinerary-block-form'
+import { TourPolicyBlockForm, type TourPolicyConfig } from '@/components/admin/blocks/tour-policy-block-form'
 import { SeoMetadataForm } from '@/components/admin/seo-metadata-form'
 import type { OgImageValue } from '@/components/admin/seo-og-image-picker'
 import { NewsCategoryPicker } from '@/components/admin/news-category-picker'
+import { TourCategoryPicker } from '@/components/admin/tour-category-picker'
+import { TourDestinationPicker, type PickableDestination } from '@/components/admin/tour-destination-picker'
 import type { CmsBlock, CmsBlockDefinition, CmsPage, CmsPageVersion, CmsSection } from '@/modules/cms/domain/types'
 import type { SeoMetadata } from '@/modules/seo/domain/types'
 import type { NewsCategory } from '@/modules/news-categories/domain/types'
+import type { TourCategory } from '@/modules/tour-categories/domain/types'
 import type { HeroContent, TrustStripContent, CeoSectionContent } from '@/types/homepage'
 
 /**
@@ -32,8 +37,9 @@ import type { HeroContent, TrustStripContent, CeoSectionContent } from '@/types/
  * ("Hero Banner", "Statistics"/"Partner logos" — both live in the
  * `trustStrip` section — and "CEO/Lãnh đạo") plus Phase 4's `meta`
  * (News) and Sprint 6's `content` (News article body, reuses the
- * existing RICH_TEXT block definition). Every other block still falls
- * through to the raw JSON editor below until it gets a dedicated form.
+ * existing RICH_TEXT block definition), plus Sprint 7's `itinerary` and
+ * `policy` (Tour). Every other block still falls through to the raw
+ * JSON editor below until it gets a dedicated form.
  */
 function BlockEditor({ pageId, sectionKey, block }: { pageId: string; sectionKey: string; block: CmsBlock }) {
   switch (sectionKey) {
@@ -47,6 +53,10 @@ function BlockEditor({ pageId, sectionKey, block }: { pageId: string; sectionKey
       return <CeoBlockForm pageId={pageId} blockId={block.id} initial={block.config as unknown as CeoSectionContent} />
     case 'content':
       return <RichTextBlockForm pageId={pageId} blockId={block.id} initial={block.config as unknown as RichTextConfig} />
+    case 'itinerary':
+      return <TourItineraryBlockForm pageId={pageId} blockId={block.id} initial={block.config as unknown as TourItineraryConfig} />
+    case 'policy':
+      return <TourPolicyBlockForm pageId={pageId} blockId={block.id} initial={block.config as unknown as TourPolicyConfig} />
     default:
       return <pre className="overflow-x-auto text-xs text-foreground/80">{JSON.stringify(block.config, null, 2)}</pre>
   }
@@ -74,6 +84,10 @@ export function CmsPageEditor({
   initialOgImage,
   newsCategories,
   currentCategoryId,
+  tourCategories,
+  currentTourCategoryIds,
+  tourDestinations,
+  currentTourDestinationIds,
 }: {
   page: CmsPage
   currentVersion: CmsPageVersion | null
@@ -85,6 +99,10 @@ export function CmsPageEditor({
   canWriteSeo: boolean
   newsCategories: NewsCategory[] | null
   currentCategoryId: string | null
+  tourCategories: TourCategory[] | null
+  currentTourCategoryIds: string[]
+  tourDestinations: PickableDestination[] | null
+  currentTourDestinationIds: string[]
   seoMetadata: SeoMetadata | null
   initialOgImage?: OgImageValue
 }) {
@@ -201,6 +219,24 @@ export function CmsPageEditor({
           websiteId={page.websiteId}
           categories={newsCategories.filter((c) => c.isActive || c.id === currentCategoryId)}
           currentCategoryId={currentCategoryId}
+        />
+      )}
+
+      {tourCategories && canUpdate && (
+        <TourCategoryPicker
+          pageId={page.id}
+          websiteId={page.websiteId}
+          categories={tourCategories.filter((c) => c.isActive || currentTourCategoryIds.includes(c.id))}
+          currentCategoryIds={currentTourCategoryIds}
+        />
+      )}
+
+      {tourDestinations && canUpdate && (
+        <TourDestinationPicker
+          pageId={page.id}
+          websiteId={page.websiteId}
+          destinations={tourDestinations}
+          currentDestinationIds={currentTourDestinationIds}
         />
       )}
 

@@ -17,14 +17,18 @@ async function getService() {
 }
 
 /**
- * Creates the page + first DRAFT version + a `content` section/block
- * (RICH_TEXT, empty body) for the tour's overview text — reuses
- * RichTextBlockForm as-is (same `content` section-key convention as
- * News), required non-empty before publish, see
- * `requireTourContentBeforePublish` in app/admin/cms/actions.ts.
- * Categories/destinations (Phase 3), itinerary/gallery/policy blocks
- * (Phase 3/5), and departures (Phase 4) are added after creation, on the
- * shared editor at /admin/cms/{id} — same flow News uses.
+ * Creates the page + first DRAFT version + three sections:
+ * - `content` (RICH_TEXT, empty body) — the tour's overview text, reuses
+ *   RichTextBlockForm as-is (same section-key convention as News),
+ *   required non-empty before publish (requireContentBodyBeforePublish
+ *   in app/admin/cms/actions.ts).
+ * - `itinerary` (TIMELINE, {days: []}) — day-by-day plan, edited via
+ *   TourItineraryBlockForm.
+ * - `policy` (CUSTOM, {inclusions: [], exclusions: [], cancellationNote:
+ *   ''}) — edited via TourPolicyBlockForm.
+ * Categories/destinations (Phase 3 taxonomy), the gallery (Phase 5), and
+ * departures (Phase 4) are added after creation, on the shared editor at
+ * /admin/cms/{id} — same flow News uses.
  */
 export async function createTourAction(input: {
   websiteId: string
@@ -44,6 +48,10 @@ export async function createTourAction(input: {
     )
     const contentSection = await service.createSection(actor, page.id, 'content', 0, requestId)
     await service.createBlock(actor, contentSection.id, 'RICH_TEXT', 0, { body: '' }, requestId)
+    const itinerarySection = await service.createSection(actor, page.id, 'itinerary', 1, requestId)
+    await service.createBlock(actor, itinerarySection.id, 'TIMELINE', 0, { days: [] }, requestId)
+    const policySection = await service.createSection(actor, page.id, 'policy', 2, requestId)
+    await service.createBlock(actor, policySection.id, 'CUSTOM', 0, { inclusions: [], exclusions: [], cancellationNote: '' }, requestId)
     revalidatePath('/admin/tours')
     revalidatePath('/tours')
     return { ok: true, pageId: page.id }

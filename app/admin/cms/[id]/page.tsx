@@ -13,6 +13,8 @@ import { TourCategoryService } from '@/modules/tour-categories/application/tour-
 import { SupabaseTourCategoryRepository } from '@/modules/tour-categories/infrastructure/tour-category.repository'
 import { TourDestinationService } from '@/modules/tour-destinations/application/tour-destination.service'
 import { SupabaseTourDestinationRepository } from '@/modules/tour-destinations/infrastructure/tour-destination.repository'
+import { TourDepartureService } from '@/modules/tour-departures/application/tour-departure.service'
+import { SupabaseTourDepartureRepository } from '@/modules/tour-departures/infrastructure/tour-departure.repository'
 import { MasterDataService } from '@/modules/master-data/application/master-data.service'
 import { SupabaseMasterDataRepository } from '@/modules/master-data/infrastructure/master-data.repository'
 import { TOUR_SLUG_PREFIX } from '@/lib/cms/tour-constants'
@@ -68,15 +70,17 @@ export default async function AdminCmsPageDetail({ params }: { params: Promise<{
   const isTour = page.slug.startsWith(TOUR_SLUG_PREFIX)
   const tourCategoryService = new TourCategoryService(new SupabaseTourCategoryRepository(supabase), supabase, recordAuditLog)
   const tourDestinationService = new TourDestinationService(new SupabaseTourDestinationRepository(supabase), supabase, recordAuditLog)
+  const tourDepartureService = new TourDepartureService(new SupabaseTourDepartureRepository(supabase), supabase, recordAuditLog)
   const masterDataService = new MasterDataService(new SupabaseMasterDataRepository(supabase), recordAuditLog)
-  const [tourCategories, currentTourCategoryIds, allDestinations, currentTourDestinationIds] = isTour
+  const [tourCategories, currentTourCategoryIds, allDestinations, currentTourDestinationIds, tourDepartures] = isTour
     ? await Promise.all([
         tourCategoryService.listCategories(page.websiteId),
         tourCategoryService.getTourCategoryIds(page.id),
         masterDataService.listDestinations(page.locale),
         tourDestinationService.getTourDestinationIds(page.id),
+        tourDepartureService.listByPage(page.id),
       ])
-    : [[], [], [], []]
+    : [[], [], [], [], []]
   const pickableDestinations = allDestinations.map((d) => ({ id: d.id, name: d.translation?.name ?? d.id }))
 
   return (
@@ -97,6 +101,7 @@ export default async function AdminCmsPageDetail({ params }: { params: Promise<{
       currentTourCategoryIds={currentTourCategoryIds}
       tourDestinations={isTour ? pickableDestinations : null}
       currentTourDestinationIds={currentTourDestinationIds}
+      tourDepartures={isTour ? tourDepartures : null}
     />
   )
 }

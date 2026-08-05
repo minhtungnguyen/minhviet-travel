@@ -15,6 +15,7 @@ import { TourCategoryService } from '@/modules/tour-categories/application/tour-
 import { SupabaseTourCategoryRepository } from '@/modules/tour-categories/infrastructure/tour-category.repository'
 import { TourDestinationService } from '@/modules/tour-destinations/application/tour-destination.service'
 import { SupabaseTourDestinationRepository } from '@/modules/tour-destinations/infrastructure/tour-destination.repository'
+import { SupabaseTourDepartureRepository } from '@/modules/tour-departures/infrastructure/tour-departure.repository'
 import type { CmsPageCreateInput } from '@/modules/cms/schemas/cms.schema'
 import type { ActorContext } from '@/shared/auth/guards'
 
@@ -145,7 +146,18 @@ export async function publishPageAction(pageId: string, scheduledPublishAt?: str
     actor, service, pageId, TOUR_SLUG_PREFIX, 'Tour cần có nội dung giới thiệu trước khi xuất bản.',
   )
   if (tourBodyError) return { ok: false, message: tourBodyError }
+  const tourDepartureError = await requireTourDepartureBeforePublish(pageId)
+  if (tourDepartureError) return { ok: false, message: tourDepartureError }
   return wrap(() => service.publishPage(actor, pageId, scheduledPublishAt ? { scheduledPublishAt } : {}, newRequestId()), pageId)
+}
+
+/** A Tour with no bookable dates isn't ready to go live — same "belongs to Sprint 7 Phase 0's Decision 1" reasoning as the content-body guard above, just checking a join table instead of a block. */
+async function requireTourDepartureBeforePublish(pageId: string): Promise<string | null> {
+  const client = await getServerSupabaseClient()
+  const page = await new CmsService(new SupabaseCmsRepository(client), client, recordAuditLog).getPage(pageId)
+  if (!page.slug.startsWith(TOUR_SLUG_PREFIX)) return null
+  const departures = await new SupabaseTourDepartureRepository(client).listByPage(pageId)
+  return departures.length > 0 ? null : 'Tour cần có ít nhất 1 ngày khởi hành trước khi xuất bản.'
 }
 
 export async function unpublishPageAction(pageId: string): Promise<ActionResult> {

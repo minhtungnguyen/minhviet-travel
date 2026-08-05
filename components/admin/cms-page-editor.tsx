@@ -26,10 +26,12 @@ import type { OgImageValue } from '@/components/admin/seo-og-image-picker'
 import { NewsCategoryPicker } from '@/components/admin/news-category-picker'
 import { TourCategoryPicker } from '@/components/admin/tour-category-picker'
 import { TourDestinationPicker, type PickableDestination } from '@/components/admin/tour-destination-picker'
+import { TourDeparturesForm } from '@/components/admin/tour-departures-form'
 import type { CmsBlock, CmsBlockDefinition, CmsPage, CmsPageVersion, CmsSection } from '@/modules/cms/domain/types'
 import type { SeoMetadata } from '@/modules/seo/domain/types'
 import type { NewsCategory } from '@/modules/news-categories/domain/types'
 import type { TourCategory } from '@/modules/tour-categories/domain/types'
+import type { TourDeparture } from '@/modules/tour-departures/domain/types'
 import type { HeroContent, TrustStripContent, CeoSectionContent } from '@/types/homepage'
 
 /**
@@ -88,6 +90,7 @@ export function CmsPageEditor({
   currentTourCategoryIds,
   tourDestinations,
   currentTourDestinationIds,
+  tourDepartures,
 }: {
   page: CmsPage
   currentVersion: CmsPageVersion | null
@@ -103,6 +106,7 @@ export function CmsPageEditor({
   currentTourCategoryIds: string[]
   tourDestinations: PickableDestination[] | null
   currentTourDestinationIds: string[]
+  tourDepartures: TourDeparture[] | null
   seoMetadata: SeoMetadata | null
   initialOgImage?: OgImageValue
 }) {
@@ -238,6 +242,10 @@ export function CmsPageEditor({
           destinations={tourDestinations}
           currentDestinationIds={currentTourDestinationIds}
         />
+      )}
+
+      {tourDepartures && canPublish && (
+        <TourDeparturesForm pageId={page.id} websiteId={page.websiteId} departures={tourDepartures} />
       )}
 
       {canWriteSeo && (

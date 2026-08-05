@@ -17,7 +17,7 @@ async function getService() {
 }
 
 /**
- * Creates the page + first DRAFT version + three sections:
+ * Creates the page + first DRAFT version + four sections:
  * - `content` (RICH_TEXT, empty body) — the tour's overview text, reuses
  *   RichTextBlockForm as-is (same section-key convention as News),
  *   required non-empty before publish (requireContentBodyBeforePublish
@@ -26,9 +26,11 @@ async function getService() {
  *   TourItineraryBlockForm.
  * - `policy` (CUSTOM, {inclusions: [], exclusions: [], cancellationNote:
  *   ''}) — edited via TourPolicyBlockForm.
- * Categories/destinations (Phase 3 taxonomy), the gallery (Phase 5), and
- * departures (Phase 4) are added after creation, on the shared editor at
- * /admin/cms/{id} — same flow News uses.
+ * - `gallery` (GALLERY, {images: []}) — photo gallery, edited via
+ *   TourGalleryBlockForm.
+ * Categories/destinations (Phase 3 taxonomy) and departures (Phase 4)
+ * are added after creation, on the shared editor at /admin/cms/{id} —
+ * same flow News uses.
  */
 export async function createTourAction(input: {
   websiteId: string
@@ -52,6 +54,8 @@ export async function createTourAction(input: {
     await service.createBlock(actor, itinerarySection.id, 'TIMELINE', 0, { days: [] }, requestId)
     const policySection = await service.createSection(actor, page.id, 'policy', 2, requestId)
     await service.createBlock(actor, policySection.id, 'CUSTOM', 0, { inclusions: [], exclusions: [], cancellationNote: '' }, requestId)
+    const gallerySection = await service.createSection(actor, page.id, 'gallery', 3, requestId)
+    await service.createBlock(actor, gallerySection.id, 'GALLERY', 0, { images: [] }, requestId)
     revalidatePath('/admin/tours')
     revalidatePath('/tours')
     return { ok: true, pageId: page.id }

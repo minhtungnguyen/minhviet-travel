@@ -21,6 +21,7 @@ import { CeoBlockForm } from '@/components/admin/blocks/ceo-block-form'
 import { RichTextBlockForm, type RichTextConfig } from '@/components/admin/blocks/rich-text-block-form'
 import { TourItineraryBlockForm, type TourItineraryConfig } from '@/components/admin/blocks/tour-itinerary-block-form'
 import { TourPolicyBlockForm, type TourPolicyConfig } from '@/components/admin/blocks/tour-policy-block-form'
+import { TourGalleryBlockForm, type TourGalleryConfig } from '@/components/admin/blocks/tour-gallery-block-form'
 import { SeoMetadataForm } from '@/components/admin/seo-metadata-form'
 import type { OgImageValue } from '@/components/admin/seo-og-image-picker'
 import { NewsCategoryPicker } from '@/components/admin/news-category-picker'
@@ -39,9 +40,11 @@ import type { HeroContent, TrustStripContent, CeoSectionContent } from '@/types/
  * ("Hero Banner", "Statistics"/"Partner logos" — both live in the
  * `trustStrip` section — and "CEO/Lãnh đạo") plus Phase 4's `meta`
  * (News) and Sprint 6's `content` (News article body, reuses the
- * existing RICH_TEXT block definition), plus Sprint 7's `itinerary` and
- * `policy` (Tour). Every other block still falls through to the raw
- * JSON editor below until it gets a dedicated form.
+ * existing RICH_TEXT block definition), plus Sprint 7's `itinerary`,
+ * `policy`, and `gallery` (Tour — the last reuses the already-seeded
+ * GALLERY block-definition key, previously unimplemented). Every other
+ * block still falls through to the raw JSON editor below until it gets
+ * a dedicated form.
  */
 function BlockEditor({ pageId, sectionKey, block }: { pageId: string; sectionKey: string; block: CmsBlock }) {
   switch (sectionKey) {
@@ -59,6 +62,8 @@ function BlockEditor({ pageId, sectionKey, block }: { pageId: string; sectionKey
       return <TourItineraryBlockForm pageId={pageId} blockId={block.id} initial={block.config as unknown as TourItineraryConfig} />
     case 'policy':
       return <TourPolicyBlockForm pageId={pageId} blockId={block.id} initial={block.config as unknown as TourPolicyConfig} />
+    case 'gallery':
+      return <TourGalleryBlockForm pageId={pageId} blockId={block.id} initial={block.config as unknown as TourGalleryConfig} />
     default:
       return <pre className="overflow-x-auto text-xs text-foreground/80">{JSON.stringify(block.config, null, 2)}</pre>
   }

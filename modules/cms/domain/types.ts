@@ -20,6 +20,7 @@ export type CmsPageType =
   | 'CONTACT'
   | 'POLICY'
   | 'CUSTOM'
+  | 'TOUR'
 
 export type CmsLifecycleStatus = 'DRAFT' | 'IN_REVIEW' | 'APPROVED' | 'SCHEDULED' | 'PUBLISHED' | 'ARCHIVED'
 

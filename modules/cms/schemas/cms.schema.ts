@@ -3,7 +3,7 @@ import { generalStatusSchema, localeSchema, slugSchema, uuidSchema } from '@/sha
 
 const pageTypeSchema = z.enum([
   'HOME', 'SERVICE_HUB', 'LANDING_PAGE', 'STATIC_PAGE', 'PROGRAM_INSPIRATION',
-  'ARTICLE_INDEX', 'PRODUCT_INDEX', 'CONTACT', 'POLICY', 'CUSTOM',
+  'ARTICLE_INDEX', 'PRODUCT_INDEX', 'CONTACT', 'POLICY', 'CUSTOM', 'TOUR',
 ])
 
 export const cmsPageCreateSchema = z.object({

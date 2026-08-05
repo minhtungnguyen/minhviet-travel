@@ -10,6 +10,7 @@ import { newRequestId } from '@/shared/http/request-id'
 import { NEWS_SLUG_PREFIX } from '@/lib/cms/news-constants'
 import { NewsCategoryService } from '@/modules/news-categories/application/news-category.service'
 import { SupabaseNewsCategoryRepository } from '@/modules/news-categories/infrastructure/news-category.repository'
+import { TOUR_SLUG_PREFIX } from '@/lib/cms/tour-constants'
 import type { CmsPageCreateInput } from '@/modules/cms/schemas/cms.schema'
 import type { ActorContext } from '@/shared/auth/guards'
 
@@ -105,26 +106,41 @@ export async function approvePageAction(pageId: string): Promise<ActionResult> {
 }
 
 /**
- * News articles have no dedicated "is this a news page" flag — the
- * slug prefix convention (`lib/cms/news.ts`) is the only signal. Body
- * lives in the `content` section's RICH_TEXT block (see
- * createNewsArticleAction); a News page can't go live with it empty.
+ * News/Tour pages have no dedicated "what kind of page is this" flag —
+ * the slug prefix convention (lib/cms/news-constants.ts, tour-constants.ts)
+ * is the only signal for either. Both put their body text in the same
+ * `content` section's RICH_TEXT block (see createNewsArticleAction,
+ * createTourAction); neither can go live with it empty. One shared check
+ * parameterized by prefix + message, rather than two near-identical
+ * functions.
  */
-async function requireNewsBodyBeforePublish(actor: ActorContext, service: CmsService, pageId: string): Promise<string | null> {
+async function requireContentBodyBeforePublish(
+  actor: ActorContext,
+  service: CmsService,
+  pageId: string,
+  slugPrefix: string,
+  emptyMessage: string,
+): Promise<string | null> {
   const page = await service.getPage(pageId)
-  if (!page.slug.startsWith(NEWS_SLUG_PREFIX)) return null
+  if (!page.slug.startsWith(slugPrefix)) return null
   const sections = await service.listSections(actor, pageId)
   const contentSection = sections.find((s) => s.sectionKey === 'content')
   const blocks = contentSection ? await service.listBlocks(actor, contentSection.id) : []
   const body = (blocks[0]?.config as { body?: string } | undefined)?.body ?? ''
-  return body.trim() ? null : 'Bài viết cần có nội dung (phần thân bài) trước khi xuất bản.'
+  return body.trim() ? null : emptyMessage
 }
 
 export async function publishPageAction(pageId: string, scheduledPublishAt?: string): Promise<ActionResult> {
   const actor = await resolveActor()
   const service = await getService()
-  const bodyError = await requireNewsBodyBeforePublish(actor, service, pageId)
-  if (bodyError) return { ok: false, message: bodyError }
+  const newsBodyError = await requireContentBodyBeforePublish(
+    actor, service, pageId, NEWS_SLUG_PREFIX, 'Bài viết cần có nội dung (phần thân bài) trước khi xuất bản.',
+  )
+  if (newsBodyError) return { ok: false, message: newsBodyError }
+  const tourBodyError = await requireContentBodyBeforePublish(
+    actor, service, pageId, TOUR_SLUG_PREFIX, 'Tour cần có nội dung giới thiệu trước khi xuất bản.',
+  )
+  if (tourBodyError) return { ok: false, message: tourBodyError }
   return wrap(() => service.publishPage(actor, pageId, scheduledPublishAt ? { scheduledPublishAt } : {}, newRequestId()), pageId)
 }
 

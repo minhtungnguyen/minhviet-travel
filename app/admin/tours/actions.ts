@@ -1,0 +1,53 @@
+'use server'
+
+import { revalidatePath } from 'next/cache'
+import { resolveActor } from '@/shared/auth/session'
+import { getServerSupabaseClient } from '@/shared/supabase/server-client'
+import { recordAuditLog } from '@/modules/audit/application/audit.service'
+import { CmsService } from '@/modules/cms/application/cms.service'
+import { SupabaseCmsRepository } from '@/modules/cms/infrastructure/cms.repository'
+import { newRequestId } from '@/shared/http/request-id'
+import { TOUR_SLUG_PREFIX } from '@/lib/cms/tour-constants'
+
+export type CreateTourResult = { ok: true; pageId: string } | { ok: false; message: string }
+
+async function getService() {
+  const client = await getServerSupabaseClient()
+  return new CmsService(new SupabaseCmsRepository(client), client, recordAuditLog)
+}
+
+/**
+ * Creates the page + first DRAFT version + a `content` section/block
+ * (RICH_TEXT, empty body) for the tour's overview text — reuses
+ * RichTextBlockForm as-is (same `content` section-key convention as
+ * News), required non-empty before publish, see
+ * `requireTourContentBeforePublish` in app/admin/cms/actions.ts.
+ * Categories/destinations (Phase 3), itinerary/gallery/policy blocks
+ * (Phase 3/5), and departures (Phase 4) are added after creation, on the
+ * shared editor at /admin/cms/{id} — same flow News uses.
+ */
+export async function createTourAction(input: {
+  websiteId: string
+  locale: 'vi' | 'en' | 'zh' | 'ko' | 'ja'
+  title: string
+  slugSuffix: string
+}): Promise<CreateTourResult> {
+  try {
+    const actor = await resolveActor()
+    const service = await getService()
+    const requestId = newRequestId()
+    const { page } = await service.createPageWithDraftVersion(
+      actor,
+      { websiteId: input.websiteId, locale: input.locale, pageType: 'TOUR', slug: `${TOUR_SLUG_PREFIX}${input.slugSuffix}` },
+      input.title,
+      requestId,
+    )
+    const contentSection = await service.createSection(actor, page.id, 'content', 0, requestId)
+    await service.createBlock(actor, contentSection.id, 'RICH_TEXT', 0, { body: '' }, requestId)
+    revalidatePath('/admin/tours')
+    revalidatePath('/tours')
+    return { ok: true, pageId: page.id }
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : 'Có lỗi xảy ra.' }
+  }
+}

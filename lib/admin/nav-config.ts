@@ -31,6 +31,8 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { label: 'Media', href: '/admin/media', icon: 'media', permission: 'media.asset.read' },
   { label: 'Popup / Thông báo', href: '/admin/cms/announcements', icon: 'announcement', permission: 'cms.announcement.update' },
   { label: 'Tin tức', href: '/admin/news', icon: 'news', permission: 'cms.page.read' },
+  // href goes live in Sprint 7 Phase 2 (Tour Core admin CRUD) once /admin/tours exists.
+  { label: 'Tours', href: '/admin/tours', icon: 'tours', permission: 'cms.page.read', comingSoon: true },
   { label: 'SEO', href: '/admin/seo', icon: 'seo', permission: 'seo.metadata.update' },
   { label: 'Navigation Menu', href: '/admin/navigation', icon: 'navigation', permission: 'cms.navigation.update' },
   { label: 'Products', href: '/admin/products', icon: 'products', permission: null, comingSoon: true },

@@ -13,6 +13,7 @@ import {
   Search,
   Newspaper,
   Menu,
+  MapPinned,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -32,6 +33,7 @@ export const ADMIN_NAV_ICONS = {
   media: ImageIcon,
   announcement: Megaphone,
   news: Newspaper,
+  tours: MapPinned,
   seo: Search,
   navigation: Menu,
   products: Package,

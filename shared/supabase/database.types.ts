@@ -2955,6 +2955,178 @@ export type Database = {
           },
         ]
       }
+      tour_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+          website_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+          website_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tour_categories_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tour_departures: {
+        Row: {
+          created_at: string
+          currency: string
+          departure_date: string
+          id: string
+          page_id: string
+          price: number
+          price_type: Database["public"]["Enums"]["tour_price_type"]
+          return_date: string | null
+          seats_available: number | null
+          seats_total: number | null
+          status: Database["public"]["Enums"]["tour_departure_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          departure_date: string
+          id?: string
+          page_id: string
+          price: number
+          price_type?: Database["public"]["Enums"]["tour_price_type"]
+          return_date?: string | null
+          seats_available?: number | null
+          seats_total?: number | null
+          status?: Database["public"]["Enums"]["tour_departure_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          departure_date?: string
+          id?: string
+          page_id?: string
+          price?: number
+          price_type?: Database["public"]["Enums"]["tour_price_type"]
+          return_date?: string | null
+          seats_available?: number | null
+          seats_total?: number | null
+          status?: Database["public"]["Enums"]["tour_departure_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tour_departures_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "cms_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tour_page_categories: {
+        Row: {
+          category_id: string
+          created_at: string
+          page_id: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          page_id: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          page_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tour_page_categories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "tour_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tour_page_categories_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "cms_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tour_page_destinations: {
+        Row: {
+          created_at: string
+          destination_id: string
+          page_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          destination_id: string
+          page_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          destination_id?: string
+          page_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tour_page_destinations_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tour_page_destinations_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "cms_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_organization_memberships: {
         Row: {
           created_at: string
@@ -3222,6 +3394,10 @@ export type Database = {
       }
       auth_user_organization_ids: { Args: never; Returns: string[] }
       auth_user_website_ids: { Args: never; Returns: string[] }
+      public_author_display_name: {
+        Args: { p_user_id: string }
+        Returns: string
+      }
     }
     Enums: {
       account_status:
@@ -3255,6 +3431,7 @@ export type Database = {
         | "CONTACT"
         | "POLICY"
         | "CUSTOM"
+        | "TOUR"
       destination_type:
         | "COUNTRY"
         | "REGION"
@@ -3294,6 +3471,13 @@ export type Database = {
         | "BRAND"
         | "WEBSITE"
         | "USER"
+      tour_departure_status:
+        | "OPEN"
+        | "LIMITED"
+        | "ALMOST_FULL"
+        | "CLOSED"
+        | "PENDING_CONFIRMATION"
+      tour_price_type: "ESTIMATE" | "CONFIRMED"
       website_status: "ACTIVE" | "PLANNED" | "INACTIVE" | "ARCHIVED"
       website_type: "MAIN_SITE" | "SERVICE_APP" | "PARTNER_PORTAL" | "INTERNAL"
     }
@@ -3457,6 +3641,7 @@ export const Constants = {
         "CONTACT",
         "POLICY",
         "CUSTOM",
+        "TOUR",
       ],
       destination_type: [
         "COUNTRY",
@@ -3502,6 +3687,14 @@ export const Constants = {
         "WEBSITE",
         "USER",
       ],
+      tour_departure_status: [
+        "OPEN",
+        "LIMITED",
+        "ALMOST_FULL",
+        "CLOSED",
+        "PENDING_CONFIRMATION",
+      ],
+      tour_price_type: ["ESTIMATE", "CONFIRMED"],
       website_status: ["ACTIVE", "PLANNED", "INACTIVE", "ARCHIVED"],
       website_type: ["MAIN_SITE", "SERVICE_APP", "PARTNER_PORTAL", "INTERNAL"],
     },

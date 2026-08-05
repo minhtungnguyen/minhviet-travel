@@ -186,6 +186,7 @@ export function MediaAssetCard({ asset, url, canEdit }: { asset: MediaAsset; url
             SHA-256: {asset.checksum.slice(0, 12)}…
           </p>
         )}
+        {error && <p className="mt-1 text-[11px] text-destructive">{error}</p>}
         {canEdit && (
           <div className="mt-1 flex items-center gap-3">
             <button
@@ -270,7 +271,6 @@ export function MediaAssetCard({ asset, url, canEdit }: { asset: MediaAsset; url
 
       {editing && (
         <div className="space-y-2 border-t border-border p-3">
-          {error && <p className="text-xs text-destructive">{error}</p>}
           <input
             type="text"
             value={altText}

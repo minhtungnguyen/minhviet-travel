@@ -61,12 +61,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
   const { data: seoRow } = await client
     .from('seo_metadata')
-    .select('title, meta_description, og_title, og_description, is_indexed, is_followed, og_image_media_id, featured_image_media_id')
+    .select('title, meta_description, canonical_url, og_title, og_description, is_indexed, is_followed, og_image_media_id, featured_image_media_id')
     .eq('id', version.seoMetadataId)
     .maybeSingle()
   const row = seoRow as {
     title?: string
     meta_description?: string
+    canonical_url?: string | null
     og_title?: string
     og_description?: string
     is_indexed?: boolean
@@ -77,6 +78,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const title = row?.title ?? version.title
   const description = row?.meta_description ?? undefined
   const robots = row ? `${row.is_indexed === false ? 'noindex' : 'index'}, ${row.is_followed === false ? 'nofollow' : 'follow'}` : fallback.robots
+  // Editors can pin a custom canonical (syndication/dedup); falls back to this page's own URL.
+  const resolvedCanonicalUrl = row?.canonical_url || canonicalUrl
   // Fallback chain: per-page OG image -> featured image -> global default.
   const ogImage =
     (await resolveMediaImageUrl(client, row?.og_image_media_id)) ??
@@ -86,11 +89,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title,
     description,
     robots,
-    alternates: { canonical: canonicalPath },
+    alternates: { canonical: resolvedCanonicalUrl },
     openGraph: {
       title: row?.og_title ?? title,
       description: row?.og_description ?? description,
-      url: canonicalUrl,
+      url: resolvedCanonicalUrl,
       siteName: fallback.siteName,
       type: 'website',
       images: ogImage ? [{ url: ogImage }] : undefined,

@@ -8,6 +8,8 @@ import { CmsService } from '@/modules/cms/application/cms.service'
 import { SupabaseCmsRepository } from '@/modules/cms/infrastructure/cms.repository'
 import { newRequestId } from '@/shared/http/request-id'
 import { NEWS_SLUG_PREFIX } from '@/lib/cms/news-constants'
+import { NewsCategoryService } from '@/modules/news-categories/application/news-category.service'
+import { SupabaseNewsCategoryRepository } from '@/modules/news-categories/infrastructure/news-category.repository'
 import type { CmsPageCreateInput } from '@/modules/cms/schemas/cms.schema'
 import type { ActorContext } from '@/shared/auth/guards'
 
@@ -135,8 +137,20 @@ export async function unpublishPageAction(pageId: string): Promise<ActionResult>
 export async function duplicatePageAction(pageId: string): Promise<CreatePageResult> {
   try {
     const actor = await resolveActor()
-    const service = await getService()
+    const client = await getServerSupabaseClient()
+    const service = new CmsService(new SupabaseCmsRepository(client), client, recordAuditLog)
     const newPage = await service.duplicatePage(actor, pageId, newRequestId())
+    // News articles are `cms_pages` with the `tin-tuc/` slug prefix (see
+    // NEWS_SLUG_PREFIX) but their category lives in a separate relational
+    // table (news_article_categories, not a cms_sections/cms_blocks row),
+    // so the generic duplicatePage() above never sees it — copy it here.
+    if (newPage.slug.startsWith(NEWS_SLUG_PREFIX)) {
+      const categoryService = new NewsCategoryService(new SupabaseNewsCategoryRepository(client), client, recordAuditLog)
+      const categoryId = await categoryService.getArticleCategoryId(pageId)
+      if (categoryId) {
+        await categoryService.assignArticleCategory(actor, newPage.id, categoryId, newPage.websiteId, newRequestId())
+      }
+    }
     revalidatePath('/admin/cms')
     revalidatePath('/admin/news')
     return { ok: true, pageId: newPage.id }

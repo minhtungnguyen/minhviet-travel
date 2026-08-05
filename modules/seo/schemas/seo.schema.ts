@@ -1,12 +1,12 @@
 import { z } from 'zod'
-import { generalStatusSchema, localeSchema, slugSchema, uuidSchema } from '@/shared/validation/common'
+import { generalStatusSchema, localeSchema, pathSlugSchema, uuidSchema } from '@/shared/validation/common'
 
 export const seoMetadataPutSchema = z.object({
   websiteId: uuidSchema,
   locale: localeSchema,
   title: z.string().min(1).max(300),
   metaDescription: z.string().max(500).optional(),
-  slug: slugSchema,
+  slug: pathSlugSchema,
   canonicalUrl: z.string().url().optional(),
   isIndexed: z.boolean().default(true),
   isFollowed: z.boolean().default(true),

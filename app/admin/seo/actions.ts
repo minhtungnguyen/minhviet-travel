@@ -21,8 +21,18 @@ export async function updateSeoMetadataAction(
     const actor = await resolveActor()
     const client = await getServerSupabaseClient()
     const service = new SeoService(new SupabaseSeoRepository(client), client, recordAuditLog)
-    await service.putMetadata(actor, entityType, entityId, parsed, newRequestId())
+    const metadata = await service.putMetadata(actor, entityType, entityId, parsed, newRequestId())
+    // `cms_page_versions.seo_metadata_id` is what the public site's
+    // `generateMetadata()` actually reads (see app/tin-tuc/[slug]/page.tsx
+    // and the generic Pages equivalent) — `seo_metadata` itself is a single
+    // upserted row per entity+locale, not versioned, so every version of
+    // this page shares the same pointer.
+    if (entityType === 'cms_page') {
+      await client.from('cms_page_versions').update({ seo_metadata_id: metadata.id }).eq('page_id', entityId)
+    }
     revalidatePath('/admin/seo')
+    revalidatePath('/admin/cms')
+    revalidatePath('/admin/news')
     revalidatePath('/')
     return { ok: true }
   } catch (error) {

@@ -1,22 +1,25 @@
 'use client'
 
 import { useState } from 'react'
-import { tours, tourFilters } from '@/lib/site-data'
+import type { PublicTourCard } from '@/lib/tours/public-tours'
 import { MVButton } from '@/components/mv/mv-button'
 import { TourCard } from '@/components/site/tour-card'
 import { cn } from '@/lib/utils'
 
-export function ToursListing() {
-  const [filter, setFilter] = useState<(typeof tourFilters)[number]>('Tất cả')
+const ALL_FILTER = 'Tất cả'
 
-  const filtered = filter === 'Tất cả' ? tours : tours.filter((t) => t.category === filter)
+export function ToursListing({ tours, categoryNames }: { tours: PublicTourCard[]; categoryNames: string[] }) {
+  const [filter, setFilter] = useState(ALL_FILTER)
+  const filters = [ALL_FILTER, ...categoryNames]
+
+  const filtered = filter === ALL_FILTER ? tours : tours.filter((t) => t.categoryNames.includes(filter))
 
   return (
     <section className="bg-background py-16 lg:py-20">
       <div className="container-mv">
         <div className="flex flex-wrap items-center justify-between gap-6 border-b border-border pb-6">
           <div className="flex flex-wrap gap-6">
-            {tourFilters.map((f) => (
+            {filters.map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
@@ -46,7 +49,7 @@ export function ToursListing() {
         ) : (
           <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((tour) => (
-              <TourCard key={tour.id} tour={tour} />
+              <TourCard key={tour.pageId} tour={tour} />
             ))}
           </div>
         )}

@@ -1,9 +1,10 @@
 import type { MetadataRoute } from 'next'
 import { SITE_URL } from '@/constants/seo'
-import { tours } from '@/lib/site-data'
+import { listPublishedTourCards } from '@/lib/tours/public-tours'
 import { getCatalogService, getMasterDataService } from '@/lib/attraction-ticket/get-attraction-ticket-services'
 import { getPublicSupabaseClient } from '@/shared/supabase/public-client'
 import { NEWS_SLUG_PREFIX } from '@/lib/cms/news-constants'
+import { TOUR_SLUG_PREFIX } from '@/lib/cms/tour-constants'
 
 const ATTRACTION_TICKET_WEBSITE_ID = '00000000-0000-4000-8000-000000000003'
 const CMS_WEBSITE_ID = '00000000-0000-4000-8000-000000000003'
@@ -33,17 +34,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/tin-tuc`, changeFrequency: 'daily', priority: 0.7 },
   ]
 
-  const tourRoutes: MetadataRoute.Sitemap = tours.map((tour) => ({
-    url: `${SITE_URL}/tour/${tour.id}`,
-    changeFrequency: 'weekly',
-    priority: 0.7,
-  }))
+  // Dynamic — reflects whatever is actually published right now, matching
+  // cmsPageRoutes/attractionTicketRoutes below (Sprint 7 Phase 6: Tours are
+  // real cms_pages rows, no longer a hardcoded lib/site-data seed).
+  const tourRoutes: MetadataRoute.Sitemap = await (async () => {
+    try {
+      const client = getPublicSupabaseClient()
+      const tours = await listPublishedTourCards(client)
+      return tours.map((tour) => ({
+        url: `${SITE_URL}/tour/${tour.slug}`,
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+      }))
+    } catch {
+      return []
+    }
+  })()
 
-  // Dynamic — reflects whatever is actually published right now, so this
-  // list never drifts out of sync with the CMS the way a hardcoded array
-  // would (unlike `tours` above, which is still `lib/site-data`'s static
-  // seed — matching that module's own current data source, not a
-  // deliberate inconsistency introduced here).
   const attractionTicketRoutes: MetadataRoute.Sitemap = await (async () => {
     try {
       const catalogService = await getCatalogService()
@@ -75,7 +82,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Published cms_pages (generic Pages + News, Sprint 5A) — 'home' is
   // excluded (it's `/`, listed in staticRoutes above; app/[slug]/page.tsx
-  // itself refuses to serve that slug).
+  // itself refuses to serve that slug). Tours are excluded too — they're
+  // also cms_pages rows (Sprint 7), but already covered by tourRoutes
+  // above with tour-specific priority/changeFrequency; without this
+  // filter every Tour would double up here with generic Page metadata.
   const cmsPageRoutes: MetadataRoute.Sitemap = await (async () => {
     try {
       const client = getPublicSupabaseClient()
@@ -85,6 +95,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .eq('website_id', CMS_WEBSITE_ID)
         .eq('locale', CMS_LOCALE)
         .neq('slug', 'home')
+        .not('slug', 'like', `${TOUR_SLUG_PREFIX}%`)
         .is('deleted_at', null)
       if (!pages || pages.length === 0) return []
 

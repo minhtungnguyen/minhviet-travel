@@ -1,5 +1,5 @@
 import { CircleDollarSign, Undo2 } from 'lucide-react'
-import type { CancellationTier } from '@/lib/tours/tour-detail-content'
+import type { CancellationTier } from '@/lib/tours/policy-content'
 
 export function TourPolicy({
   paymentPolicy,

@@ -1,13 +1,13 @@
 import Image from 'next/image'
-import type { GalleryImage } from '@/lib/tours/tour-detail-content'
+import type { TourGalleryImage as GalleryImage } from '@/lib/tours/public-tours'
 
 /**
- * Degrades gracefully by design: most seed tours only have one genuinely
- * matching destination photo available in /public (see
- * lib/tours/tour-detail-content.ts) — padding the grid with an unrelated
- * stock image would violate Volume 01 §08 Photography ("ảnh phải phù hợp
- * thương hiệu", no generic filler). A single large editorial photo is the
- * honest baseline; a second real photo simply upgrades the layout.
+ * Degrades gracefully by design: a Tour's gallery is real Media Library
+ * images picked by an editor (see `lib/tours/public-tours.ts`), so the
+ * count varies per tour — padding the grid with an unrelated stock image
+ * would violate Volume 01 §08 Photography ("ảnh phải phù hợp thương
+ * hiệu", no generic filler). A single large editorial photo is the honest
+ * baseline; a second real photo simply upgrades the layout.
  */
 export function TourGallery({ images, title }: { images: GalleryImage[]; title: string }) {
   if (images.length === 0) return null

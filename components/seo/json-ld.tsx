@@ -9,8 +9,7 @@ import {
   ORGANIZATION_ADDRESS_COUNTRY,
 } from '@/constants/seo'
 import type { HomepageContent, JourneyContent } from '@/types/homepage'
-import type { Tour } from '@/lib/site-data'
-import type { AvailabilityStatus } from '@/types/cms'
+import type { PublicTourDetail } from '@/lib/tours/public-tours'
 import { buildTourCardViewModel } from '@/lib/tours/availability'
 import type { TourAvailabilityStatus } from '@/types/tour-availability'
 import type { FlightAirport, FlightDetail, FlightHomeContent } from '@/types/flight'
@@ -92,25 +91,13 @@ export function HomepageJsonLd({ content }: { content: HomepageContent }) {
   )
 }
 
-function parsePriceToNumber(price: string): number {
-  return Number(price.replace(/[^\d]/g, '')) || 0
-}
-
 /**
  * Structured data for a single tour's detail page. Separate from
  * `HomepageJsonLd` — the homepage's `@graph` covers the Organization once
  * plus its featured-journeys ItemList; a tour page needs its own
  * standalone TouristTrip + Offer describing that specific product.
  */
-export function TourDetailJsonLd({
-  tour,
-  images,
-  availability,
-}: {
-  tour: Tour
-  images: string[]
-  availability: AvailabilityStatus
-}) {
+export function TourDetailJsonLd({ tour }: { tour: PublicTourDetail }) {
   const organization = {
     '@type': 'TravelAgency',
     '@id': `${SITE_URL}/#organization`,
@@ -131,17 +118,17 @@ export function TourDetailJsonLd({
     '@context': 'https://schema.org',
     '@type': 'TouristTrip',
     name: tour.title,
-    description: `${tour.duration} · Khởi hành từ ${tour.departure}.`,
-    touristType: tour.category,
-    image: images.map((src) => `${SITE_URL}${src}`),
-    url: `${SITE_URL}/tour/${tour.id}`,
+    description: [tour.duration, tour.departureCity && `Khởi hành từ ${tour.departureCity}.`].filter(Boolean).join(' · '),
+    touristType: tour.categoryNames.join(', ') || undefined,
+    image: tour.gallery.map((image) => image.src),
+    url: `${SITE_URL}/tour/${tour.slug}`,
     provider: organization,
     offers: {
       '@type': 'Offer',
       priceCurrency: 'VND',
-      price: parsePriceToNumber(tour.price),
-      availability: availability === 'closed' ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock',
-      url: `${SITE_URL}/tour/${tour.id}`,
+      price: tour.priceFrom ?? undefined,
+      availability: tour.availability === 'CLOSED' ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock',
+      url: `${SITE_URL}/tour/${tour.slug}`,
     },
   }
 

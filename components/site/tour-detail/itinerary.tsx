@@ -1,5 +1,5 @@
 import { Accordion, AccordionItem, AccordionTrigger, AccordionPanel } from '@/components/ui/accordion'
-import type { ItineraryDay } from '@/lib/tours/tour-detail-content'
+import type { ItineraryDay } from '@/lib/tours/public-tours'
 
 export function TourItinerary({ days }: { days: ItineraryDay[] }) {
   return (

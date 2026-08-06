@@ -93,9 +93,14 @@ export default async function AdminToursPage({
             Danh mục
           </Link>
           {hasPermission(actor, 'cms.page.create') && (
-            <Link href="/admin/tours/new" className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-deep">
-              Tạo tour mới
-            </Link>
+            <>
+              <Link href="/admin/tours/import" className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-secondary/60">
+                Nhập từ Word (AI)
+              </Link>
+              <Link href="/admin/tours/new" className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-deep">
+                Tạo tour mới
+              </Link>
+            </>
           )}
         </div>
       </div>

@@ -1903,6 +1903,102 @@ export type Database = {
           },
         ]
       }
+      import_drafts: {
+        Row: {
+          created_at: string
+          data: Json
+          id: string
+          job_id: string
+          updated_at: string
+          validation_errors: Json
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          id?: string
+          job_id: string
+          updated_at?: string
+          validation_errors?: Json
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          id?: string
+          job_id?: string
+          updated_at?: string
+          validation_errors?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_drafts_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: true
+            referencedRelation: "import_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_jobs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          entity_type: string
+          error_message: string | null
+          id: string
+          published_page_id: string | null
+          source_media_asset_id: string
+          status: Database["public"]["Enums"]["import_job_status"]
+          updated_at: string
+          website_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          entity_type: string
+          error_message?: string | null
+          id?: string
+          published_page_id?: string | null
+          source_media_asset_id: string
+          status?: Database["public"]["Enums"]["import_job_status"]
+          updated_at?: string
+          website_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          entity_type?: string
+          error_message?: string | null
+          id?: string
+          published_page_id?: string | null
+          source_media_asset_id?: string
+          status?: Database["public"]["Enums"]["import_job_status"]
+          updated_at?: string
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_jobs_published_page_id_fkey"
+            columns: ["published_page_id"]
+            isOneToOne: false
+            referencedRelation: "cms_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_jobs_source_media_asset_id_fkey"
+            columns: ["source_media_asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_jobs_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       languages: {
         Row: {
           code: string
@@ -3445,6 +3541,16 @@ export type Database = {
         | "PROCESSED"
         | "REJECTED"
         | "SPAM"
+      import_job_status:
+        | "UPLOADED"
+        | "PARSING"
+        | "PARSED"
+        | "VALIDATING"
+        | "DRAFT_READY"
+        | "IN_REVIEW"
+        | "APPROVED"
+        | "PUBLISHED"
+        | "FAILED"
       media_visibility: "PUBLIC" | "PRIVATE"
       navigation_menu_key:
         | "HEADER"
@@ -3657,6 +3763,17 @@ export const Constants = {
         "PROCESSED",
         "REJECTED",
         "SPAM",
+      ],
+      import_job_status: [
+        "UPLOADED",
+        "PARSING",
+        "PARSED",
+        "VALIDATING",
+        "DRAFT_READY",
+        "IN_REVIEW",
+        "APPROVED",
+        "PUBLISHED",
+        "FAILED",
       ],
       media_visibility: ["PUBLIC", "PRIVATE"],
       navigation_menu_key: [

@@ -49,3 +49,18 @@ export function getServiceRoleEnv() {
   }
   return parsed.data
 }
+
+const anthropicEnvSchema = z.object({
+  ANTHROPIC_API_KEY: z.string().min(1),
+})
+
+/** AI Import (Sprint 7 Phase 7) — server-only, only called from integrations/ai/providers/anthropic-tour-import-provider.ts when a job is actually run. */
+export function getAnthropicEnv() {
+  const parsed = anthropicEnvSchema.safeParse({
+    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+  })
+  if (!parsed.success) {
+    throw new Error(`Missing or invalid Anthropic environment variables: ${formatIssues(parsed.error.issues)}`)
+  }
+  return parsed.data
+}

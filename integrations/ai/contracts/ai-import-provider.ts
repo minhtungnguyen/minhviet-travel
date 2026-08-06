@@ -12,8 +12,14 @@ export type ImportJobStatus =
   | 'UPLOADED' | 'PARSING' | 'PARSED' | 'VALIDATING' | 'DRAFT_READY'
   | 'IN_REVIEW' | 'APPROVED' | 'PUBLISHED' | 'FAILED'
 
-export type ImportDraft = {
-  jobId: string
+/**
+ * No `jobId` here (unlike an earlier stub version of this type) — parsing
+ * and normalization are pure content transformations with no orchestration
+ * state of their own. `modules/ai-import/application/ai-import.service.ts`
+ * is what owns an `ImportJob`/persisted draft row and assigns the job id
+ * when it saves this result.
+ */
+export type NormalizedImportDraft = {
   entityType: string // e.g. 'tour', 'hotel' — whatever domain owns the target table
   data: Record<string, unknown>
   validationErrors: Array<{ field: string; message: string }>
@@ -23,5 +29,5 @@ export interface AiImportProvider {
   /** Extracts raw structured content from a source file (PDF/Word/Excel/image). */
   parse(sourceFileUrl: string, mimeType: string): Promise<{ rawContent: Record<string, unknown> }>
   /** Maps raw content to a draft entity of the given type, flagging validation issues. */
-  normalize(rawContent: Record<string, unknown>, entityType: string): Promise<ImportDraft>
+  normalize(rawContent: Record<string, unknown>, entityType: string): Promise<NormalizedImportDraft>
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react'
 import { MVButton } from '@/components/mv/mv-button'
@@ -99,9 +100,9 @@ export function LoginForm({
       </label>
 
       <div className="flex justify-end text-sm">
-        <a href="/forgot-password" className="font-medium text-mv-journey-blue hover:underline">
+        <Link href="/forgot-password" className="font-medium text-mv-journey-blue hover:underline">
           Quên mật khẩu?
-        </a>
+        </Link>
       </div>
 
       {error && (

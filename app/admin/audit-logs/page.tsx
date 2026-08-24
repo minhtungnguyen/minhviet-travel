@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { hasPermission, resolveActor } from '@/shared/auth/session'
 import { getServerSupabaseClient } from '@/shared/supabase/server-client'
 import { AuditQueryService } from '@/modules/audit/application/audit-query.service'
@@ -36,18 +37,18 @@ export default async function AdminAuditLogsPage({
       </div>
 
       <div className="flex gap-2 border-b border-border">
-        <a
+        <Link
           href="/admin/audit-logs?tab=audit"
           className={`px-3 py-2 text-sm font-medium ${tab === 'audit' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
         >
           Hoạt động
-        </a>
-        <a
+        </Link>
+        <Link
           href="/admin/audit-logs?tab=security"
           className={`px-3 py-2 text-sm font-medium ${tab === 'security' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
         >
           Sự kiện bảo mật
-        </a>
+        </Link>
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-border bg-card">

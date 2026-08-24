@@ -1,22 +1,23 @@
-# Supabase Environment — mv-travel-os-dev
+# Supabase Environment — minh-viet-travel-prod
 
-Sprint 1B.1 infrastructure record. No secrets appear in this file — see `.env.example` for variable names and the Supabase dashboard for real values.
+Sprint 1B.1 infrastructure record, updated Sprint 7.5+ after the project was recreated. No secrets appear in this file — see `.env.example` for variable names and the Supabase dashboard for real values.
 
 ## Account and project
 
 | Field | Value |
 |---|---|
-| Supabase account | `dev@***@minhviettravel.com` (masked) |
-| Organization | Minh Viet Travel (`tbmdjgtcohesrslhgwnf`) |
-| Project name | `mv-travel-os-dev` |
-| Project ref | `otusjahkdjpxqayeeqqn` |
-| Project URL | `https://otusjahkdjpxqayeeqqn.supabase.co` |
+| Organization | `pzhbljirvljsmgoupwln` |
+| Project name | `minh-viet-travel-prod` |
+| Project ref | `mwurkddnbfqipvziooot` |
+| Project URL | `https://mwurkddnbfqipvziooot.supabase.co` |
 | Region | `ap-southeast-1` (Singapore) |
-| Postgres version | `17.6.1.147` (engine 17, `ga` channel) |
-| Status at provisioning check | `ACTIVE_HEALTHY` |
-| Created | 2026-07-25 |
+| Postgres version | `17.6.1.155` (engine 17, `ga` channel) |
+| Status | `ACTIVE_HEALTHY` |
+| Created | 2026-08-08 |
 
-This is a dedicated project — do not point this repository's environment variables at `minhviet-erp` or `mivigo` (prior/unrelated Supabase projects under a different personal account) at any point.
+**Superseded projects — do not reconnect to any of these:** `mv-travel-os-dev` (`otusjahkdjpxqayeeqqn`, the original Sprint 1B.1 project, superseded 2026-08-08), the unidentified project connected during the Sprint 7 audit (`lkvzxwycvtbmbxnakmtq`), and `minhviet-erp` / `mivigo` (prior/unrelated projects under a different personal account).
+
+Full schema, RLS policies, seeds, and storage buckets (`media-public`/`media-private`, with size/MIME limits) are already provisioned on `minh-viet-travel-prod` — confirmed via `pnpm build` succeeding end-to-end against it (Sprint 7.5+ session). Vercel's Preview/Production environment variables have **not** been confirmed to point at this project yet — verify in the Vercel dashboard before merging to `main`.
 
 ## Environment variables
 

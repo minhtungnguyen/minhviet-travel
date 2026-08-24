@@ -32,8 +32,17 @@ export async function updateSupabaseSession(request: NextRequest) {
   })
 
   // Touches the session so an expired token is refreshed before any
-  // downstream Server Component/Route Handler reads it.
-  const { data } = await supabase.auth.getUser()
+  // downstream Server Component/Route Handler reads it. Guarded: this runs
+  // on every request through `proxy.ts`'s matcher (nearly the whole site),
+  // so a transient Supabase Auth outage must degrade to "no session"
+  // instead of crashing every route.
+  let user: Awaited<ReturnType<typeof supabase.auth.getUser>>['data']['user'] = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch {
+    user = null
+  }
 
-  return { response, user: data.user }
+  return { response, user }
 }

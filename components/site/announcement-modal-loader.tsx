@@ -18,7 +18,16 @@ const WEBSITE_ID = '00000000-0000-4000-8000-000000000003'
 export async function AnnouncementModalLoader() {
   const client = getPublicSupabaseClient()
   const service = new CmsService(new SupabaseCmsRepository(client), client, recordAuditLog)
-  const announcements = await service.listAnnouncements(WEBSITE_ID)
+
+  // Rendered from the root layout, so every route carries this — a failed
+  // fetch must degrade to "no popup" rather than crashing the whole page.
+  let announcements: Awaited<ReturnType<typeof service.listAnnouncements>>
+  try {
+    announcements = await service.listAnnouncements(WEBSITE_ID)
+  } catch {
+    return null
+  }
+
   const active = announcements.find((a) => a.status === 'ACTIVE')
   if (!active) return null
 

@@ -26,15 +26,22 @@ export async function SiteFooter() {
   const nav = new NavigationService(new SupabaseNavigationRepository(client), client, recordAuditLog)
   const settings = new SettingsService(new SupabaseSettingsRepository(client), recordAuditLog)
 
+  // Each setting is fetched independently and guarded — an unguarded
+  // Promise.all means any single missing/erroring setting rejects the
+  // whole footer (rendered on every public page), contradicting the
+  // "degrades gracefully" intent below.
+  const emptySetting = { resolved: { value: '' } } as Awaited<ReturnType<typeof settings.getSetting>>
+  const safeSetting = (key: string) => settings.getSetting(key, {}).catch(() => emptySetting)
+
   const [menuResult, hotline, email, address, city, facebook, youtube, linkedin] = await Promise.all([
     nav.getPublicMenu(WEBSITE_ID, 'FOOTER', 'vi').catch(() => null),
-    settings.getSetting('company.hotline', {}),
-    settings.getSetting('company.email', {}),
-    settings.getSetting('company.address', {}),
-    settings.getSetting('company.city', {}),
-    settings.getSetting('company.social_facebook', {}),
-    settings.getSetting('company.social_youtube', {}),
-    settings.getSetting('company.social_linkedin', {}),
+    safeSetting('company.hotline'),
+    safeSetting('company.email'),
+    safeSetting('company.address'),
+    safeSetting('company.city'),
+    safeSetting('company.social_facebook'),
+    safeSetting('company.social_youtube'),
+    safeSetting('company.social_linkedin'),
   ])
 
   const columns = menuResult
